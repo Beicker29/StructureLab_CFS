@@ -7,7 +7,12 @@ from numbers import Real
 from pathlib import Path
 
 from cfs_design.core.exceptions import ValidationError
-from cfs_design.domain import DesignContext, MemberCase, ProjectMetadata
+from cfs_design.domain import (
+    AISIProjectScopeEvidence,
+    DesignContext,
+    MemberCase,
+    ProjectMetadata,
+)
 from cfs_design.domain._validation import require_bool, require_non_empty
 from cfs_design.io.etabs import ETABSImportConfig
 
@@ -205,6 +210,7 @@ class ProjectConfig:
     schema_version: str
     metadata: ProjectMetadata
     design_context: DesignContext
+    scope_evidence: AISIProjectScopeEvidence
     files: ProjectFilesConfig
     catalog_verification: CatalogVerificationConfig
     etabs_import: ProjectETABSConfig
@@ -220,6 +226,10 @@ class ProjectConfig:
             raise ValidationError("metadata must be ProjectMetadata")
         if not isinstance(self.design_context, DesignContext):
             raise ValidationError("design_context must be DesignContext")
+        if not isinstance(self.scope_evidence, AISIProjectScopeEvidence):
+            raise ValidationError(
+                "scope_evidence must be AISIProjectScopeEvidence"
+            )
         if not isinstance(self.files, ProjectFilesConfig):
             raise ValidationError("files must be ProjectFilesConfig")
         if not isinstance(self.catalog_verification, CatalogVerificationConfig):

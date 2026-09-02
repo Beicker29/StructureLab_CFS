@@ -7,6 +7,7 @@ import cfs_design.domain as domain
 
 def test_principal_domain_types_are_publicly_exposed() -> None:
     expected = {
+        "AISIProjectScopeEvidence",
         "CatalogSection",
         "DemandCombination",
         "DemandPoint",
@@ -20,9 +21,12 @@ def test_principal_domain_types_are_publicly_exposed() -> None:
         "ResolvedMember",
         "ResolvedSection",
         "Restraints",
+        "ScopeAssertion",
         "SectionGeometry",
         "SectionProperties",
         "StandardSectionDimensions",
+        "GoverningCountryDeclaration",
+        "StructureApplicationDeclaration",
     }
     assert expected <= set(domain.__all__)
     assert all(hasattr(domain, name) for name in expected)
@@ -35,6 +39,7 @@ def test_future_section_families_are_representable_without_claiming_support() ->
 
 def test_public_domain_dataclasses_are_frozen_and_slotted() -> None:
     value_object_types = (
+        domain.AISIProjectScopeEvidence,
         domain.CatalogSection,
         domain.DemandCombination,
         domain.DemandPoint,
@@ -48,9 +53,12 @@ def test_public_domain_dataclasses_are_frozen_and_slotted() -> None:
         domain.ResolvedMember,
         domain.ResolvedSection,
         domain.Restraints,
+        domain.ScopeAssertion,
         domain.SectionGeometry,
         domain.SectionProperties,
         domain.StandardSectionDimensions,
+        domain.GoverningCountryDeclaration,
+        domain.StructureApplicationDeclaration,
     )
     for value_object_type in value_object_types:
         assert is_dataclass(value_object_type)

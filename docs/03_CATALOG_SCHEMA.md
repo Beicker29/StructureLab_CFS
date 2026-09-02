@@ -160,3 +160,9 @@ particular, M2 never converts `MIDLINE` geometry into AISI dimensions.
 M2 also does not load `project.yaml`, `members.xlsx`, or ETABS exports and does
 not implement project resolution, AISI methods, pyCUFSM, resistance, or
 utilization.
+
+Material `specification` and `grade` do not by themselves establish the A1.1
+steel-product/A3 qualification route. M8A.1 intentionally leaves that check
+indeterminate and proposes a separate future versioned material-qualification
+record; it does not change `materials_catalog.xlsx`. See
+[`20_SCOPE_AND_DISTORTIONAL_INPUTS_M8A1.md`](20_SCOPE_AND_DISTORTIONAL_INPUTS_M8A1.md).

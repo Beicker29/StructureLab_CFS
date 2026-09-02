@@ -32,7 +32,7 @@ def test_project_yaml_declares_approved_m0_context() -> None:
     with PROJECT_YAML_PATH.open(encoding="utf-8") as stream:
         document = yaml.safe_load(stream)
 
-    assert document["schema_version"] == "0.1.0"
+    assert document["schema_version"] == "0.2.0"
     assert document["project"]["project_id"] == "PRJ_001"
     assert document["design_context"]["standard"] == {
         "id": "ANSI_SDI_AISI_S100",

@@ -51,7 +51,10 @@ M7 records B4.2 as unevaluated when that distinction is needed.
 |---|---|---|---|---|---|---|
 | `M7_SOURCE_SELECTION` | Source guard | Both | All | Primary document identity | `normative.applicability` | Prevents S100-24 rules from evaluating another edition |
 | `A1_1_THICKNESS` | Specification scope | Both | Current actions | A1.1, specification p. 1 | `normative.applicability` | Checks the explicit 25.4 mm thickness ceiling |
-| `A1_1_MEMBER_PROVENANCE` | Member/material scope | Both | Current actions | A1.1, specification p. 1 | `normative.applicability` | Requires forming, material class, structural use, and dynamic context to be established |
+| `A1_1_COLD_FORMED_TO_SHAPE` | Forming scope | Both | Current actions | A1.1, specification p. 1 | `normative.applicability` | Consumes the provenance-bearing project declaration. |
+| `A1_1_QUALIFYING_STEEL_PRODUCT` | Material/product scope | Both | Current actions | A1.1 and A3.1-A3.2, specification pp. 1 and 14-19 | `normative.applicability` | Remains indeterminate pending a material-specific qualification contract. |
+| `A1_1_STRUCTURAL_LOAD_CARRYING_USE` | Structural use | Both | Current actions | A1.1, specification p. 1 | `normative.applicability` | Consumes the project structural-use declaration. |
+| `A1_1_STRUCTURE_APPLICATION` | Building/dynamic branch | Both | Current actions | A1.1, specification p. 1 | `normative.applicability` | Applies the dynamic-effects condition only to other structures. |
 | `A1_2_3_DESIGN_FORMAT_JURISDICTION` | Design-format geography | Both | Current actions | A1.2.3, specification p. 1 | `normative.applicability` | Relates ASD/LRFD/LSD to the governing country |
 | `B4_1_YIELD_STRESS` | Method material limit | EWM / DSM | Current actions | B4.1, Table B4.1-1, specification p. 26 | `normative.applicability` | Checks the method-specific Fy ceiling |
 | `B4_1_INSIDE_RADIUS` | Method geometry limit | EWM / DSM | Current actions | B4.1, Table B4.1-1, specification p. 26 | `normative.applicability` | Checks the method-specific inside-radius ratio |
@@ -70,11 +73,11 @@ The code cites clauses only. It implements no equation from the cited pages.
 
 ## Deliberately indeterminate facts
 
-M7 returns `INDETERMINATE` when current domain data cannot establish:
+M7 returns `INDETERMINATE` when available evidence cannot establish:
 
-- the cold-forming process, qualifying base-metal class, intended
-  load-carrying use, or dynamic-effects allowance needed by A1.1;
-- the governing country needed to finish the A1.2.3 design-format check;
+- any missing project declaration needed by A1.1;
+- the material-specific qualifying product and A3 route;
+- the governing country needed to finish A1.2.3;
 - B4.1 flat and out-to-out element dimensions when the resolved section has no
   matching explicit S100-24 dimensional record;
 - Chapter F load-plane coincidence with the shear center when twisting is not

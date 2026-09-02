@@ -18,7 +18,7 @@ from cfs_design.io.project import CatalogVerificationAction, load_project_config
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 PROJECT_YAML = REPOSITORY_ROOT / "projects" / "PRJ_001" / "project.yaml"
 APPROVED_PROJECT_SHA256 = (
-    "759e66a3eb6829b74e3cc3f1cffbb9974a073359081a7f90c7e7ae8bc6921932"
+    "a2e13a538d086e1048035d8b47b4f6d53f6d3d41196d6a98ff431aac36c94d42"
 )
 
 
@@ -35,7 +35,7 @@ def _write(tmp_path: Path, document: dict[str, object]) -> Path:
 def test_approved_project_config_is_typed_and_preserves_configured_paths() -> None:
     config = load_project_config(PROJECT_YAML)
 
-    assert config.schema_version == "0.1.0"
+    assert config.schema_version == "0.2.0"
     assert config.metadata.project_id == "PRJ_001"
     assert config.design_context.design_format is DesignFormat.LRFD
     assert config.design_context.methods == (DesignMethod.EWM, DesignMethod.DSM)

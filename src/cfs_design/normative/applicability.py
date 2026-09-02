@@ -4,11 +4,16 @@ from math import isclose
 
 from cfs_design.core.exceptions import ValidationError
 from cfs_design.domain import (
+    AISIProjectScopeEvidence,
     DesignContext,
+    DesignFormat,
     DesignMethod,
+    EvidenceState,
+    GoverningCountry,
     ResolvedMember,
     S100_24_STANDARD_EDITION,
     SectionFamily,
+    StructureApplication,
 )
 from cfs_design.results import (
     ApplicabilityStatus,
@@ -115,6 +120,7 @@ def _general_scope_checks(
     context: DesignContext,
     method: DesignMethod,
     action: DesignAction,
+    scope_evidence: AISIProjectScopeEvidence,
 ) -> tuple[ApplicabilityCheck, ...]:
     thickness = member.section.geometry.t_mm
     thickness_observed = (MetadataEntry("thickness_mm", thickness),)
@@ -141,55 +147,228 @@ def _general_scope_checks(
         ),
     )
 
-    provenance_observed = (
-        MetadataEntry("material_specification", member.material.specification),
-        MetadataEntry(
-            "section_source_id", member.section.catalog_section.source_id
-        ),
+    cold_formed = scope_evidence.cold_formed_to_shape
+    cold_formed_observed = (
+        MetadataEntry("state", cold_formed.state.value),
+        MetadataEntry("basis", cold_formed.basis),
     )
-    provenance_check = _check(
+    cold_formed_check = _check(
         method=method,
         action=action,
-        rule_id="A1_1_MEMBER_PROVENANCE",
-        topic="member and material scope",
-        status=ApplicabilityStatus.INDETERMINATE,
-        observed=provenance_observed,
+        rule_id="A1_1_COLD_FORMED_TO_SHAPE",
+        topic="cold-formed member scope",
+        status=(
+            ApplicabilityStatus.APPLICABLE
+            if cold_formed.state is EvidenceState.TRUE
+            else ApplicabilityStatus.NOT_APPLICABLE
+            if cold_formed.state is EvidenceState.FALSE
+            else ApplicabilityStatus.INDETERMINATE
+        ),
+        observed=cold_formed_observed,
         requirement=(
-            "The member must have the qualifying cold-formed material and "
-            "load-carrying use required by the specification scope."
+            "The project must establish that its structural members are "
+            "cold-formed to shape."
         ),
         clause="A1.1",
-        reference_title="Member and material scope",
-        diagnostic_code="AISI_SCOPE_FACTS_UNMODELED",
+        reference_title="Cold-formed member scope",
+        diagnostic_code=(
+            None
+            if cold_formed.state is EvidenceState.TRUE
+            else "AISI_SCOPE_COLD_FORMING_FAILED"
+            if cold_formed.state is EvidenceState.FALSE
+            else "AISI_SCOPE_COLD_FORMING_UNKNOWN"
+        ),
         diagnostic_message=(
-            "The domain does not explicitly record forming process, base-metal "
-            "classification, structural use, or dynamic-effects context"
+            None
+            if cold_formed.state is EvidenceState.TRUE
+            else "The project declares that the members are not cold-formed to shape"
+            if cold_formed.state is EvidenceState.FALSE
+            else "Cold-forming evidence is not established"
         ),
     )
 
+    material_observed = (
+        MetadataEntry("material_id", member.material.material_id),
+        MetadataEntry("material_specification", member.material.specification),
+        MetadataEntry("material_grade", member.material.grade),
+        MetadataEntry("material_source_id", member.material.source_id),
+    )
+    material_check = _check(
+        method=method,
+        action=action,
+        rule_id="A1_1_QUALIFYING_STEEL_PRODUCT",
+        topic="qualifying steel product",
+        status=ApplicabilityStatus.INDETERMINATE,
+        observed=material_observed,
+        requirement=(
+            "Each material must establish the qualifying steel product and "
+            "applicable A3 material route."
+        ),
+        clause="A1.1; A3.1-A3.2",
+        reference_title="Steel product and material qualification",
+        diagnostic_code="AISI_MATERIAL_QUALIFICATION_UNMODELED",
+        diagnostic_message=(
+            "The material contract does not establish product form, steel class, "
+            "or its A3.1/A3.2 qualification route"
+        ),
+    )
+
+    load_use = scope_evidence.structural_load_carrying_use
+    load_use_observed = (
+        MetadataEntry("state", load_use.state.value),
+        MetadataEntry("basis", load_use.basis),
+    )
+    load_use_check = _check(
+        method=method,
+        action=action,
+        rule_id="A1_1_STRUCTURAL_LOAD_CARRYING_USE",
+        topic="structural load-carrying use",
+        status=(
+            ApplicabilityStatus.APPLICABLE
+            if load_use.state is EvidenceState.TRUE
+            else ApplicabilityStatus.NOT_APPLICABLE
+            if load_use.state is EvidenceState.FALSE
+            else ApplicabilityStatus.INDETERMINATE
+        ),
+        observed=load_use_observed,
+        requirement="The members must be used for structural load-carrying purposes.",
+        clause="A1.1",
+        reference_title="Structural load-carrying use",
+        diagnostic_code=(
+            None
+            if load_use.state is EvidenceState.TRUE
+            else "AISI_SCOPE_LOAD_CARRYING_USE_FAILED"
+            if load_use.state is EvidenceState.FALSE
+            else "AISI_SCOPE_LOAD_CARRYING_USE_UNKNOWN"
+        ),
+        diagnostic_message=(
+            None
+            if load_use.state is EvidenceState.TRUE
+            else "The project declares a non-load-carrying use"
+            if load_use.state is EvidenceState.FALSE
+            else "Structural load-carrying use is not established"
+        ),
+    )
+
+    application = scope_evidence.structure_application
+    dynamic = scope_evidence.dynamic_effects_addressed
+    application_observed = (
+        MetadataEntry("structure_application", application.application.value),
+        MetadataEntry("structure_application_basis", application.basis),
+        MetadataEntry("dynamic_effects_state", dynamic.state.value),
+        MetadataEntry("dynamic_effects_basis", dynamic.basis),
+    )
+    if application.application is StructureApplication.BUILDING:
+        application_status = ApplicabilityStatus.APPLICABLE
+        application_code = None
+        application_message = None
+    elif application.application is StructureApplication.OTHER_STRUCTURE:
+        application_status = (
+            ApplicabilityStatus.APPLICABLE
+            if dynamic.state is EvidenceState.TRUE
+            else ApplicabilityStatus.NOT_APPLICABLE
+            if dynamic.state is EvidenceState.FALSE
+            else ApplicabilityStatus.INDETERMINATE
+        )
+        application_code = (
+            None
+            if dynamic.state is EvidenceState.TRUE
+            else "AISI_SCOPE_DYNAMIC_EFFECTS_FAILED"
+            if dynamic.state is EvidenceState.FALSE
+            else "AISI_SCOPE_DYNAMIC_EFFECTS_UNKNOWN"
+        )
+        application_message = (
+            None
+            if dynamic.state is EvidenceState.TRUE
+            else "Dynamic effects are not addressed for a nonbuilding structure"
+            if dynamic.state is EvidenceState.FALSE
+            else "Dynamic-effects allowances are not established"
+        )
+    else:
+        application_status = ApplicabilityStatus.INDETERMINATE
+        application_code = "AISI_SCOPE_STRUCTURE_APPLICATION_UNKNOWN"
+        application_message = (
+            "The project does not establish whether the application is a "
+            "building or another structure"
+        )
+    application_check = _check(
+        method=method,
+        action=action,
+        rule_id="A1_1_STRUCTURE_APPLICATION",
+        topic="building or other-structure scope",
+        status=application_status,
+        observed=application_observed,
+        requirement=(
+            "A nonbuilding structure must include allowances for dynamic effects."
+        ),
+        clause="A1.1",
+        reference_title="Building and other-structure scope",
+        diagnostic_code=application_code,
+        diagnostic_message=application_message,
+    )
+
+    country = scope_evidence.governing_country
     format_observed = (
         MetadataEntry("design_format", context.design_format.value),
-        MetadataEntry("jurisdiction", None),
+        MetadataEntry("governing_country", country.country.value),
+        MetadataEntry("governing_country_basis", country.basis),
     )
+    if country.country in (
+        GoverningCountry.UNITED_STATES,
+        GoverningCountry.MEXICO,
+    ):
+        format_matches = context.design_format in (
+            DesignFormat.ASD,
+            DesignFormat.LRFD,
+        )
+        format_status = (
+            ApplicabilityStatus.APPLICABLE
+            if format_matches
+            else ApplicabilityStatus.NOT_APPLICABLE
+        )
+    elif country.country is GoverningCountry.CANADA:
+        # The current domain intentionally represents only LRFD/ASD; neither
+        # is the Canadian LSD route identified by A1.2.3.
+        format_matches = False
+        format_status = ApplicabilityStatus.NOT_APPLICABLE
+    else:
+        format_matches = False
+        format_status = ApplicabilityStatus.INDETERMINATE
     format_check = _check(
         method=method,
         action=action,
         rule_id="A1_2_3_DESIGN_FORMAT_JURISDICTION",
         topic="design-format jurisdiction",
-        status=ApplicabilityStatus.INDETERMINATE,
+        status=format_status,
         observed=format_observed,
         requirement=(
             "The selected design format must correspond to the governing country."
         ),
         clause="A1.2.3",
         reference_title="Geographic applicability of design methods",
-        diagnostic_code="AISI_JURISDICTION_UNMODELED",
+        diagnostic_code=(
+            None
+            if format_matches
+            else "AISI_DESIGN_FORMAT_COUNTRY_MISMATCH"
+            if country.country is not GoverningCountry.UNKNOWN
+            else "AISI_GOVERNING_COUNTRY_UNKNOWN"
+        ),
         diagnostic_message=(
-            "The design format is known, but the governing country is not an "
-            "explicit DesignContext field"
+            None
+            if format_matches
+            else "The selected design format does not apply in the declared country"
+            if country.country is not GoverningCountry.UNKNOWN
+            else "The governing country is not established"
         ),
     )
-    return thickness_check, provenance_check, format_check
+    return (
+        thickness_check,
+        cold_formed_check,
+        material_check,
+        load_use_check,
+        application_check,
+        format_check,
+    )
 
 
 def _b4_checks(
@@ -635,6 +814,7 @@ def evaluate_normative_applicability(
     context: DesignContext,
     method: DesignMethod,
     action: DesignAction,
+    scope_evidence: AISIProjectScopeEvidence | None = None,
 ) -> NormativeApplicabilityResult:
     """Evaluate verified clause-level criteria without calculating resistance."""
 
@@ -646,6 +826,14 @@ def evaluate_normative_applicability(
         raise ValidationError("method must be DesignMethod")
     if not isinstance(action, DesignAction):
         raise ValidationError("action must be DesignAction")
+    if scope_evidence is None:
+        scope_evidence = AISIProjectScopeEvidence.unknown(
+            "No project-level AISI scope evidence was supplied to M7."
+        )
+    if not isinstance(scope_evidence, AISIProjectScopeEvidence):
+        raise ValidationError(
+            "scope_evidence must be AISIProjectScopeEvidence or None"
+        )
 
     checks: list[ApplicabilityCheck] = [
         _source_selection_check(member, context, method, action)
@@ -661,7 +849,11 @@ def evaluate_normative_applicability(
             status=aggregate_normative_status(checked),
             checks=checked,
         )
-    checks.extend(_general_scope_checks(member, context, method, action))
+    checks.extend(
+        _general_scope_checks(
+            member, context, method, action, scope_evidence
+        )
+    )
     checks.extend(_b4_checks(member, method, action))
     if action is DesignAction.AXIAL_COMPRESSION:
         checks.extend(_compression_checks(method, action))

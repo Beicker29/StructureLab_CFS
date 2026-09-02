@@ -81,6 +81,8 @@ class Restraints:
     torsion_restrained: bool
     warping_restrained: bool
     lateral_brace_spacing_mm: float | None = None
+    distortional_unbraced_length_mm: float | None = None
+    distortional_restraint_source: str | None = None
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -94,6 +96,26 @@ class Restraints:
             self.lateral_brace_spacing_mm,
             "lateral_brace_spacing_mm",
         )
+        require_optional_positive(
+            self.distortional_unbraced_length_mm,
+            "distortional_unbraced_length_mm",
+        )
+        require_optional_string(
+            self.distortional_restraint_source,
+            "distortional_restraint_source",
+        )
+        length_supplied = self.distortional_unbraced_length_mm is not None
+        source_supplied = self.distortional_restraint_source is not None
+        if length_supplied != source_supplied:
+            raise ValidationError(
+                "distortional_unbraced_length_mm and "
+                "distortional_restraint_source must be supplied together"
+            )
+        if source_supplied:
+            require_non_empty(
+                self.distortional_restraint_source,
+                "distortional_restraint_source",
+            )
 
 
 @dataclass(frozen=True, slots=True)

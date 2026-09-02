@@ -24,8 +24,13 @@ from cfs_design.domain import (
 from .models import MembersLoadResult, MembersWorkbookMetadata
 
 
-SUPPORTED_MEMBERS_SCHEMA_VERSION = "0.1.0"
-MEMBERS_COLUMNS = (
+LEGACY_MEMBERS_SCHEMA_VERSION = "0.1.0"
+SUPPORTED_MEMBERS_SCHEMA_VERSION = "0.2.0"
+SUPPORTED_MEMBERS_SCHEMA_VERSIONS = (
+    LEGACY_MEMBERS_SCHEMA_VERSION,
+    SUPPORTED_MEMBERS_SCHEMA_VERSION,
+)
+LEGACY_MEMBERS_COLUMNS = (
     "case_id",
     "label",
     "member_type",
@@ -48,6 +53,10 @@ MEMBERS_COLUMNS = (
     "lateral_brace_spacing_mm",
     "active",
     "notes",
+)
+MEMBERS_COLUMNS = LEGACY_MEMBERS_COLUMNS + (
+    "distortional_unbraced_length_mm",
+    "distortional_restraint_source",
 )
 
 
@@ -221,7 +230,7 @@ def _required_text(row: _MemberRow, field: str) -> str:
 
 
 def _optional_text(row: _MemberRow, field: str) -> str | None:
-    value = row.values[field]
+    value = row.values.get(field)
     if _is_blank(value):
         _reject_formula(row, field)
         return None
@@ -241,7 +250,7 @@ def _required_number(row: _MemberRow, field: str) -> float:
 
 
 def _optional_number(row: _MemberRow, field: str) -> float | None:
-    value = row.values[field]
+    value = row.values.get(field)
     if _is_blank(value):
         _reject_formula(row, field)
         return None
@@ -307,11 +316,11 @@ def _metadata(reader: _MembersWorkbook) -> MembersWorkbookMetadata:
         return value
 
     schema_version = text("schema_version")
-    if schema_version != SUPPORTED_MEMBERS_SCHEMA_VERSION:
+    if schema_version not in SUPPORTED_MEMBERS_SCHEMA_VERSIONS:
         raise SchemaError(
             f"{reader.source_path.name}: unsupported schema_version "
-            f"{schema_version!r}; supported version is "
-            f"{SUPPORTED_MEMBERS_SCHEMA_VERSION!r}"
+            f"{schema_version!r}; supported versions are "
+            f"{', '.join(repr(item) for item in SUPPORTED_MEMBERS_SCHEMA_VERSIONS)}"
         )
     return MembersWorkbookMetadata(
         name=text("name"),
@@ -353,6 +362,12 @@ def _member(row: _MemberRow) -> MemberCase:
             lateral_brace_spacing_mm=_optional_number(
                 row, "lateral_brace_spacing_mm"
             ),
+            distortional_unbraced_length_mm=_optional_number(
+                row, "distortional_unbraced_length_mm"
+            ),
+            distortional_restraint_source=_optional_text(
+                row, "distortional_restraint_source"
+            ),
         )
         return MemberCase(
             case_id=_required_text(row, "case_id"),
@@ -377,7 +392,12 @@ def load_members(path: str | Path) -> MembersLoadResult:
     with _MembersWorkbook(path) as reader:
         reader.require_sheets("Metadata", "Members")
         metadata = _metadata(reader)
-        positions = reader.header_positions("Members", MEMBERS_COLUMNS)
+        columns = (
+            MEMBERS_COLUMNS
+            if metadata.schema_version == SUPPORTED_MEMBERS_SCHEMA_VERSION
+            else LEGACY_MEMBERS_COLUMNS
+        )
+        positions = reader.header_positions("Members", columns)
         members: list[MemberCase] = []
         seen: dict[str, int] = {}
         for row in reader.rows("Members", positions):
@@ -397,4 +417,10 @@ def load_members(path: str | Path) -> MembersLoadResult:
         return MembersLoadResult(metadata=metadata, members=tuple(members))
 
 
-__all__ = ["SUPPORTED_MEMBERS_SCHEMA_VERSION", "load_members"]
+__all__ = [
+    "LEGACY_MEMBERS_SCHEMA_VERSION",
+    "MEMBERS_COLUMNS",
+    "SUPPORTED_MEMBERS_SCHEMA_VERSION",
+    "SUPPORTED_MEMBERS_SCHEMA_VERSIONS",
+    "load_members",
+]

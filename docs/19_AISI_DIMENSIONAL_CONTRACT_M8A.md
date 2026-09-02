@@ -151,7 +151,7 @@ complete `C_LIPPED` EWM axial-compression result must include E4. M8A records
 the required `h_o` input but implements no E4 equation. M8B is incomplete until
 E4 and its verified elastic distortional input are implemented and validated.
 
-## Project-level applicability gap (proposal only)
+## Project-level applicability gap resolved by M8A.1
 
 A1.1 requires facts about cold forming, qualifying steel product, structural
 load-carrying use, and treatment of dynamic effects where relevant. A1.2.3
@@ -159,10 +159,10 @@ requires the governing country to resolve the LRFD geographic route. Current
 project metadata does not establish these facts. This is a separate contract
 gap and does not justify guessing.
 
-A future versioned `project.yaml` proposal should add controlled fields such
-as `governing_country`, `cold_formed_to_shape`,
-`qualifying_steel_product`, `structural_load_carrying_use`, and
-`dynamic_effects_addressed` (with an explicit not-applicable state where
-appropriate). Exact enum values, schema version, migration, and validation
-must receive owner approval first. M8A does not modify `project.yaml` and M7
-continues to report these checks as indeterminate.
+M8A.1 adds a versioned project evidence model for country, forming, structural
+use, structure application, and dynamic effects. Each declaration includes a
+controlled state/value and basis. Missing legacy evidence remains
+indeterminate. Material/product qualification was verified as material-
+specific under A1.1 and A3.1-A3.2, so it was not hidden behind a project-level
+Boolean and remains a separate contract stop. See
+[`20_SCOPE_AND_DISTORTIONAL_INPUTS_M8A1.md`](20_SCOPE_AND_DISTORTIONAL_INPUTS_M8A1.md).

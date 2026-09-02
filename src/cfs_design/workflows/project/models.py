@@ -172,6 +172,8 @@ class ResolvedProject:
             raise ValidationError("project metadata must match ProjectConfig")
         if self.project.design_context != self.project_config.design_context:
             raise ValidationError("project design context must match ProjectConfig")
+        if self.project.scope_evidence != self.project_config.scope_evidence:
+            raise ValidationError("project scope evidence must match ProjectConfig")
         if not isinstance(self.section_verification_results, tuple) or any(
             not isinstance(result, CatalogVerificationResult)
             for result in self.section_verification_results
@@ -210,6 +212,10 @@ class ResolvedProject:
     @property
     def design_context(self):
         return self.project.design_context
+
+    @property
+    def scope_evidence(self):
+        return self.project.scope_evidence
 
     @property
     def all_member_cases(self):

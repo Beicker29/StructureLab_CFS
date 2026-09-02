@@ -49,6 +49,30 @@ def _set(path: Path, row: int, header: str, value: object) -> None:
     _modify(path, operation)
 
 
+def _upgrade_to_schema_02(path: Path) -> None:
+    def operation(workbook: object) -> None:
+        metadata = workbook["Metadata"]  # type: ignore[index]
+        for row in range(2, metadata.max_row + 1):
+            if metadata.cell(row, 1).value == "schema_version":
+                metadata.cell(row, 2).value = "0.2.0"
+                break
+        else:
+            raise AssertionError("No schema_version metadata row")
+        members = workbook["Members"]  # type: ignore[index]
+        headers = {cell.value for cell in members[1]}
+        if "distortional_unbraced_length_mm" not in headers:
+            members.cell(1, members.max_column + 1).value = (
+                "distortional_unbraced_length_mm"
+            )
+        headers = {cell.value for cell in members[1]}
+        if "distortional_restraint_source" not in headers:
+            members.cell(1, members.max_column + 1).value = (
+                "distortional_restraint_source"
+            )
+
+    _modify(path, operation)
+
+
 def test_approved_members_loads_both_inactive_member_styles() -> None:
     result = load_members(MEMBERS_SOURCE)
 
@@ -150,4 +174,74 @@ def test_missing_required_column_is_rejected(members_copy: Path) -> None:
 
     _modify(members_copy, operation)
     with pytest.raises(SchemaError, match="orientation_deg"):
+        load_members(members_copy)
+
+
+def test_schema_02_preserves_valid_explicit_lm_and_source(
+    members_copy: Path,
+) -> None:
+    _upgrade_to_schema_02(members_copy)
+    _set(members_copy, 2, "distortional_unbraced_length_mm", 1800.0)
+    _set(
+        members_copy,
+        2,
+        "distortional_restraint_source",
+        "Structural restraint schedule R-01.",
+    )
+
+    result = load_members(members_copy)
+    restraints = result.members[0].restraints
+
+    assert result.metadata.schema_version == "0.2.0"
+    assert restraints.distortional_unbraced_length_mm == 1800.0
+    assert restraints.distortional_restraint_source == (
+        "Structural restraint schedule R-01."
+    )
+
+
+def test_schema_02_allows_missing_lm_when_not_required(members_copy: Path) -> None:
+    _upgrade_to_schema_02(members_copy)
+
+    restraints = load_members(members_copy).members[0].restraints
+
+    assert restraints.distortional_unbraced_length_mm is None
+    assert restraints.distortional_restraint_source is None
+
+
+@pytest.mark.parametrize("value", (0.0, -1.0, "Infinity", "NaN"))
+def test_schema_02_rejects_invalid_lm(
+    members_copy: Path,
+    value: object,
+) -> None:
+    _upgrade_to_schema_02(members_copy)
+    _set(members_copy, 2, "distortional_unbraced_length_mm", value)
+    _set(
+        members_copy,
+        2,
+        "distortional_restraint_source",
+        "Synthetic test source.",
+    )
+
+    with pytest.raises(SchemaError, match="distortional_unbraced_length_mm"):
+        load_members(members_copy)
+
+
+def test_lm_is_never_inferred_from_existing_bracing_fields(
+    members_copy: Path,
+) -> None:
+    _upgrade_to_schema_02(members_copy)
+    _set(members_copy, 2, "Lb_mm", 1600.0)
+    _set(members_copy, 2, "lateral_brace_spacing_mm", 900.0)
+
+    restraints = load_members(members_copy).members[0].restraints
+
+    assert restraints.distortional_unbraced_length_mm is None
+    assert restraints.distortional_restraint_source is None
+
+
+def test_schema_02_rejects_unpaired_lm_source(members_copy: Path) -> None:
+    _upgrade_to_schema_02(members_copy)
+    _set(members_copy, 2, "distortional_unbraced_length_mm", 1800.0)
+
+    with pytest.raises(SchemaError, match="must be supplied together"):
         load_members(members_copy)

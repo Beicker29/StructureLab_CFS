@@ -1,0 +1,109 @@
+schema_version: 0.2.0
+project:
+  project_id: PRJ_001
+  name: Replace with project name
+  description: ''
+  engineer: ''
+  client: ''
+  location: ''
+design_context:
+  standard:
+    id: ANSI_SDI_AISI_S100
+    edition: 2024
+  design_format: LRFD
+  methods:
+  - EWM
+  - DSM
+  run_mode: compare
+  canonical_units: SI
+aisi_scope_evidence:
+  governing_country:
+    country: UNKNOWN
+    basis: 'Project template: governing country has not been declared.'
+  structure_application:
+    application: UNKNOWN
+    basis: 'Project template: building or other-structure classification has not been
+      declared.'
+  cold_formed_to_shape:
+    state: UNKNOWN
+    basis: 'Project template: cold-forming evidence has not been supplied.'
+  structural_load_carrying_use:
+    state: UNKNOWN
+    basis: 'Project template: structural load-carrying use has not been declared.'
+  dynamic_effects_addressed:
+    state: UNKNOWN
+    basis: 'Project template: dynamic-effects design basis has not been supplied.'
+files:
+  materials_catalog: data/catalogs/materials_catalog.xlsx
+  sections_catalog: data/catalogs/sections_catalog.xlsx
+  members: projects/PRJ_001/missing.xlsx
+  etabs_results: projects/PRJ_001/ETABS_results.xlsx
+catalog_verification:
+  enabled: true
+  relative_tolerance: 0.01
+  required_properties:
+  - A
+  - Ix
+  - Iy
+  - rx
+  - ry
+  extended_properties:
+  - J
+  - Cw
+  - x0
+  - y0
+  action_on_fail: warning
+etabs_import:
+  program_control_sheet: Program Control
+  forces_sheet: Element Forces - Beams
+  native_layout:
+    table_title_row: 1
+    header_row: 2
+    units_row: 3
+    data_start_row: 4
+  columns:
+    story: Story
+    frame_label: Beam
+    unique_name: Unique Name
+    output_case: Output Case
+    case_type: Case Type
+    step_type: Step Type
+    station: Station
+    P: P
+    V2: V2
+    V3: V3
+    T: T
+    M2: M2
+    M3: M3
+    element: Element
+    element_station: Elem Station
+    location: Location
+  mapping:
+    source_sheet: ETABS_Mapping
+    priority:
+    - etabs_unique_name
+    - etabs_story+etabs_beam
+  demand_processing:
+    preserve_native_rows: true
+    preserve_station: true
+    preserve_step_type: true
+    componentwise_envelope: false
+    governing_selection: max_design_utilization
+  unit_handling:
+    read_units_from_export: true
+    convert_to_canonical_SI: true
+    reject_unknown_units: true
+quality_assurance:
+  fail_on_duplicate_case_id: true
+  fail_on_duplicate_material_id: true
+  fail_on_duplicate_section_id: true
+  fail_on_unmapped_etabs_member: true
+  fail_on_missing_catalog_reference: true
+  preserve_resolved_input_snapshot: true
+outputs:
+  root: outputs/PRJ_001
+  write_resolved_inputs: true
+  write_member_results: true
+  write_comparison_results: true
+  write_project_summary: true
+  calculation_trace: true

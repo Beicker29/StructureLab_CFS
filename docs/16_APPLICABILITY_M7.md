@@ -5,7 +5,7 @@
 M7 preserves two conclusions:
 
 ```text
-ResolvedMember + DesignContext + DesignMethod + DesignAction
+ResolvedMember + DesignContext + project scope evidence + DesignMethod + DesignAction
     |                                      |
     v                                      v
 NormativeApplicabilityResult       SoftwareSupportResult
@@ -106,3 +106,16 @@ role.
 M7 calculates no resistance, effective width, buckling strength, utilization,
 or governing demand. Reports remain consumers of future stored results and
 traces only.
+
+## M8A.1 scope and E4 gates
+
+Project schema `0.2.0` lets M7 evaluate the project-wide A1.1 declarations and
+the A1.2.3 country/format condition. `UNKNOWN` remains `INDETERMINATE`; an
+explicit failed scope fact becomes `NOT_APPLICABLE` only where the verified
+clause supports that conclusion. Material A3 qualification is still a
+separate indeterminate member-material check.
+
+For `C_LIPPED` EWM axial compression, software support now also requires the
+exact equal-flange analytical configuration and explicit `Lm`. Unequal
+flanges are `UNSUPPORTED` because the Appendix 2 Section 2.2 numerical route
+is not implemented. This never changes normative applicability.

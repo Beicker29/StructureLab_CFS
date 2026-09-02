@@ -1,4 +1,4 @@
-"""Typed loader for the approved schema-0.1.0 project.yaml contract."""
+"""Typed loader for the versioned project.yaml contract."""
 
 from collections.abc import Mapping
 from hashlib import sha256
@@ -16,13 +16,20 @@ from cfs_design.core.exceptions import (
     ValidationError,
 )
 from cfs_design.domain import (
+    AISIProjectScopeEvidence,
     DesignContext,
     DesignFormat,
     DesignMethod,
+    EvidenceState,
+    GoverningCountry,
+    GoverningCountryDeclaration,
     ProjectMetadata,
     RunMode,
     S100_24_STANDARD_EDITION,
     S100_24_STANDARD_ID,
+    ScopeAssertion,
+    StructureApplication,
+    StructureApplicationDeclaration,
 )
 from cfs_design.io.etabs import ETABSColumnMap, ETABSImportConfig
 
@@ -41,7 +48,12 @@ from .models import (
 )
 
 
-SUPPORTED_PROJECT_SCHEMA_VERSION = "0.1.0"
+LEGACY_PROJECT_SCHEMA_VERSION = "0.1.0"
+SUPPORTED_PROJECT_SCHEMA_VERSION = "0.2.0"
+SUPPORTED_PROJECT_SCHEMA_VERSIONS = (
+    LEGACY_PROJECT_SCHEMA_VERSION,
+    SUPPORTED_PROJECT_SCHEMA_VERSION,
+)
 SUPPORTED_STANDARD_ID = S100_24_STANDARD_ID
 SUPPORTED_STANDARD_EDITION = S100_24_STANDARD_EDITION
 SUPPORTED_CANONICAL_UNITS = "SI"
@@ -251,6 +263,96 @@ def _project_metadata(document: Mapping[str, object], source: Path) -> ProjectMe
         )
     except ValidationError as error:
         raise _schema_error(source, "project", str(error)) from error
+
+
+def _scope_assertion(
+    section: Mapping[str, object],
+    key: str,
+    source: Path,
+) -> ScopeAssertion:
+    location = f"aisi_scope_evidence.{key}"
+    declaration = _mapping(_required(section, key, source, "aisi_scope_evidence"), source, location)
+    return ScopeAssertion(
+        state=_enum(
+            EvidenceState,
+            _required(declaration, "state", source, location),
+            source,
+            f"{location}.state",
+        ),
+        basis=_text(declaration, "basis", source, location),
+    )
+
+
+def _scope_evidence(
+    document: Mapping[str, object],
+    source: Path,
+    schema_version: str,
+) -> AISIProjectScopeEvidence:
+    if schema_version == LEGACY_PROJECT_SCHEMA_VERSION:
+        if "aisi_scope_evidence" in document:
+            raise _schema_error(
+                source,
+                "root.aisi_scope_evidence",
+                "requires schema_version '0.2.0'",
+            )
+        return AISIProjectScopeEvidence.unknown(
+            "Legacy project schema 0.1.0 has no AISI scope-evidence contract."
+        )
+
+    section = _mapping(
+        _required(document, "aisi_scope_evidence", source, "root"),
+        source,
+        "aisi_scope_evidence",
+    )
+    country_location = "aisi_scope_evidence.governing_country"
+    country = _mapping(
+        _required(section, "governing_country", source, "aisi_scope_evidence"),
+        source,
+        country_location,
+    )
+    application_location = "aisi_scope_evidence.structure_application"
+    application = _mapping(
+        _required(section, "structure_application", source, "aisi_scope_evidence"),
+        source,
+        application_location,
+    )
+    try:
+        return AISIProjectScopeEvidence(
+            governing_country=GoverningCountryDeclaration(
+                country=_enum(
+                    GoverningCountry,
+                    _required(country, "country", source, country_location),
+                    source,
+                    f"{country_location}.country",
+                ),
+                basis=_text(country, "basis", source, country_location),
+            ),
+            structure_application=StructureApplicationDeclaration(
+                application=_enum(
+                    StructureApplication,
+                    _required(
+                        application,
+                        "application",
+                        source,
+                        application_location,
+                    ),
+                    source,
+                    f"{application_location}.application",
+                ),
+                basis=_text(application, "basis", source, application_location),
+            ),
+            cold_formed_to_shape=_scope_assertion(
+                section, "cold_formed_to_shape", source
+            ),
+            structural_load_carrying_use=_scope_assertion(
+                section, "structural_load_carrying_use", source
+            ),
+            dynamic_effects_addressed=_scope_assertion(
+                section, "dynamic_effects_addressed", source
+            ),
+        )
+    except ValidationError as error:
+        raise _schema_error(source, "aisi_scope_evidence", str(error)) from error
 
 
 def _design_context(document: Mapping[str, object], source: Path) -> DesignContext:
@@ -702,10 +804,11 @@ def load_project_config(
             f"missing required sections: {', '.join(missing_sections)}",
         )
     schema_version = _text(root_document, "schema_version", source, "root")
-    if schema_version != SUPPORTED_PROJECT_SCHEMA_VERSION:
+    if schema_version not in SUPPORTED_PROJECT_SCHEMA_VERSIONS:
         raise SchemaError(
             f"{source.name}: unsupported schema_version {schema_version!r}; "
-            f"supported version is {SUPPORTED_PROJECT_SCHEMA_VERSION!r}"
+            "supported versions are "
+            f"{', '.join(repr(item) for item in SUPPORTED_PROJECT_SCHEMA_VERSIONS)}"
         )
     root = _repository_root(source, repository_root)
     try:
@@ -713,6 +816,9 @@ def load_project_config(
             schema_version=schema_version,
             metadata=_project_metadata(root_document, source),
             design_context=_design_context(root_document, source),
+            scope_evidence=_scope_evidence(
+                root_document, source, schema_version
+            ),
             files=_file_references(root_document, source, root),
             catalog_verification=_catalog_verification(root_document, source),
             etabs_import=_etabs_config(root_document, source),
@@ -726,4 +832,9 @@ def load_project_config(
         raise _schema_error(source, "root", str(error)) from error
 
 
-__all__ = ["SUPPORTED_PROJECT_SCHEMA_VERSION", "load_project_config"]
+__all__ = [
+    "LEGACY_PROJECT_SCHEMA_VERSION",
+    "SUPPORTED_PROJECT_SCHEMA_VERSION",
+    "SUPPORTED_PROJECT_SCHEMA_VERSIONS",
+    "load_project_config",
+]

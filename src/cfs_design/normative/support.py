@@ -485,6 +485,154 @@ def _action_checks(
     return tuple(checks)
 
 
+def _e4_analytical_route_checks(
+    member: ResolvedMember,
+    method: DesignMethod,
+    action: DesignAction,
+) -> tuple[SoftwareSupportCheck, ...]:
+    """Gate only the future analytical E4 route; calculate no resistance."""
+
+    if (
+        method is not DesignMethod.EWM
+        or action is not DesignAction.AXIAL_COMPRESSION
+        or member.section.catalog_section.family is not SectionFamily.C_LIPPED
+    ):
+        return ()
+
+    geometry = member.section.geometry
+    dimensions = member.section.find_standard_dimensions(
+        S100_24_STANDARD_ID,
+        2024,
+    )
+    if dimensions is None:
+        geometry_check = _check(
+            method=method,
+            action=action,
+            capability_id="E4_ANALYTICAL_GEOMETRY",
+            topic="analytical E4 geometry",
+            status=SoftwareSupportStatus.INVALID_INPUT,
+            observed=(
+                MetadataEntry("standard_dimensions_available", False),
+                MetadataEntry("exact_equality_tolerance_mm", 0.0),
+            ),
+            requirement=(
+                "The analytical Appendix 2 Section 2.3.3.1 route requires an "
+                "explicit S100-24 dimensional record and equal stiffened flanges."
+            ),
+            diagnostic_code="E4_AISI_DIMENSIONS_REQUIRED",
+            diagnostic_message=(
+                "The analytical E4 route cannot be established without the "
+                "explicit standard-specific dimensional record"
+            ),
+        )
+    else:
+        midline_equal = (
+            geometry.b1_mm == geometry.b2_mm
+            and geometry.d1_mm == geometry.d2_mm
+        )
+        standard_pairs = (
+            (
+                dimensions.flange_1_flat_width_mm,
+                dimensions.flange_2_flat_width_mm,
+            ),
+            (
+                dimensions.flange_1_out_to_out_width_mm,
+                dimensions.flange_2_out_to_out_width_mm,
+            ),
+            (dimensions.lip_1_flat_width_mm, dimensions.lip_2_flat_width_mm),
+            (
+                dimensions.lip_1_out_to_out_width_mm,
+                dimensions.lip_2_out_to_out_width_mm,
+            ),
+            (
+                dimensions.lip_1_overall_depth_mm,
+                dimensions.lip_2_overall_depth_mm,
+            ),
+        )
+        standard_dimensions_equal = all(
+            first is not None and first == second
+            for first, second in standard_pairs
+        )
+        analytical_geometry_supported = (
+            midline_equal and standard_dimensions_equal
+        )
+        geometry_check = _check(
+            method=method,
+            action=action,
+            capability_id="E4_ANALYTICAL_GEOMETRY",
+            topic="analytical E4 geometry",
+            status=(
+                SoftwareSupportStatus.SUPPORTED
+                if analytical_geometry_supported
+                else SoftwareSupportStatus.UNSUPPORTED
+            ),
+            observed=(
+                MetadataEntry("standard_dimensions_available", True),
+                MetadataEntry("dimension_source", dimensions.source_id),
+                MetadataEntry("midline_flange_1_mm", geometry.b1_mm),
+                MetadataEntry("midline_flange_2_mm", geometry.b2_mm),
+                MetadataEntry("midline_lip_1_mm", geometry.d1_mm),
+                MetadataEntry("midline_lip_2_mm", geometry.d2_mm),
+                MetadataEntry("midline_pairs_equal", midline_equal),
+                MetadataEntry(
+                    "standard_dimension_pairs_equal",
+                    standard_dimensions_equal,
+                ),
+                MetadataEntry("exact_equality_tolerance_mm", 0.0),
+            ),
+            requirement=(
+                "Appendix 2 Section 2.3.3.1 is implemented only for equal "
+                "stiffened flanges represented by identical paired source values."
+            ),
+            diagnostic_code=(
+                None
+                if analytical_geometry_supported
+                else "E4_NUMERICAL_ROUTE_UNSUPPORTED"
+            ),
+            diagnostic_message=(
+                None
+                if analytical_geometry_supported
+                else "Unequal stiffened flanges require the unimplemented "
+                "Appendix 2 Section 2.2 numerical solution"
+            ),
+        )
+
+    lm = member.member.restraints.distortional_unbraced_length_mm
+    lm_source = member.member.restraints.distortional_restraint_source
+    lm_available = lm is not None and lm_source is not None
+    lm_check = _check(
+        method=method,
+        action=action,
+        capability_id="E4_DISTORTIONAL_RESTRAINT_LENGTH",
+        topic="distortional restraint length",
+        status=(
+            SoftwareSupportStatus.SUPPORTED
+            if lm_available
+            else SoftwareSupportStatus.INVALID_INPUT
+        ),
+        observed=(
+            MetadataEntry("distortional_unbraced_length_mm", lm),
+            MetadataEntry("distortional_restraint_source", lm_source),
+            MetadataEntry("lb_mm", member.member.geometry.lb_mm),
+            MetadataEntry(
+                "lateral_brace_spacing_mm",
+                member.member.restraints.lateral_brace_spacing_mm,
+            ),
+        ),
+        requirement=(
+            "The analytical E4 input must state Lm as the distance between "
+            "discrete restraints that restrict distortional buckling."
+        ),
+        diagnostic_code=None if lm_available else "E4_LM_REQUIRED",
+        diagnostic_message=(
+            None
+            if lm_available
+            else "No explicit distortional restraint length and provenance are supplied"
+        ),
+    )
+    return geometry_check, lm_check
+
+
 def evaluate_software_support(
     member: ResolvedMember,
     context: DesignContext,
@@ -506,6 +654,7 @@ def evaluate_software_support(
         _input_checks(member, context, method, action)
         + _context_checks(context, method, action)
         + _section_checks(member, method, action)
+        + _e4_analytical_route_checks(member, method, action)
         + _action_checks(member, method, action)
     )
     return SoftwareSupportResult(

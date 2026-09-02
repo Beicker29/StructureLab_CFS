@@ -34,6 +34,10 @@ only catalog references, member length/orientation information, restraints,
 and project metadata. It does not duplicate material values, section geometry,
 or section properties.
 
+`Project` also owns immutable `AISIProjectScopeEvidence`. This keeps project
+design-basis declarations separate from `DesignContext` method selection and
+from material-specific qualification data.
+
 `ResolvedMember` is the common future design input. It verifies that a member's
 section and material identifiers match its resolved objects. In M5 it retains
 the normalized M4 source demands and the one-to-one section-axis demands. No
@@ -44,6 +48,8 @@ separate `EWMMember` or `DSMMember` exists.
 - `enums.py`: `MemberType`, `SectionFamily`, `GeometryConvention`,
   `LengthDefinition`, `DesignFormat`, `DesignMethod`, and `RunMode`.
 - `project.py`: `ProjectMetadata` and `Project`.
+- `scope.py`: three-state, provenance-bearing project scope declarations and
+  controlled S100-24 country/application identities.
 - `design_context.py`: selected standard metadata, format, methods, run mode,
   and canonical unit-system identifier.
 - `material.py`: catalog material values and derived isotropic `g_mpa`.
@@ -156,6 +162,11 @@ Supplying fields from both modes or omitting a required value is invalid. The
 object does not convert `K * L` into effective lengths and does not calculate
 Euler or AISI buckling; normalization belongs to a later resolver/service.
 
+`Restraints.distortional_unbraced_length_mm` is the explicit future AISI `Lm`
+input. It is optional as a member-contract field, but when supplied it must be
+positive and paired with `distortional_restraint_source`. It is independent of
+`lb_mm`, lateral brace spacing, and the translation/torsion/warping flags.
+
 ## Section separation
 
 `CatalogSection` is identity only. `SectionGeometry` preserves the dimensions
@@ -207,6 +218,8 @@ complete M4 import result, diagnostics, and reproducibility provenance. M8A
 also adds one `ResolvedSectionMechanics` per mechanically resolved active
 section. That bundle contains the complete M3A gross and M3B advanced objects,
 its catalog comparison, and an explicit `design_use_permitted` QA gate.
+It also preserves the exact `AISIProjectScopeEvidence` and member restraint
+values loaded at the IO boundary.
 
 Future design reads only that coherent M3 bundle. `ResolvedSection.properties`
 remains available as the independent catalog QA/reference record; no mixed

@@ -82,6 +82,46 @@ def test_invalid_brace_spacing_is_rejected(restraints: Restraints) -> None:
         replace(restraints, lateral_brace_spacing_mm=0.0)
 
 
+def test_explicit_distortional_unbraced_length_and_source_are_preserved(
+    restraints: Restraints,
+) -> None:
+    updated = replace(
+        restraints,
+        distortional_unbraced_length_mm=1800.0,
+        distortional_restraint_source="Structural restraint schedule R-01.",
+    )
+
+    assert updated.distortional_unbraced_length_mm == 1800.0
+    assert updated.distortional_restraint_source == (
+        "Structural restraint schedule R-01."
+    )
+
+
+@pytest.mark.parametrize("value", (0.0, -1.0, float("inf"), float("nan")))
+def test_invalid_distortional_unbraced_length_is_rejected(
+    restraints: Restraints,
+    value: float,
+) -> None:
+    with pytest.raises(ValidationError, match="distortional_unbraced_length_mm"):
+        replace(
+            restraints,
+            distortional_unbraced_length_mm=value,
+            distortional_restraint_source="Synthetic test source.",
+        )
+
+
+def test_distortional_length_and_source_must_be_paired(
+    restraints: Restraints,
+) -> None:
+    with pytest.raises(ValidationError, match="must be supplied together"):
+        replace(restraints, distortional_unbraced_length_mm=1800.0)
+    with pytest.raises(ValidationError, match="must be supplied together"):
+        replace(
+            restraints,
+            distortional_restraint_source="Synthetic test source.",
+        )
+
+
 def test_valid_member_case(member: MemberCase) -> None:
     assert member.section_id == "SEC_C200"
 
@@ -93,4 +133,3 @@ def test_blank_member_identity_is_rejected(
 ) -> None:
     with pytest.raises(ValidationError):
         replace(member, **{field_name: "  "})
-

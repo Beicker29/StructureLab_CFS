@@ -24,8 +24,10 @@ geometry construction, property equations, or ETABS normalization rules.
 
 ## Typed configuration and paths
 
-`load_project_config()` accepts only YAML schema `0.1.0` and returns frozen,
-typed values for project identity, design context, files, catalog
+`load_project_config()` accepts legacy YAML schema `0.1.0` and current `0.2.0`.
+Schema `0.2.0` adds frozen, provenance-bearing `AISIProjectScopeEvidence`;
+legacy projects receive explicit `UNKNOWN` declarations rather than defaults.
+The loader otherwise returns frozen, typed values for project identity, design context, files, catalog
 verification, ETABS behavior, quality assurance, and output configuration.
 Raw nested configuration dictionaries do not cross this boundary.
 
@@ -43,12 +45,16 @@ or result file is created by M5.
 
 ## Member loading and activity
 
-The member loader reads the named `Members` and `Metadata` sheets, validates
-schema version `0.1.0`, uses named columns, rejects formulas and partial rows,
+The member loader reads the named `Members` and `Metadata` sheets, accepts
+legacy schema `0.1.0` and current `0.2.0`, uses named columns, rejects formulas and partial rows,
 and constructs the existing immutable `MemberCase`, `MemberGeometry`, and
 `Restraints` domain values. Blank rows are ignored; every complete active or
 inactive row is preserved. Domain validation remains the authority for length
 definitions, member types, orientation, and restraint consistency.
+
+Schema `0.2.0` adds optional `distortional_unbraced_length_mm` (`Lm`) and its
+paired source. Schema `0.1.0` resolves both as `None`. M5 preserves the exact
+values; it never derives `Lm` from `Lb_mm`, lateral bracing, or restraint flags.
 
 Only active members are resolved for design input. Every active member must
 reference an existing active material and existing active section when the

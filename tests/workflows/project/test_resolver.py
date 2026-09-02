@@ -103,6 +103,28 @@ def _activate_example(root: Path) -> None:
     )
 
 
+def _upgrade_members_to_schema_02(root: Path) -> None:
+    def operation(workbook: object) -> None:
+        metadata = workbook["Metadata"]  # type: ignore[index]
+        for row in range(2, metadata.max_row + 1):
+            if metadata.cell(row, 1).value == "schema_version":
+                metadata.cell(row, 2).value = "0.2.0"
+                break
+        members = workbook["Members"]  # type: ignore[index]
+        headers = _headers(members)
+        if "distortional_unbraced_length_mm" not in headers:
+            members.cell(1, members.max_column + 1).value = (
+                "distortional_unbraced_length_mm"
+            )
+        headers = _headers(members)
+        if "distortional_restraint_source" not in headers:
+            members.cell(1, members.max_column + 1).value = (
+                "distortional_restraint_source"
+            )
+
+    _modify_workbook(_workbook(root, "members.xlsx"), operation)
+
+
 def test_approved_inactive_project_loads_without_forcing_execution() -> None:
     resolved = resolve_project(APPROVED_PROJECT, repository_root=REPOSITORY_ROOT)
 
@@ -163,6 +185,31 @@ def test_active_example_resolves_catalogs_demands_verification_and_provenance(
     assert provenance.etabs_sha256 == sha256(_workbook(project_root, "ETABS_results.xlsx").read_bytes()).hexdigest()
     assert provenance.etabs_program_version == "18.1.1"
     assert not resolved.project_config.outputs.resolved_root.exists()
+
+
+def test_explicit_lm_survives_members_loader_and_m5_resolution(
+    project_root: Path,
+) -> None:
+    _upgrade_members_to_schema_02(project_root)
+    _activate_example(project_root)
+    _set_by_id(
+        _workbook(project_root, "members.xlsx"),
+        "Members",
+        "case_id",
+        "EX_BEAM_001",
+        distortional_unbraced_length_mm=1800.0,
+        distortional_restraint_source="Structural restraint schedule R-01.",
+    )
+
+    resolved = resolve_project(
+        _project_yaml(project_root), repository_root=project_root
+    )
+    restraints = resolved.active_resolved_members[0].member.restraints
+
+    assert restraints.distortional_unbraced_length_mm == 1800.0
+    assert restraints.distortional_restraint_source == (
+        "Structural restraint schedule R-01."
+    )
 
 
 def test_all_stations_and_before_after_survive_resolution(project_root: Path) -> None:

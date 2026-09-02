@@ -142,7 +142,7 @@ result/trace objects only. See `docs/08_CALCULATION_TRACE.md` and
 M7 adds two independent rule paths downstream of the shared M5 input:
 
 ```text
-ResolvedMember + DesignContext + requested method/action
+ResolvedMember + DesignContext + project scope evidence + requested method/action
     -> S100-24 applicability rules -> NormativeApplicabilityResult
     -> v0.1 capability rules       -> SoftwareSupportResult
     -> DesignEligibility
@@ -185,5 +185,12 @@ continues under warning policy. The S100 normative layer separately owns its
 prescribed elastic constants.
 
 The production illustrative catalog deliberately has no dimensional records,
-so its M7 B4.1 result remains `INDETERMINATE`. A1.1/A1.2.3 project facts are
-also still unmodeled. See `docs/19_AISI_DIMENSIONAL_CONTRACT_M8A.md`.
+so its M7 B4.1 result remains `INDETERMINATE`.
+
+M8A.1 adds typed, provenance-bearing project evidence for the project-wide
+A1.1 facts and A1.2.3 governing country, while leaving material-specific A3
+qualification on the material side of the boundary. It also adds explicit
+member `Lm` without deriving it from other bracing fields. M7 separately gates
+the future analytical E4 route to exact equal-flange data; unequal flanges are
+software-unsupported without becoming normatively prohibited. See
+`docs/20_SCOPE_AND_DISTORTIONAL_INPUTS_M8A1.md`.

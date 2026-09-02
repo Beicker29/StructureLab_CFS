@@ -247,21 +247,19 @@ centralizes the printed `E`, `G`, and `mu` as immutable normative constants for
 the clauses that prescribe them. Material values remain untouched and no
 material schema or value was changed.
 
-## Existing M7 gate also blocks execution
+## M7 scope gate after M8A.1
 
-Even after the dimensional issue is resolved, the current public M7 result is
-not executable because it deliberately records the following current-contract
-facts as indeterminate:
+M8A.1 versions project evidence so forming, load-carrying use, application,
+dynamic effects, and governing country are evaluable without assumptions.
+Legacy/missing declarations remain indeterminate. The qualifying steel-product
+condition remains material-specific and indeterminate pending a separate
+material-catalog contract approval.
 
-- A1.1 forming process, base-metal classification, load-carrying use, and
-  dynamic-effects context;
-- A1.2.3 governing country for LRFD;
-- B4.1 element dimensions.
+- material-specific A1.1/A3 qualification;
+- B4.1 element dimensions when no explicit production record exists.
 
 Per `DesignEligibility`, M8 can execute only for normative `APPLICABLE` and
-software `SUPPORTED`. It cannot replace these facts with assumptions. A
-separate approved contract change would be needed to represent jurisdiction
-and scope evidence, followed by M7 rules that consume it.
+software `SUPPORTED`. It cannot replace these remaining facts with assumptions.
 
 ## Lipped-C distortional scope decision
 
@@ -290,8 +288,8 @@ without the verified E4 route and benchmark.
 
 1. Populate each production section's schema-0.2 AISI dimensional row from a
    trusted, traceable source; absence must continue blocking execution.
-2. Add and approve the M7 scope/jurisdiction evidence needed for an
-   `APPLICABLE` result.
+2. Add and approve the material-specific A1.1/A3 qualification contract needed
+   for an `APPLICABLE` result.
 3. Implement every applicable E2/E3.1/E4 component from the primary source,
    with CalculationTrace coverage and independent benchmarks.
 

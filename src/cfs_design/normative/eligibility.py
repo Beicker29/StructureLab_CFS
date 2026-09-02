@@ -1,6 +1,11 @@
 """Combined M7 eligibility orchestration."""
 
-from cfs_design.domain import DesignContext, DesignMethod, ResolvedMember
+from cfs_design.domain import (
+    AISIProjectScopeEvidence,
+    DesignContext,
+    DesignMethod,
+    ResolvedMember,
+)
 
 from .applicability import evaluate_normative_applicability
 from .enums import DesignAction
@@ -13,6 +18,7 @@ def evaluate_design_eligibility(
     context: DesignContext,
     method: DesignMethod,
     action: DesignAction,
+    scope_evidence: AISIProjectScopeEvidence | None = None,
 ) -> DesignEligibility:
     """Retain independent AISI and software conclusions in one execution gate."""
 
@@ -21,6 +27,7 @@ def evaluate_design_eligibility(
         context=context,
         method=method,
         action=action,
+        scope_evidence=scope_evidence,
     )
     software = evaluate_software_support(
         member=member,

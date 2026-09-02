@@ -1,12 +1,13 @@
 """Project metadata and unresolved physical-member collection."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from cfs_design.core.exceptions import ValidationError
 
 from ._validation import require_non_empty, require_optional_string
 from .design_context import DesignContext
 from .member import MemberCase
+from .scope import AISIProjectScopeEvidence, unspecified_scope_evidence
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,6 +31,9 @@ class Project:
     metadata: ProjectMetadata
     design_context: DesignContext
     members: tuple[MemberCase, ...]
+    scope_evidence: AISIProjectScopeEvidence = field(
+        default_factory=unspecified_scope_evidence
+    )
 
     def __post_init__(self) -> None:
         if not isinstance(self.metadata, ProjectMetadata):
@@ -45,7 +49,10 @@ class Project:
         case_ids = tuple(member.case_id for member in self.members)
         if len(set(case_ids)) != len(case_ids):
             raise ValidationError("case_id values must be unique within a Project")
+        if not isinstance(self.scope_evidence, AISIProjectScopeEvidence):
+            raise ValidationError(
+                "scope_evidence must be AISIProjectScopeEvidence"
+            )
 
 
 __all__ = ["Project", "ProjectMetadata"]
-

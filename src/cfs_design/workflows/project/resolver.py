@@ -343,6 +343,7 @@ def resolve_project(
         metadata=config.metadata,
         design_context=config.design_context,
         members=members_result.members,
+        scope_evidence=config.scope_evidence,
     )
     registry = CatalogRegistry(
         material_catalog=load_material_catalog(
