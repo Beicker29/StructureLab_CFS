@@ -108,8 +108,14 @@ Members schema `0.1.0` remains loadable and yields `None` for both new fields.
 The production workbook migration target is `0.1.0 -> 0.2.0`, preserving all
 existing cells and adding blank values only. Its prior SHA-256 is
 `288d2fe4bea7cbe514884db6fec52e5b5b13a433e2d3ac64a5d1136fad855ee8`.
-The new digest will be recorded after the controlled physical workbook
-migration and verification.
+Its migrated SHA-256 is
+`5b6add4838f33d0ad49f286f16ede5655bc9a681e4ba29fb4192ad182485f6f2`.
+Programmatic before/after verification preserved 320 pre-existing cells,
+sheet order, sheet states, merged ranges, freeze panes, filters and data
+validations; only the metadata version changed. The `Members` sheet has the
+two approved new headers, both production rows are blank in both fields, the
+`Schema` sheet has exactly the two corresponding rows, and the workbook has
+zero formulas.
 
 ## Analytical E4 software limitation
 
@@ -149,6 +155,10 @@ digests are:
 | S100-24 PDF | `6ec32742f056d08a0823557d9ce58b69d84312e64a6e656b8ba4b3b10cf4b4ca` |
 
 No dependency is added. The required spreadsheet `@oai/artifact-tool` runtime
-is unavailable in this session, so physical `members.xlsx` migration and
-render verification remain pending unless the owner separately authorizes the
-same controlled `openpyxl` fallback previously limited to the section catalog.
+was unavailable in this session. With explicit owner authorization,
+`openpyxl` was used only for this controlled `members.xlsx` migration. Visual
+render verification with `artifact-tool` was therefore not possible; the
+structural and cell-level checks above were performed programmatically.
+
+After the physical migration, the complete repository suite passed:
+`472 passed in 12.46s`. No project dependency was added or changed.

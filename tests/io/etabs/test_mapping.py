@@ -18,7 +18,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 ETABS_SOURCE = REPOSITORY_ROOT / "projects" / "PRJ_001" / "ETABS_results.xlsx"
 MEMBERS_SOURCE = REPOSITORY_ROOT / "projects" / "PRJ_001" / "members.xlsx"
 APPROVED_MEMBERS_SHA256 = (
-    "288d2fe4bea7cbe514884db6fec52e5b5b13a433e2d3ac64a5d1136fad855ee8"
+    "5b6add4838f33d0ad49f286f16ede5655bc9a681e4ba29fb4192ad182485f6f2"
 )
 
 

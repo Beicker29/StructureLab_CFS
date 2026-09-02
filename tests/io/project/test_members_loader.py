@@ -16,7 +16,7 @@ from cfs_design.io.project import load_members
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 MEMBERS_SOURCE = REPOSITORY_ROOT / "projects" / "PRJ_001" / "members.xlsx"
 APPROVED_MEMBERS_SHA256 = (
-    "288d2fe4bea7cbe514884db6fec52e5b5b13a433e2d3ac64a5d1136fad855ee8"
+    "5b6add4838f33d0ad49f286f16ede5655bc9a681e4ba29fb4192ad182485f6f2"
 )
 
 
@@ -76,7 +76,7 @@ def _upgrade_to_schema_02(path: Path) -> None:
 def test_approved_members_loads_both_inactive_member_styles() -> None:
     result = load_members(MEMBERS_SOURCE)
 
-    assert result.metadata.schema_version == "0.1.0"
+    assert result.metadata.schema_version == "0.2.0"
     assert result.metadata.source_path == MEMBERS_SOURCE.resolve()
     assert result.metadata.file_sha256 == APPROVED_MEMBERS_SHA256
     assert result.metadata.file_sha256 == sha256(MEMBERS_SOURCE.read_bytes()).hexdigest()
@@ -90,6 +90,8 @@ def test_approved_members_loads_both_inactive_member_styles() -> None:
     assert second.geometry.length_definition is LengthDefinition.EFFECTIVE_LENGTHS
     assert second.geometry.lx_mm == 4000.0
     assert first.restraints.y_translation_restrained is True
+    assert first.restraints.distortional_unbraced_length_mm is None
+    assert first.restraints.distortional_restraint_source is None
 
 
 def test_duplicate_case_id_is_rejected_with_rows(members_copy: Path) -> None:
@@ -206,6 +208,35 @@ def test_schema_02_allows_missing_lm_when_not_required(members_copy: Path) -> No
 
     assert restraints.distortional_unbraced_length_mm is None
     assert restraints.distortional_restraint_source is None
+
+
+def test_legacy_schema_01_loads_without_fabricating_lm(
+    members_copy: Path,
+) -> None:
+    def operation(workbook: object) -> None:
+        metadata = workbook["Metadata"]  # type: ignore[index]
+        for row in range(2, metadata.max_row + 1):
+            if metadata.cell(row, 1).value == "schema_version":
+                metadata.cell(row, 2).value = "0.1.0"
+                break
+        members = workbook["Members"]  # type: ignore[index]
+        for header in reversed(
+            (
+                "distortional_unbraced_length_mm",
+                "distortional_restraint_source",
+            )
+        ):
+            members.delete_cols(_column(members, header))
+
+    _modify(members_copy, operation)
+    result = load_members(members_copy)
+
+    assert result.metadata.schema_version == "0.1.0"
+    assert all(
+        member.restraints.distortional_unbraced_length_mm is None
+        and member.restraints.distortional_restraint_source is None
+        for member in result.members
+    )
 
 
 @pytest.mark.parametrize("value", (0.0, -1.0, "Infinity", "NaN"))
