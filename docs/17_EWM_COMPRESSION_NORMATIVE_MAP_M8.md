@@ -288,8 +288,9 @@ without the verified E4 route and benchmark.
 
 1. Populate each production section's schema-0.2 AISI dimensional row from a
    trusted, traceable source; absence must continue blocking execution.
-2. Add and approve the material-specific A1.1/A3 qualification contract needed
-   for an `APPLICABLE` result.
+2. Populate the M8A.2 material-specific A1.1/A3 qualification contract from
+   verified production evidence; the empty/missing record remains
+   `INDETERMINATE`.
 3. Implement every applicable E2/E3.1/E4 component from the primary source,
    with CalculationTrace coverage and independent benchmarks.
 

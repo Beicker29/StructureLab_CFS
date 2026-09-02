@@ -12,6 +12,15 @@ from .enums import (
     SectionFamily,
 )
 from .material import Material
+from .material_qualification import (
+    A3ElongationGroup,
+    MaterialProductForm,
+    MaterialQualificationRoute,
+    MaterialQualificationState,
+    QualificationRequirementState,
+    StandardMaterialQualification,
+    SteelClassification,
+)
 from .member import MemberCase, MemberGeometry, Restraints
 from .project import Project, ProjectMetadata
 from .scope import (
@@ -52,6 +61,10 @@ __all__ = [
     "GoverningCountryDeclaration",
     "LengthDefinition",
     "Material",
+    "A3ElongationGroup",
+    "MaterialProductForm",
+    "MaterialQualificationRoute",
+    "MaterialQualificationState",
     "MemberCase",
     "MemberGeometry",
     "MemberType",
@@ -61,11 +74,14 @@ __all__ = [
     "ResolvedSection",
     "Restraints",
     "RunMode",
+    "QualificationRequirementState",
     "ScopeAssertion",
     "SectionFamily",
     "SectionGeometry",
     "SectionProperties",
     "StandardSectionDimensions",
+    "StandardMaterialQualification",
+    "SteelClassification",
     "StructureApplication",
     "StructureApplicationDeclaration",
     "S100_24_STANDARD_EDITION",

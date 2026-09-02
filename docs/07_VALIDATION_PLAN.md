@@ -112,3 +112,11 @@ hand-calculated capacity benchmark, or
 be created until trusted production dimensions, remaining M7 project evidence,
 and the M8B equation/benchmark scope in
 `docs/19_AISI_DIMENSIONAL_CONTRACT_M8A.md` are satisfied.
+
+M8A.1 adds project-scope and explicit `Lm` contract tests. M8A.2 adds material
+schema 0.1/0.2 compatibility, exact keys/references, controlled A3 routes and
+states, required provenance, route-specific completeness, formula rejection,
+M7 qualified/unqualified/missing behavior, immutable design-input assembly,
+coherent M3 property authority, QA blocking, CAPACITY without member demands,
+and DEMAND_CHECK with and without the preserved M4/M5 pair. These remain input
+and eligibility tests; they contain no resistance benchmark.

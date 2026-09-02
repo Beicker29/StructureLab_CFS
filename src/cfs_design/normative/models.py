@@ -17,7 +17,7 @@ from cfs_design.results import (
 from cfs_design.results.diagnostics import validate_diagnostics
 from cfs_design.results.values import validate_metadata
 
-from .enums import DesignAction, SoftwareSupportStatus
+from .enums import DesignAction, DesignExecutionPurpose, SoftwareSupportStatus
 
 
 _NORMATIVE_STATUSES = frozenset(
@@ -206,6 +206,7 @@ class SoftwareSupportResult:
     status: SoftwareSupportStatus
     checks: tuple[SoftwareSupportCheck, ...]
     software_scope_version: str
+    purpose: DesignExecutionPurpose = DesignExecutionPurpose.DEMAND_CHECK
     diagnostics: tuple[EngineeringDiagnostic, ...] = field(init=False)
 
     def __post_init__(self) -> None:
@@ -215,6 +216,8 @@ class SoftwareSupportResult:
             raise ValidationError("action must be DesignAction")
         if not isinstance(self.status, SoftwareSupportStatus):
             raise ValidationError("status must be SoftwareSupportStatus")
+        if not isinstance(self.purpose, DesignExecutionPurpose):
+            raise ValidationError("purpose must be DesignExecutionPurpose")
         require_non_empty(self.software_scope_version, "software_scope_version")
         expected = aggregate_software_status(self.checks)
         if self.status is not expected:

@@ -52,7 +52,7 @@ M7 records B4.2 as unevaluated when that distinction is needed.
 | `M7_SOURCE_SELECTION` | Source guard | Both | All | Primary document identity | `normative.applicability` | Prevents S100-24 rules from evaluating another edition |
 | `A1_1_THICKNESS` | Specification scope | Both | Current actions | A1.1, specification p. 1 | `normative.applicability` | Checks the explicit 25.4 mm thickness ceiling |
 | `A1_1_COLD_FORMED_TO_SHAPE` | Forming scope | Both | Current actions | A1.1, specification p. 1 | `normative.applicability` | Consumes the provenance-bearing project declaration. |
-| `A1_1_QUALIFYING_STEEL_PRODUCT` | Material/product scope | Both | Current actions | A1.1 and A3.1-A3.2, specification pp. 1 and 14-19 | `normative.applicability` | Remains indeterminate pending a material-specific qualification contract. |
+| `A1_1_QUALIFYING_STEEL_PRODUCT` | Material/product scope | Both | Current actions | A1.1 and A3.1-A3.2, specification pp. 1 and 14-19 | `normative.applicability` | Evaluates exact sourced material qualification; missing evidence remains indeterminate. |
 | `A1_1_STRUCTURAL_LOAD_CARRYING_USE` | Structural use | Both | Current actions | A1.1, specification p. 1 | `normative.applicability` | Consumes the project structural-use declaration. |
 | `A1_1_STRUCTURE_APPLICATION` | Building/dynamic branch | Both | Current actions | A1.1, specification p. 1 | `normative.applicability` | Applies the dynamic-effects condition only to other structures. |
 | `A1_2_3_DESIGN_FORMAT_JURISDICTION` | Design-format geography | Both | Current actions | A1.2.3, specification p. 1 | `normative.applicability` | Relates ASD/LRFD/LSD to the governing country |
@@ -71,12 +71,17 @@ M7 records B4.2 as unevaluated when that distinction is needed.
 
 The code cites clauses only. It implements no equation from the cited pages.
 
+M8A.2 distinguishes A3.1.1, A3.1.2, A3.1.3, and A3.2.1 evidence groups.
+A3.1.3 is not applicable to the current single-web C member; A3.2.1 remains
+indeterminate where its purlin/girt/curtain-wall-stud restriction cannot be
+established from the approved member contract.
+
 ## Deliberately indeterminate facts
 
 M7 returns `INDETERMINATE` when available evidence cannot establish:
 
 - any missing project declaration needed by A1.1;
-- the material-specific qualifying product and A3 route;
+- a missing or indeterminate material-specific qualifying product/A3 record;
 - the governing country needed to finish A1.2.3;
 - B4.1 flat and out-to-out element dimensions when the resolved section has no
   matching explicit S100-24 dimensional record;

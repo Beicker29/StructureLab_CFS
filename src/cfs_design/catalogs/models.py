@@ -14,6 +14,7 @@ from cfs_design.domain import (
     SectionGeometry,
     SectionProperties,
     StandardSectionDimensions,
+    StandardMaterialQualification,
 )
 
 
@@ -71,6 +72,7 @@ class MaterialCatalog:
     metadata: CatalogMetadata
     sources: tuple[CatalogSource, ...]
     materials: tuple[Material, ...]
+    material_qualifications: tuple[StandardMaterialQualification, ...] = ()
     _source_index: Mapping[str, CatalogSource] = field(
         init=False,
         repr=False,
@@ -83,10 +85,14 @@ class MaterialCatalog:
         compare=False,
         hash=False,
     )
+    _qualification_index: Mapping[
+        tuple[str, str, int], StandardMaterialQualification
+    ] = field(init=False, repr=False, compare=False, hash=False)
 
     def __post_init__(self) -> None:
         _require_tuple(self.sources, "sources")
         _require_tuple(self.materials, "materials")
+        _require_tuple(self.material_qualifications, "material_qualifications")
         object.__setattr__(
             self,
             "_source_index",
@@ -96,6 +102,25 @@ class MaterialCatalog:
             self,
             "_material_index",
             _unique_index(self.materials, "material_id", "material"),
+        )
+        qualification_index: dict[
+            tuple[str, str, int], StandardMaterialQualification
+        ] = {}
+        for qualification in self.material_qualifications:
+            if not isinstance(qualification, StandardMaterialQualification):
+                raise CatalogError(
+                    "material_qualifications must contain "
+                    "StandardMaterialQualification"
+                )
+            if qualification.key in qualification_index:
+                raise CatalogError(
+                    f"Duplicate material qualification key: {qualification.key!r}"
+                )
+            qualification_index[qualification.key] = qualification
+        object.__setattr__(
+            self,
+            "_qualification_index",
+            MappingProxyType(qualification_index),
         )
 
     def get_material(self, material_id: str) -> Material:
@@ -109,6 +134,37 @@ class MaterialCatalog:
             return self._source_index[source_id]
         except KeyError as error:
             raise CatalogError(f"Unknown source_id: {source_id}") from error
+
+    def find_material_qualification(
+        self,
+        material_id: str,
+        standard_id: str,
+        standard_edition: int,
+    ) -> StandardMaterialQualification | None:
+        """Return an exact qualification match or an explicit missing outcome."""
+
+        return self._qualification_index.get(
+            (material_id, standard_id, standard_edition)
+        )
+
+    def get_material_qualification(
+        self,
+        material_id: str,
+        standard_id: str,
+        standard_edition: int,
+    ) -> StandardMaterialQualification:
+        qualification = self.find_material_qualification(
+            material_id,
+            standard_id,
+            standard_edition,
+        )
+        if qualification is None:
+            raise CatalogError(
+                "Unknown material qualification for "
+                f"material_id={material_id!r}, standard_id={standard_id!r}, "
+                f"standard_edition={standard_edition!r}"
+            )
+        return qualification
 
     @property
     def active_materials(self) -> tuple[Material, ...]:

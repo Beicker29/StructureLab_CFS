@@ -104,7 +104,16 @@ def test_all_five_approved_input_contracts_exist() -> None:
 @pytest.mark.parametrize(
     ("path", "sheets"),
     (
-        (MATERIALS_PATH, {"Materials", "Sources", "Metadata", "Schema"}),
+        (
+            MATERIALS_PATH,
+            {
+                "Materials",
+                "AISI_Material_Qualification",
+                "Sources",
+                "Metadata",
+                "Schema",
+            },
+        ),
         (
             SECTIONS_PATH,
             {
@@ -146,6 +155,37 @@ def test_materials_catalog_core_columns() -> None:
             "nu",
             "source_id",
             "active",
+        },
+    )
+    _assert_columns(
+        MATERIALS_PATH,
+        "AISI_Material_Qualification",
+        {
+            "material_id",
+            "standard_id",
+            "standard_edition",
+            "qualification_route",
+            "qualification_state",
+            "product_form",
+            "steel_classification",
+            "elongation_group",
+            "minimum_elongation_percent",
+            "elongation_gauge_length_mm",
+            "elongation_test_standard",
+            "mandatory_mechanical_properties_state",
+            "test_reports_required_state",
+            "chemical_mechanical_conformance_state",
+            "properties_determined_per_reference_state",
+            "coating_requirements_state",
+            "welding_requirements_state",
+            "production_identification_state",
+            "master_coil_10_percent_overstrength_state",
+            "local_elongation_percent",
+            "uniform_elongation_percent",
+            "ductility_test_standard",
+            "source_id",
+            "basis",
+            "notes",
         },
     )
 

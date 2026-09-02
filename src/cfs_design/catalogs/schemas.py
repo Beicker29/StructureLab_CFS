@@ -4,7 +4,13 @@ from dataclasses import dataclass
 
 
 SUPPORTED_SCHEMA_VERSION = "0.1.0"
-MATERIAL_SCHEMA_VERSION = "0.1.0"
+MATERIAL_SCHEMA_VERSION_V0_1 = "0.1.0"
+MATERIAL_SCHEMA_VERSION_V0_2 = "0.2.0"
+MATERIAL_SCHEMA_VERSION = MATERIAL_SCHEMA_VERSION_V0_2
+SUPPORTED_MATERIAL_SCHEMA_VERSIONS = (
+    MATERIAL_SCHEMA_VERSION_V0_1,
+    MATERIAL_SCHEMA_VERSION_V0_2,
+)
 SECTION_SCHEMA_VERSION_V0_1 = "0.1.0"
 SECTION_SCHEMA_VERSION_V0_2 = "0.2.0"
 SUPPORTED_SECTION_SCHEMA_VERSIONS = (
@@ -56,6 +62,33 @@ MATERIAL_COLUMNS = (
     "density_kg_m3",
     "source_id",
     "active",
+    "notes",
+)
+MATERIAL_QUALIFICATION_COLUMNS = (
+    "material_id",
+    "standard_id",
+    "standard_edition",
+    "qualification_route",
+    "qualification_state",
+    "product_form",
+    "steel_classification",
+    "elongation_group",
+    "minimum_elongation_percent",
+    "elongation_gauge_length_mm",
+    "elongation_test_standard",
+    "mandatory_mechanical_properties_state",
+    "test_reports_required_state",
+    "chemical_mechanical_conformance_state",
+    "properties_determined_per_reference_state",
+    "coating_requirements_state",
+    "welding_requirements_state",
+    "production_identification_state",
+    "master_coil_10_percent_overstrength_state",
+    "local_elongation_percent",
+    "uniform_elongation_percent",
+    "ductility_test_standard",
+    "source_id",
+    "basis",
     "notes",
 )
 SECTION_COLUMNS = (
@@ -128,7 +161,7 @@ AISI_DIMENSION_COLUMNS = (
     "notes",
 )
 
-MATERIAL_WORKBOOK_SCHEMA = WorkbookSchema(
+MATERIAL_WORKBOOK_SCHEMA_V0_1 = WorkbookSchema(
     sheets=(
         SheetSchema("Metadata", METADATA_COLUMNS),
         SheetSchema("Materials", MATERIAL_COLUMNS),
@@ -136,6 +169,22 @@ MATERIAL_WORKBOOK_SCHEMA = WorkbookSchema(
         SheetSchema("Schema", SCHEMA_COLUMNS),
     )
 )
+
+MATERIAL_WORKBOOK_SCHEMA_V0_2 = WorkbookSchema(
+    sheets=(
+        SheetSchema("Metadata", METADATA_COLUMNS),
+        SheetSchema("Materials", MATERIAL_COLUMNS),
+        SheetSchema(
+            "AISI_Material_Qualification",
+            MATERIAL_QUALIFICATION_COLUMNS,
+        ),
+        SheetSchema("Sources", SOURCE_COLUMNS),
+        SheetSchema("Schema", SCHEMA_COLUMNS),
+    )
+)
+
+# The unversioned name denotes the current material-catalog contract.
+MATERIAL_WORKBOOK_SCHEMA = MATERIAL_WORKBOOK_SCHEMA_V0_2
 
 SECTION_WORKBOOK_SCHEMA_V0_1 = WorkbookSchema(
     sheets=(
@@ -167,12 +216,18 @@ SOURCE_TYPES = frozenset({"STANDARD", "MANUFACTURER", "PAPER", "OTHER"})
 
 __all__ = [
     "MATERIAL_WORKBOOK_SCHEMA",
+    "MATERIAL_QUALIFICATION_COLUMNS",
+    "MATERIAL_WORKBOOK_SCHEMA_V0_1",
+    "MATERIAL_WORKBOOK_SCHEMA_V0_2",
     "MATERIAL_SCHEMA_VERSION",
+    "MATERIAL_SCHEMA_VERSION_V0_1",
+    "MATERIAL_SCHEMA_VERSION_V0_2",
     "SECTION_WORKBOOK_SCHEMA",
     "SECTION_WORKBOOK_SCHEMA_V0_1",
     "SECTION_WORKBOOK_SCHEMA_V0_2",
     "SECTION_SCHEMA_VERSION_V0_1",
     "SECTION_SCHEMA_VERSION_V0_2",
     "SUPPORTED_SCHEMA_VERSION",
+    "SUPPORTED_MATERIAL_SCHEMA_VERSIONS",
     "SUPPORTED_SECTION_SCHEMA_VERSIONS",
 ]

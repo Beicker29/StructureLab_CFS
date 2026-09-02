@@ -133,7 +133,7 @@ def _make_legacy_section_catalog(path: Path) -> None:
 def test_approved_material_catalog_loads_two_inactive_materials() -> None:
     catalog = load_material_catalog(MATERIALS_SOURCE)
 
-    assert catalog.metadata.schema_version == "0.1.0"
+    assert catalog.metadata.schema_version == "0.2.0"
     assert catalog.metadata.canonical_units == "SI"
     assert dict(catalog.metadata.additional_fields)["created"] == "2026-08-31"
     assert len(catalog.sources) == 1
@@ -144,6 +144,7 @@ def test_approved_material_catalog_loads_two_inactive_materials() -> None:
     )
     assert all(not material.active for material in catalog.materials)
     assert catalog.active_materials == ()
+    assert catalog.material_qualifications == ()
 
 
 def test_material_catalog_records_absolute_path_and_sha256() -> None:
@@ -158,7 +159,16 @@ def test_missing_catalog_file_is_rejected(tmp_path: Path) -> None:
         load_material_catalog(tmp_path / "missing.xlsx")
 
 
-@pytest.mark.parametrize("sheet_name", ("Materials", "Sources", "Metadata", "Schema"))
+@pytest.mark.parametrize(
+    "sheet_name",
+    (
+        "Materials",
+        "AISI_Material_Qualification",
+        "Sources",
+        "Metadata",
+        "Schema",
+    ),
+)
 def test_missing_material_workbook_sheet_is_rejected(
     materials_copy: Path,
     sheet_name: str,

@@ -5,12 +5,11 @@ reproducible cold-formed steel member design workflows. The approved v0.1
 target is ANSI/SDI AISI S100-24 LRFD for catalogued lipped and unlipped C
 sections under axial compression and strong-axis flexure.
 
-> **Development warning:** M8A provides a versioned, explicit S100-24
-> dimensional contract and resolves the property/constant/E4 policies, but the
-> illustrative production sections have no trusted dimensional rows and
-> project A1.1/A1.2.3 evidence remains unmodeled. The package does not calculate or
-> select a governing demand, resistance, utilization, effective width, or
-> elastic buckling. It is not suitable for engineering use.
+> **Development warning:** M8A-M8A.2 provide versioned S100-24 dimensional,
+> scope, material-qualification, and design-input contracts, but production
+> qualification/dimension evidence remains absent. The package does not
+> calculate or select a governing demand, resistance, utilization, effective
+> width, or elastic buckling. It is not suitable for engineering use.
 
 ## Planned design architecture
 
@@ -153,7 +152,7 @@ never invents a conversion or proxy. The PDFs are development authorities, not r
 engines. See [M7 Normative Map](docs/15_AISI_NORMATIVE_MAP_M7.md) and
 [M7 Applicability](docs/16_APPLICABILITY_M7.md).
 
-## Implemented M8A input readiness — stopped before resistance
+## Implemented M8A-M8A.2 input readiness — stopped before resistance
 
 Section-catalog schema `0.2.0` adds a separate `AISI_Dimensions` worksheet and
 immutable edition-keyed records; schema `0.1.0` remains readable. No value is
@@ -164,11 +163,20 @@ M5 exposes M3A/M3B as one coherent future design-property set behind the
 catalog-verification QA gate. The normative layer centralizes S100-24's
 prescribed `E`, `G`, and `mu` without overwriting material data. A complete
 future lipped-C axial EWM result must include E4. Project-level A1.1/A1.2.3
-fields require a separately approved YAML migration.
+evidence and explicit member `Lm` are typed without inferred production facts.
+
+M8A.2 adds edition-keyed material qualification evidence and an immutable
+`MemberDesignInput` that references one coherent M3 mechanics set behind its
+QA gate. Pure CAPACITY support no longer requires ETABS demands; DEMAND_CHECK
+still requires the preserved M4/M5 pair. The production material workbook is
+now schema `0.2.0` with a header-only 25-column qualification sheet; no
+production qualification evidence was fabricated.
 
 No resistance, effective width, buckling force, utilization, DSM, or pyCUFSM
-integration is implemented. See [M8A Dimensional Contract](docs/19_AISI_DIMENSIONAL_CONTRACT_M8A.md)
-and the historical [M8 Normative Map](docs/17_EWM_COMPRESSION_NORMATIVE_MAP_M8.md).
+integration is implemented. See [M8A Dimensional Contract](docs/19_AISI_DIMENSIONAL_CONTRACT_M8A.md),
+[M8A.2 Material Qualification](docs/21_AISI_MATERIAL_QUALIFICATION_M8A2.md),
+[M8A.2 Design Input](docs/22_DESIGN_INPUT_BOUNDARY_M8A2.md), and the historical
+[M8 Normative Map](docs/17_EWM_COMPRESSION_NORMATIVE_MAP_M8.md).
 
 ## Validation philosophy
 

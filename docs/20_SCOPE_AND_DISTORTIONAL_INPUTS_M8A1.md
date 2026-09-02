@@ -67,6 +67,10 @@ source/basis, and only the route-specific facts needed to audit that status
 remain unchanged. This proposal requires separate owner approval; M8A.1 does
 not modify `materials_catalog.xlsx`.
 
+M8A.2 implements this proposal as `StandardMaterialQualification` and the
+schema-0.2 `AISI_Material_Qualification` contract. See
+[`21_AISI_MATERIAL_QUALIFICATION_M8A2.md`](21_AISI_MATERIAL_QUALIFICATION_M8A2.md).
+
 ## M7 A1.1 and A1.2.3 behavior
 
 M7 now receives optional `AISIProjectScopeEvidence`:

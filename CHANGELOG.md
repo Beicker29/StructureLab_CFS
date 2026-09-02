@@ -99,6 +99,21 @@ design use.
 - Formal M8B requirement that a complete lipped-C axial EWM result include E4,
   plus a versioned proposal (not an implementation) for missing A1.1/A1.2.3
   project facts.
+- Milestone 8A.1 typed project scope evidence, schema-0.2 member `Lm` fields,
+  and an exact equal-flange analytical E4 software gate without dimensional
+  conversion or numerical Section 2.2 implementation.
+- Milestone 8A.2 immutable `StandardMaterialQualification` evidence keyed by
+  material/standard/edition, controlled A3 routes/states, mandatory provenance,
+  legacy/current catalog loading, exact registry lookup, and the controlled
+  production catalog migration to a header-only 25-field schema-0.2 worksheet.
+- M7 material applicability from explicit qualification evidence while
+  preserving missing evidence as `INDETERMINATE` and keeping normative failure
+  separate from software support.
+- Shared immutable `MemberDesignInput` referencing permitted coherent M3
+  mechanics, standard dimensions, material qualification, context, scope, and
+  eligibility without duplicating engineering values.
+- `DesignExecutionPurpose` separation: CAPACITY has no ETABS prerequisite;
+  DEMAND_CHECK retains the paired M4/M5 demand/provenance requirement.
 
 ### Not implemented
 
@@ -107,5 +122,5 @@ design use.
   equations, EWM/DSM design engines, pyCUFSM integration, serialization, and
   reporting calculations. Normative facts absent from the current domain stay
   explicitly INDETERMINATE. M8B remains stopped and no resistance validation
-  benchmark is claimed until trusted dimensions and remaining project evidence
-  are approved.
+  benchmark is claimed until trusted dimensions and production qualification
+  evidence are approved.

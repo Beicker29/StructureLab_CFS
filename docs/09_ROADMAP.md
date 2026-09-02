@@ -28,18 +28,21 @@ Each milestone requires separate authorization and proportionate validation.
     lipped-C E4 decision. No resistance exists.
 11. **M8A.1 - Scope and Distortional Inputs:** implemented versioned,
     provenance-bearing project scope evidence, explicit member `Lm`, and the
-    analytical equal-flange E4 software gate. Material A3 qualification remains
-    a separate contract stop; no resistance exists.
-12. **M8B - EWM Compression:** remains blocked until trusted production section
+    analytical equal-flange E4 software gate. No resistance exists.
+12. **M8A.2 - Material Qualification and Design Input:** implemented the typed
+    A3.1/A3.2 evidence model, M7 material evaluation, coherent shared
+    `MemberDesignInput`, CAPACITY/DEMAND_CHECK separation, and the controlled
+    header-only materials-catalog schema-0.2 migration.
+13. **M8B - EWM Compression:** remains blocked until trusted production section
     dimensions and material-specific A3 qualification evidence exist; a
     complete lipped-C result must include verified E4.
-13. **M9 - DSM Compression + pyCUFSM:** adapter, benchmarks, and authorized DSM
+14. **M9 - DSM Compression + pyCUFSM:** adapter, benchmarks, and authorized DSM
     provisions.
-14. **M10 - EWM/DSM Comparison:** independent result comparison.
-15. **M11 - Flexure:** strong-axis EWM and DSM design within approved scope.
-16. **M12 - Future Interactions:** reserved for separately approved scope;
+15. **M10 - EWM/DSM Comparison:** independent result comparison.
+16. **M11 - Flexure:** strong-axis EWM and DSM design within approved scope.
+17. **M12 - Future Interactions:** reserved for separately approved scope;
     P-M interaction remains outside v0.1.
-17. **M13 - Reporting / Calculation Memory:** presentation from result and trace
+18. **M13 - Reporting / Calculation Memory:** presentation from result and trace
     objects with no recalculation.
 
 The calculation implementation still stops before M8B. M8A provides exact

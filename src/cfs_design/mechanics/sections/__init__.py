@@ -1,6 +1,7 @@
 """Public M3A/M3B section-mechanics API."""
 
 from .advanced_properties import compute_advanced_properties
+from .design_properties import ResolvedSectionMechanics
 from .builder import build_centerline_section
 from .centerline import CenterlineSection
 from .gross_properties import compute_gross_properties
@@ -25,6 +26,7 @@ from .verification import verify_catalog_properties
 __all__ = [
     "AdvancedPropertyMethod",
     "AdvancedSectionProperties",
+    "ResolvedSectionMechanics",
     "CatalogVerificationResult",
     "CenterlineSection",
     "ComputedSectionProperties",

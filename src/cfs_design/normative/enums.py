@@ -20,6 +20,13 @@ class SoftwareSupportStatus(str, Enum):
     INVALID_INPUT = "INVALID_INPUT"
 
 
+class DesignExecutionPurpose(str, Enum):
+    """Small execution boundary between resistance and demand checking."""
+
+    CAPACITY = "CAPACITY"
+    DEMAND_CHECK = "DEMAND_CHECK"
+
+
 class StandardDocumentRole(str, Enum):
     """Authority role assigned to a locally registered standards document."""
 
@@ -32,6 +39,7 @@ class StandardDocumentRole(str, Enum):
 
 __all__ = [
     "DesignAction",
+    "DesignExecutionPurpose",
     "SoftwareSupportStatus",
     "StandardDocumentRole",
 ]

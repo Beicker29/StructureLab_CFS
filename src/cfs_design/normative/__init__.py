@@ -7,7 +7,12 @@ from .constants import (
     S100_24_ELASTIC_CONSTANTS,
 )
 from .eligibility import evaluate_design_eligibility
-from .enums import DesignAction, SoftwareSupportStatus, StandardDocumentRole
+from .enums import (
+    DesignAction,
+    DesignExecutionPurpose,
+    SoftwareSupportStatus,
+    StandardDocumentRole,
+)
 from .models import (
     ApplicabilityCheck,
     DesignEligibility,
@@ -49,6 +54,7 @@ from .support import (
 __all__ = [
     "ApplicabilityCheck",
     "DesignAction",
+    "DesignExecutionPurpose",
     "DesignEligibility",
     "FUTURE_S240_20",
     "FUTURE_S400_20",

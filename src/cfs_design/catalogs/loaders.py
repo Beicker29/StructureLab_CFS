@@ -5,14 +5,21 @@ from pathlib import Path
 
 from cfs_design.core.exceptions import CatalogError, SchemaError, ValidationError
 from cfs_design.domain import (
+    A3ElongationGroup,
     CatalogSection,
     GeometryConvention,
     Material,
+    MaterialProductForm,
+    MaterialQualificationRoute,
+    MaterialQualificationState,
+    QualificationRequirementState,
     ResolvedSection,
     SectionFamily,
     SectionGeometry,
     SectionProperties,
     StandardSectionDimensions,
+    StandardMaterialQualification,
+    SteelClassification,
     S100_24_STANDARD_EDITION,
     S100_24_STANDARD_ID,
 )
@@ -30,12 +37,14 @@ from ._excel import (
 )
 from .models import CatalogMetadata, CatalogSource, MaterialCatalog, SectionCatalog
 from .schemas import (
-    MATERIAL_WORKBOOK_SCHEMA,
-    MATERIAL_SCHEMA_VERSION,
+    MATERIAL_SCHEMA_VERSION_V0_2,
+    MATERIAL_WORKBOOK_SCHEMA_V0_1,
+    MATERIAL_WORKBOOK_SCHEMA_V0_2,
     SECTION_SCHEMA_VERSION_V0_2,
     SECTION_WORKBOOK_SCHEMA_V0_1,
     SECTION_WORKBOOK_SCHEMA_V0_2,
     SOURCE_TYPES,
+    SUPPORTED_MATERIAL_SCHEMA_VERSIONS,
     SUPPORTED_SECTION_SCHEMA_VERSIONS,
 )
 from .validation import register_unique, reject_orphans, require_reference
@@ -123,48 +132,217 @@ def _parse_sources(
     return tuple(sources), rows_by_id
 
 
+def _parse_materials(
+    reader: ExcelCatalogReader,
+    source_ids: Collection[str],
+) -> tuple[tuple[Material, ...], dict[str, Material]]:
+    materials: list[Material] = []
+    by_id: dict[str, Material] = {}
+    seen_rows: dict[str, int] = {}
+    for row in reader.rows("Materials"):
+        material_id = required_text(row, "material_id")
+        register_unique(material_id, seen_rows, row.context, "material_id")
+        source_id = required_text(row, "source_id")
+        require_reference(
+            source_id,
+            source_ids,
+            row.context,
+            "source_id",
+            "Sources.source_id",
+        )
+        try:
+            material = Material(
+                material_id=material_id,
+                designation=required_text(row, "designation"),
+                specification=required_text(row, "specification"),
+                grade=required_text(row, "grade"),
+                fy_mpa=required_number(row, "Fy_MPa"),
+                fu_mpa=required_number(row, "Fu_MPa"),
+                e_mpa=required_number(row, "E_MPa"),
+                nu=required_number(row, "nu"),
+                density_kg_m3=optional_number(row, "density_kg_m3"),
+                source_id=source_id,
+                active=required_boolean(row, "active"),
+                notes=optional_text(row, "notes"),
+            )
+        except ValidationError as error:
+            raise row.context.catalog_error(
+                None,
+                f"Invalid Material domain values: {error}",
+            ) from error
+        materials.append(material)
+        by_id[material_id] = material
+    return tuple(materials), by_id
+
+
+def _parse_material_qualifications(
+    reader: ExcelCatalogReader,
+    materials: dict[str, Material],
+    source_ids: Collection[str],
+) -> tuple[StandardMaterialQualification, ...]:
+    qualifications: list[StandardMaterialQualification] = []
+    seen_rows: dict[str, int] = {}
+    for row in reader.rows("AISI_Material_Qualification"):
+        if row.formulas:
+            fields = ", ".join(sorted(row.formulas))
+            raise row.context.catalog_error(
+                fields,
+                "Formulas are prohibited in material qualification evidence",
+            )
+        material_id = required_text(row, "material_id")
+        standard_id = required_text(row, "standard_id")
+        standard_edition = required_integer(row, "standard_edition")
+        key = f"{material_id}\x1f{standard_id}\x1f{standard_edition}"
+        register_unique(
+            key,
+            seen_rows,
+            row.context,
+            "material_id, standard_id, standard_edition",
+        )
+        require_reference(
+            material_id,
+            materials.keys(),
+            row.context,
+            "material_id",
+            "Materials.material_id",
+        )
+        source_id = required_text(row, "source_id")
+        require_reference(
+            source_id,
+            source_ids,
+            row.context,
+            "source_id",
+            "Sources.source_id",
+        )
+        if (
+            standard_id != S100_24_STANDARD_ID
+            or standard_edition != S100_24_STANDARD_EDITION
+        ):
+            raise row.context.catalog_error(
+                "standard_id, standard_edition",
+                "Unsupported material-qualification standard identity "
+                f"({standard_id!r}, {standard_edition!r}); expected "
+                f"({S100_24_STANDARD_ID!r}, {S100_24_STANDARD_EDITION!r})",
+            )
+        try:
+            qualification = StandardMaterialQualification(
+                material_id=material_id,
+                standard_id=standard_id,
+                standard_edition=standard_edition,
+                qualification_route=required_enum(
+                    row, "qualification_route", MaterialQualificationRoute
+                ),
+                qualification_state=required_enum(
+                    row, "qualification_state", MaterialQualificationState
+                ),
+                product_form=required_enum(
+                    row, "product_form", MaterialProductForm
+                ),
+                steel_classification=required_enum(
+                    row, "steel_classification", SteelClassification
+                ),
+                elongation_group=required_enum(
+                    row, "elongation_group", A3ElongationGroup
+                ),
+                minimum_elongation_percent=optional_number(
+                    row, "minimum_elongation_percent"
+                ),
+                elongation_gauge_length_mm=optional_number(
+                    row, "elongation_gauge_length_mm"
+                ),
+                elongation_test_standard=optional_text(
+                    row, "elongation_test_standard"
+                ),
+                mandatory_mechanical_properties_state=required_enum(
+                    row,
+                    "mandatory_mechanical_properties_state",
+                    QualificationRequirementState,
+                ),
+                test_reports_required_state=required_enum(
+                    row,
+                    "test_reports_required_state",
+                    QualificationRequirementState,
+                ),
+                chemical_mechanical_conformance_state=required_enum(
+                    row,
+                    "chemical_mechanical_conformance_state",
+                    QualificationRequirementState,
+                ),
+                properties_determined_per_reference_state=required_enum(
+                    row,
+                    "properties_determined_per_reference_state",
+                    QualificationRequirementState,
+                ),
+                coating_requirements_state=required_enum(
+                    row,
+                    "coating_requirements_state",
+                    QualificationRequirementState,
+                ),
+                welding_requirements_state=required_enum(
+                    row,
+                    "welding_requirements_state",
+                    QualificationRequirementState,
+                ),
+                production_identification_state=required_enum(
+                    row,
+                    "production_identification_state",
+                    QualificationRequirementState,
+                ),
+                master_coil_10_percent_overstrength_state=required_enum(
+                    row,
+                    "master_coil_10_percent_overstrength_state",
+                    QualificationRequirementState,
+                ),
+                local_elongation_percent=optional_number(
+                    row, "local_elongation_percent"
+                ),
+                uniform_elongation_percent=optional_number(
+                    row, "uniform_elongation_percent"
+                ),
+                ductility_test_standard=optional_text(
+                    row, "ductility_test_standard"
+                ),
+                source_id=source_id,
+                basis=required_text(row, "basis"),
+                notes=optional_text(row, "notes"),
+            )
+            qualification.validate_against_material(materials[material_id])
+        except ValidationError as error:
+            raise row.context.catalog_error(
+                None,
+                f"Invalid StandardMaterialQualification domain values: {error}",
+            ) from error
+        qualifications.append(qualification)
+    return tuple(qualifications)
+
+
 def load_material_catalog(path: str | Path) -> MaterialCatalog:
     """Load and validate an approved material catalog workbook."""
 
-    with ExcelCatalogReader(path, MATERIAL_WORKBOOK_SCHEMA) as reader:
-        metadata = _parse_metadata(reader, (MATERIAL_SCHEMA_VERSION,))
+    with ExcelCatalogReader(path, MATERIAL_WORKBOOK_SCHEMA_V0_1) as reader:
+        metadata = _parse_metadata(reader, SUPPORTED_MATERIAL_SCHEMA_VERSIONS)
+        if metadata.schema_version == MATERIAL_SCHEMA_VERSION_V0_2:
+            reader.validate_schema(MATERIAL_WORKBOOK_SCHEMA_V0_2)
         sources, source_rows = _parse_sources(reader)
-        source_ids = source_rows.keys()
-        materials: list[Material] = []
-        seen_rows: dict[str, int] = {}
-        for row in reader.rows("Materials"):
-            material_id = required_text(row, "material_id")
-            register_unique(material_id, seen_rows, row.context, "material_id")
-            source_id = required_text(row, "source_id")
-            require_reference(
-                source_id,
-                source_ids,
-                row.context,
-                "source_id",
-                "Sources.source_id",
+        materials, material_by_id = _parse_materials(
+            reader,
+            source_rows.keys(),
+        )
+        qualifications = (
+            _parse_material_qualifications(
+                reader,
+                material_by_id,
+                source_rows.keys(),
             )
-            try:
-                material = Material(
-                    material_id=material_id,
-                    designation=required_text(row, "designation"),
-                    specification=required_text(row, "specification"),
-                    grade=required_text(row, "grade"),
-                    fy_mpa=required_number(row, "Fy_MPa"),
-                    fu_mpa=required_number(row, "Fu_MPa"),
-                    e_mpa=required_number(row, "E_MPa"),
-                    nu=required_number(row, "nu"),
-                    density_kg_m3=optional_number(row, "density_kg_m3"),
-                    source_id=source_id,
-                    active=required_boolean(row, "active"),
-                    notes=optional_text(row, "notes"),
-                )
-            except ValidationError as error:
-                raise row.context.catalog_error(
-                    None,
-                    f"Invalid Material domain values: {error}",
-                ) from error
-            materials.append(material)
-        return MaterialCatalog(metadata, sources, tuple(materials))
+            if metadata.schema_version == MATERIAL_SCHEMA_VERSION_V0_2
+            else ()
+        )
+        return MaterialCatalog(
+            metadata=metadata,
+            sources=sources,
+            materials=materials,
+            material_qualifications=qualifications,
+        )
 
 
 def _parse_geometries(

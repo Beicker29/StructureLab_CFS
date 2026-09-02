@@ -3,7 +3,12 @@
 from dataclasses import dataclass
 
 from cfs_design.core.exceptions import CatalogError
-from cfs_design.domain import Material, ResolvedSection, StandardSectionDimensions
+from cfs_design.domain import (
+    Material,
+    ResolvedSection,
+    StandardMaterialQualification,
+    StandardSectionDimensions,
+)
 
 from .models import MaterialCatalog, SectionCatalog
 
@@ -33,6 +38,30 @@ class CatalogRegistry:
     ) -> StandardSectionDimensions:
         return self.section_catalog.get_standard_dimensions(
             geometry_id,
+            standard_id,
+            standard_edition,
+        )
+
+    def find_material_qualification(
+        self,
+        material_id: str,
+        standard_id: str,
+        standard_edition: int,
+    ) -> StandardMaterialQualification | None:
+        return self.material_catalog.find_material_qualification(
+            material_id,
+            standard_id,
+            standard_edition,
+        )
+
+    def get_material_qualification(
+        self,
+        material_id: str,
+        standard_id: str,
+        standard_edition: int,
+    ) -> StandardMaterialQualification:
+        return self.material_catalog.get_material_qualification(
+            material_id,
             standard_id,
             standard_edition,
         )

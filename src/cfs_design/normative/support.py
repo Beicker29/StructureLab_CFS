@@ -18,7 +18,7 @@ from cfs_design.results import (
     MetadataEntry,
 )
 
-from .enums import DesignAction, SoftwareSupportStatus
+from .enums import DesignAction, DesignExecutionPurpose, SoftwareSupportStatus
 from .models import (
     SoftwareSupportCheck,
     SoftwareSupportResult,
@@ -148,6 +148,7 @@ def _input_checks(
     context: DesignContext,
     method: DesignMethod,
     action: DesignAction,
+    purpose: DesignExecutionPurpose,
 ) -> tuple[SoftwareSupportCheck, ...]:
     records_active = (
         member.member.active
@@ -210,11 +211,15 @@ def _input_checks(
     )
 
     m5_demands = member.section_demands is not None and member.source_demands is not None
+    demand_inputs_required = purpose is DesignExecutionPurpose.DEMAND_CHECK
+    demand_supported = m5_demands or not demand_inputs_required
     demand_observed = (
         MetadataEntry(
             "section_axis_demands", member.section_demands is not None
         ),
         MetadataEntry("source_demands_preserved", member.source_demands is not None),
+        MetadataEntry("execution_purpose", purpose.value),
+        MetadataEntry("demand_inputs_required", demand_inputs_required),
     )
     demand_check = _check(
         method=method,
@@ -223,18 +228,18 @@ def _input_checks(
         topic="demand-source boundary",
         status=(
             SoftwareSupportStatus.SUPPORTED
-            if m5_demands
+            if demand_supported
             else SoftwareSupportStatus.INVALID_INPUT
         ),
         observed=demand_observed,
         requirement=(
-            "M7 execution input must preserve imported ETABS demands and their "
-            "M5 section-axis transformation."
+            "Demand checking must preserve imported ETABS demands and their M5 "
+            "section-axis transformation; capacity evaluation has no demand input."
         ),
-        diagnostic_code=(None if m5_demands else "M5_DEMAND_INPUT_REQUIRED"),
+        diagnostic_code=(None if demand_supported else "M5_DEMAND_INPUT_REQUIRED"),
         diagnostic_message=(
             None
-            if m5_demands
+            if demand_supported
             else "The resolved member does not contain the approved M5 demand pair"
         ),
     )
@@ -638,6 +643,7 @@ def evaluate_software_support(
     context: DesignContext,
     method: DesignMethod,
     action: DesignAction,
+    purpose: DesignExecutionPurpose = DesignExecutionPurpose.DEMAND_CHECK,
 ) -> SoftwareSupportResult:
     """Evaluate only the approved software envelope, never AISI permission."""
 
@@ -649,9 +655,11 @@ def evaluate_software_support(
         raise ValidationError("method must be DesignMethod")
     if not isinstance(action, DesignAction):
         raise ValidationError("action must be DesignAction")
+    if not isinstance(purpose, DesignExecutionPurpose):
+        raise ValidationError("purpose must be DesignExecutionPurpose")
 
     checks = (
-        _input_checks(member, context, method, action)
+        _input_checks(member, context, method, action, purpose)
         + _context_checks(context, method, action)
         + _section_checks(member, method, action)
         + _e4_analytical_route_checks(member, method, action)
@@ -663,6 +671,7 @@ def evaluate_software_support(
         status=aggregate_software_status(checks),
         checks=checks,
         software_scope_version=SOFTWARE_SCOPE_VERSION,
+        purpose=purpose,
     )
 
 

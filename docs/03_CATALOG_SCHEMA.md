@@ -16,8 +16,8 @@ Excel
 
 ## Supported schema and authority
 
-The materials loader supports `schema_version = "0.1.0"`. The section loader
-supports legacy `0.1.0` and current `0.2.0`; any other declared version raises
+The materials and section loaders support legacy `0.1.0` and current `0.2.0`;
+any other declared version raises
 `SchemaError` rather than triggering a best-effort parse. Section `0.1.0`
 contains no standard-specific dimensions. Section `0.2.0` requires the
 separate `AISI_Dimensions` worksheet even when it contains only its header.
@@ -48,6 +48,14 @@ properties must reference an existing source.
 - `Materials`;
 - `Sources`; and
 - `Schema`.
+
+Schema `0.2.0` additionally requires `AISI_Material_Qualification`, even when
+the sheet contains only its header. Its exact fields and A3 route validation
+are documented in
+[`21_AISI_MATERIAL_QUALIFICATION_M8A2.md`](21_AISI_MATERIAL_QUALIFICATION_M8A2.md).
+The unique key is `(material_id, standard_id, standard_edition)`; every record
+references both `Materials.material_id` and `Sources.source_id`. Formulas are
+prohibited in qualification evidence.
 
 Every nonblank `Materials` row becomes the existing M1 `Material` object.
 Catalog validation checks unique `material_id`, unique source IDs, and material
@@ -118,7 +126,8 @@ errors add catalog/row context without reimplementing those invariants.
 
 ## Immutable containers and public API
 
-`MaterialCatalog` preserves metadata, sources, and all materials.
+`MaterialCatalog` preserves metadata, sources, all materials, and immutable
+standard-specific material qualifications.
 `SectionCatalog` preserves metadata, sources, identities, geometries,
 properties, standard-specific dimensions, and resolved sections. Public
 collections and active views are tuples; lookup indexes are private read-only
@@ -144,6 +153,11 @@ dimensions = registry.get_standard_dimensions(
     "ANSI_SDI_AISI_S100",
     2024,
 )
+qualification = registry.find_material_qualification(
+    material_id,
+    "ANSI_SDI_AISI_S100",
+    2024,
+)
 ```
 
 Missing required IDs raise `CatalogError`; lookups do not return `None`.
@@ -162,7 +176,6 @@ not implement project resolution, AISI methods, pyCUFSM, resistance, or
 utilization.
 
 Material `specification` and `grade` do not by themselves establish the A1.1
-steel-product/A3 qualification route. M8A.1 intentionally leaves that check
-indeterminate and proposes a separate future versioned material-qualification
-record; it does not change `materials_catalog.xlsx`. See
-[`20_SCOPE_AND_DISTORTIONAL_INPUTS_M8A1.md`](20_SCOPE_AND_DISTORTIONAL_INPUTS_M8A1.md).
+steel-product/A3 qualification route. M8A.2 resolves that only through an
+exact, sourced qualification record. Missing legacy or current evidence stays
+`INDETERMINATE`; no catalog string is inferred.

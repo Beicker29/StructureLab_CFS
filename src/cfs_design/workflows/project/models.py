@@ -10,9 +10,8 @@ from cfs_design.domain._validation import require_non_empty, require_optional_st
 from cfs_design.io.etabs import ETABSImportResult, NormalizedETABSDemand
 from cfs_design.io.project import ProjectConfig
 from cfs_design.mechanics.sections import (
-    AdvancedSectionProperties,
     CatalogVerificationResult,
-    ComputedSectionProperties,
+    ResolvedSectionMechanics,
 )
 from cfs_design.results import DiagnosticSeverity
 
@@ -89,45 +88,6 @@ class ProjectProvenance:
         ):
             _sha256(getattr(self, field_name), field_name)
         require_optional_string(self.etabs_program_version, "etabs_program_version")
-
-
-@dataclass(frozen=True, slots=True)
-class ResolvedSectionMechanics:
-    """One coherent M3A/M3B design-property set and its project QA gate."""
-
-    section_id: str
-    gross: ComputedSectionProperties
-    advanced: AdvancedSectionProperties
-    verification: CatalogVerificationResult | None
-    design_use_permitted: bool
-    gate_reason: str
-
-    def __post_init__(self) -> None:
-        require_non_empty(self.section_id, "section_id")
-        if not isinstance(self.gross, ComputedSectionProperties):
-            raise ValidationError("gross must be ComputedSectionProperties")
-        if not isinstance(self.advanced, AdvancedSectionProperties):
-            raise ValidationError("advanced must be AdvancedSectionProperties")
-        if self.gross.section_id != self.section_id:
-            raise ValidationError("gross section_id must match section_id")
-        if self.advanced.section_id != self.section_id:
-            raise ValidationError("advanced section_id must match section_id")
-        if self.gross.geometry_id != self.advanced.geometry_id:
-            raise ValidationError("M3A and M3B geometry_id values must match")
-        if self.verification is not None:
-            if not isinstance(self.verification, CatalogVerificationResult):
-                raise ValidationError(
-                    "verification must be CatalogVerificationResult or None"
-                )
-            if self.verification.section_id != self.section_id:
-                raise ValidationError("verification section_id must match section_id")
-        if not isinstance(self.design_use_permitted, bool):
-            raise ValidationError("design_use_permitted must be bool")
-        if self.design_use_permitted and self.verification is None:
-            raise ValidationError(
-                "design use cannot be permitted without catalog verification"
-            )
-        require_non_empty(self.gate_reason, "gate_reason")
 
 
 @dataclass(frozen=True, slots=True)
@@ -245,6 +205,15 @@ class ResolvedProject:
             if mechanics.section_id == section_id:
                 return mechanics
         raise ValidationError(f"No resolved M3 mechanics for section_id {section_id!r}")
+
+    def get_resolved_member(self, case_id: str) -> ResolvedMember:
+        """Return one resolved member definition, with or without demands."""
+
+        require_non_empty(case_id, "case_id")
+        for member in self.active_resolved_members:
+            if member.member.case_id == case_id:
+                return member
+        raise ValidationError(f"No active resolved member for case_id {case_id!r}")
 
     def require_design_mechanics(
         self,

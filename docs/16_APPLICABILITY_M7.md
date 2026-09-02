@@ -55,7 +55,7 @@ a resistance-calculation runner; no EWM or DSM engine is implemented here.
 | Method | `DesignMethod.EWM`, `DesignMethod.DSM` | Any unapproved method |
 | Action | Explicit axial compression for `COLUMN`; explicit strong-axis flexure for `BEAM` | Shear, P-M interaction, connections, web crippling |
 | Geometry | Orthogonal, sharp-corner `MIDLINE` C geometry | `FLAT_WIDTHS`, `OUT_TO_OUT`, nonzero radii, nonorthogonal geometry |
-| Demand path | M4 ETABS source demands plus M5 section-axis demands | Direct Excel/design-engine access, SAP2000, generated combinations |
+| Demand path | CAPACITY without demands; DEMAND_CHECK with paired M4 source and M5 section-axis demands | Direct Excel/design-engine access, SAP2000, generated combinations |
 | Systems | Member-level current scope | Seismic-system design |
 
 EWM and DSM are represented as the approved v0.1 method envelope. Their
@@ -112,8 +112,14 @@ traces only.
 Project schema `0.2.0` lets M7 evaluate the project-wide A1.1 declarations and
 the A1.2.3 country/format condition. `UNKNOWN` remains `INDETERMINATE`; an
 explicit failed scope fact becomes `NOT_APPLICABLE` only where the verified
-clause supports that conclusion. Material A3 qualification is still a
-separate indeterminate member-material check.
+clause supports that conclusion. M8A.2 makes the separate member-material A3
+check evaluable from an exact standard/edition record: qualified routes can be
+applicable, an explicit sourced failure can be not applicable, and
+missing/unknown evidence stays indeterminate.
+
+`DesignExecutionPurpose.CAPACITY` removes only the ETABS software prerequisite.
+`DEMAND_CHECK` preserves the approved M4/M5 pair requirement. Normative
+applicability does not depend on this software execution purpose.
 
 For `C_LIPPED` EWM axial compression, software support now also requires the
 exact equal-flange analytical configuration and explicit `Lm`. Unequal

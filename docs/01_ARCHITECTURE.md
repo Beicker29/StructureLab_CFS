@@ -194,3 +194,25 @@ member `Lm` without deriving it from other bracing fields. M7 separately gates
 the future analytical E4 route to exact equal-flange data; unequal flanges are
 software-unsupported without becoming normatively prohibited. See
 `docs/20_SCOPE_AND_DISTORTIONAL_INPUTS_M8A1.md`.
+
+## M8A.2 material and design-execution boundary
+
+Material schema `0.2.0` adds an edition-keyed
+`AISI_Material_Qualification` evidence source without duplicating the physical
+`Material`. M7 consumes the exact record and keeps missing evidence
+`INDETERMINATE`; material qualification remains a normative question, not a
+software-support result.
+
+Future EWM and DSM engines receive one immutable `MemberDesignInput` containing
+references to the resolved member, permitted coherent M3 mechanics, exact
+standard dimensions, exact material qualification, design context, scope
+evidence, and eligibility. Construction calls
+`ResolvedProject.require_design_mechanics()`; catalog properties cannot enter
+the design-property set.
+
+`DesignExecutionPurpose` separates `CAPACITY` from `DEMAND_CHECK`. Capacity
+support does not require ETABS demands. Demand checking continues to require
+the paired M4 source and M5 section-axis demand sets. No resistance or
+utilization operation is implemented by this boundary. See
+`docs/21_AISI_MATERIAL_QUALIFICATION_M8A2.md` and
+`docs/22_DESIGN_INPUT_BOUNDARY_M8A2.md`.

@@ -38,10 +38,12 @@ or section properties.
 design-basis declarations separate from `DesignContext` method selection and
 from material-specific qualification data.
 
-`ResolvedMember` is the common future design input. It verifies that a member's
-section and material identifiers match its resolved objects. In M5 it retains
-the normalized M4 source demands and the one-to-one section-axis demands. No
-separate `EWMMember` or `DSMMember` exists.
+`ResolvedMember` verifies that a member's section and material identifiers
+match its resolved objects. Its demands may be absent for a pure capacity
+input; when M5 section-axis demands are present, the paired normalized M4
+source demands and one-to-one source identities remain mandatory. The common
+future engine boundary is `MemberDesignInput`; no separate `EWMMember` or
+`DSMMember` exists.
 
 ## Implemented modules and value objects
 
@@ -53,6 +55,8 @@ separate `EWMMember` or `DSMMember` exists.
 - `design_context.py`: selected standard metadata, format, methods, run mode,
   and canonical unit-system identifier.
 - `material.py`: catalog material values and derived isotropic `g_mpa`.
+- `material_qualification.py`: immutable standard/edition-specific A3 evidence
+  that references, rather than duplicates, `Material`.
 - `section.py`: `CatalogSection`, mechanical `SectionGeometry`, supplied
   `SectionProperties`, and explicit edition-keyed `StandardSectionDimensions`.
 - `member.py`: `MemberGeometry`, `Restraints`, and `MemberCase`.
@@ -137,6 +141,9 @@ domain models. The registry returns the same M1 `Material` and
 `ResolvedSection` values that future project resolution and design workflows
 will consume. Section schema `0.2.0` additionally exposes exact-key
 `StandardSectionDimensions`; legacy `0.1.0` resolves with an empty tuple.
+Material schema `0.2.0` similarly adds exact-key
+`StandardMaterialQualification`; legacy `0.1.0` makes the qualification lookup
+explicitly missing.
 
 ## Immutability and identity
 
@@ -224,6 +231,11 @@ values loaded at the IO boundary.
 Future design reads only that coherent M3 bundle. `ResolvedSection.properties`
 remains available as the independent catalog QA/reference record; no mixed
 catalog/computed design-property object exists.
+
+M8A.2 `MemberDesignInput` references that same M3 bundle, the resolved member,
+standard dimensions, material qualification, context, scope evidence, purpose,
+and M7 eligibility. Its resolver obtains mechanics through
+`require_design_mechanics()` so a failed QA gate blocks construction.
 
 Inactive `MemberCase` values remain in `Project.members`; only active rows enter
 `ResolvedProject.resolved_members`. The section-axis demand types are shared

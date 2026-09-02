@@ -4,15 +4,19 @@ from math import isclose
 
 from cfs_design.core.exceptions import ValidationError
 from cfs_design.domain import (
+    A3ElongationGroup,
     AISIProjectScopeEvidence,
     DesignContext,
     DesignFormat,
     DesignMethod,
     EvidenceState,
     GoverningCountry,
+    MaterialQualificationState,
+    MaterialQualificationRoute,
     ResolvedMember,
     S100_24_STANDARD_EDITION,
     SectionFamily,
+    StandardMaterialQualification,
     StructureApplication,
 )
 from cfs_design.results import (
@@ -121,6 +125,7 @@ def _general_scope_checks(
     method: DesignMethod,
     action: DesignAction,
     scope_evidence: AISIProjectScopeEvidence,
+    material_qualification: StandardMaterialQualification | None,
 ) -> tuple[ApplicabilityCheck, ...]:
     thickness = member.section.geometry.t_mm
     thickness_observed = (MetadataEntry("thickness_mm", thickness),)
@@ -187,30 +192,102 @@ def _general_scope_checks(
         ),
     )
 
-    material_observed = (
+    material_observed = [
         MetadataEntry("material_id", member.material.material_id),
         MetadataEntry("material_specification", member.material.specification),
         MetadataEntry("material_grade", member.material.grade),
         MetadataEntry("material_source_id", member.material.source_id),
+        MetadataEntry(
+            "qualification_record_available", material_qualification is not None
+        ),
+    ]
+    material_status = ApplicabilityStatus.INDETERMINATE
+    material_clause = "A1.1; A3.1-A3.2"
+    material_code = "AISI_MATERIAL_QUALIFICATION_MISSING"
+    material_message = (
+        "No exact material/standard/edition qualification record is available"
     )
+    if material_qualification is not None:
+        qualification = material_qualification
+        material_observed.extend(
+            (
+                MetadataEntry(
+                    "qualification_route", qualification.qualification_route.value
+                ),
+                MetadataEntry(
+                    "qualification_state", qualification.qualification_state.value
+                ),
+                MetadataEntry("product_form", qualification.product_form.value),
+                MetadataEntry(
+                    "steel_classification",
+                    qualification.steel_classification.value,
+                ),
+                MetadataEntry(
+                    "elongation_group", qualification.elongation_group.value
+                ),
+                MetadataEntry("qualification_source_id", qualification.source_id),
+                MetadataEntry("qualification_basis", qualification.basis),
+            )
+        )
+        if qualification.qualification_state is MaterialQualificationState.NOT_QUALIFIED:
+            material_status = ApplicabilityStatus.NOT_APPLICABLE
+            material_code = "AISI_MATERIAL_EXPLICITLY_NOT_QUALIFIED"
+            material_message = (
+                "The sourced material qualification explicitly fails its A3 route"
+            )
+        elif qualification.qualification_state is MaterialQualificationState.INDETERMINATE:
+            material_code = "AISI_MATERIAL_QUALIFICATION_INDETERMINATE"
+            material_message = (
+                "The sourced material qualification remains indeterminate"
+            )
+        elif qualification.elongation_group is A3ElongationGroup.A3_1_3_LT_3:
+            material_status = ApplicabilityStatus.NOT_APPLICABLE
+            material_clause = "A1.1; A3.1.3"
+            material_code = "AISI_A3_1_3_MEMBER_USE_NOT_APPLICABLE"
+            material_message = (
+                "A3.1.3 is restricted to multiple-web roofing, siding, or floor "
+                "decking and does not apply to the resolved single-web C member"
+            )
+        elif (
+            qualification.elongation_group
+            is A3ElongationGroup.A3_2_1_ALTERNATIVE_DUCTILITY
+        ):
+            material_clause = "A1.1; A3.2; A3.2.1"
+            material_code = "AISI_A3_2_1_MEMBER_USE_INDETERMINATE"
+            material_message = (
+                "A3.2.1 member-use restrictions require a purlin, girt, or "
+                "curtain-wall-stud identity not present in the approved member contract"
+            )
+        else:
+            material_status = ApplicabilityStatus.APPLICABLE
+            material_clause = (
+                "A1.1; A3.1; A3.1.1"
+                if qualification.elongation_group
+                is A3ElongationGroup.A3_1_1_GE_10
+                else "A1.1; A3.1; A3.1.2"
+            )
+            if (
+                qualification.qualification_route
+                is MaterialQualificationRoute.A3_2
+            ):
+                material_clause = f"A1.1; A3.2; {material_clause.split('; ')[-1]}"
+            material_code = None
+            material_message = None
     material_check = _check(
         method=method,
         action=action,
         rule_id="A1_1_QUALIFYING_STEEL_PRODUCT",
         topic="qualifying steel product",
-        status=ApplicabilityStatus.INDETERMINATE,
-        observed=material_observed,
+        status=material_status,
+        observed=tuple(material_observed),
         requirement=(
             "Each material must establish the qualifying steel product and "
             "applicable A3 material route."
         ),
-        clause="A1.1; A3.1-A3.2",
+        clause=material_clause,
         reference_title="Steel product and material qualification",
-        diagnostic_code="AISI_MATERIAL_QUALIFICATION_UNMODELED",
-        diagnostic_message=(
-            "The material contract does not establish product form, steel class, "
-            "or its A3.1/A3.2 qualification route"
-        ),
+        diagnostic_code=material_code,
+        diagnostic_message=material_message,
     )
 
     load_use = scope_evidence.structural_load_carrying_use
@@ -815,6 +892,7 @@ def evaluate_normative_applicability(
     method: DesignMethod,
     action: DesignAction,
     scope_evidence: AISIProjectScopeEvidence | None = None,
+    material_qualification: StandardMaterialQualification | None = None,
 ) -> NormativeApplicabilityResult:
     """Evaluate verified clause-level criteria without calculating resistance."""
 
@@ -834,6 +912,21 @@ def evaluate_normative_applicability(
         raise ValidationError(
             "scope_evidence must be AISIProjectScopeEvidence or None"
         )
+    if material_qualification is not None:
+        if not isinstance(material_qualification, StandardMaterialQualification):
+            raise ValidationError(
+                "material_qualification must be StandardMaterialQualification or None"
+            )
+        expected_key = (
+            member.material.material_id,
+            context.standard_id,
+            context.standard_edition,
+        )
+        if material_qualification.key != expected_key:
+            raise ValidationError(
+                "material_qualification key must match member material and "
+                "DesignContext standard"
+            )
 
     checks: list[ApplicabilityCheck] = [
         _source_selection_check(member, context, method, action)
@@ -851,7 +944,12 @@ def evaluate_normative_applicability(
         )
     checks.extend(
         _general_scope_checks(
-            member, context, method, action, scope_evidence
+            member,
+            context,
+            method,
+            action,
+            scope_evidence,
+            material_qualification,
         )
     )
     checks.extend(_b4_checks(member, method, action))

@@ -94,7 +94,7 @@ class ResolvedMember:
     member: MemberCase
     section: ResolvedSection
     material: Material
-    demands: DemandSet | SectionDemandSet
+    demands: DemandSet | SectionDemandSet | None = None
     source_demands: DemandSet | None = None
 
     def __post_init__(self) -> None:
@@ -104,8 +104,12 @@ class ResolvedMember:
             raise ValidationError("section must be a ResolvedSection")
         if not isinstance(self.material, Material):
             raise ValidationError("material must be a Material")
-        if not isinstance(self.demands, (DemandSet, SectionDemandSet)):
-            raise ValidationError("demands must be DemandSet or SectionDemandSet")
+        if self.demands is not None and not isinstance(
+            self.demands, (DemandSet, SectionDemandSet)
+        ):
+            raise ValidationError(
+                "demands must be DemandSet, SectionDemandSet, or None"
+            )
         if isinstance(self.demands, SectionDemandSet):
             if not isinstance(self.source_demands, DemandSet):
                 raise ValidationError(
@@ -149,10 +153,10 @@ class ResolvedMember:
         return self.demands if isinstance(self.demands, SectionDemandSet) else None
 
     @property
-    def local_axis_demands(self) -> DemandSet:
+    def local_axis_demands(self) -> DemandSet | None:
         if self.source_demands is not None:
             return self.source_demands
-        return self.demands  # type: ignore[return-value]
+        return self.demands if isinstance(self.demands, DemandSet) else None
 
 
 __all__ = ["ResolvedMember", "ResolvedSection"]
