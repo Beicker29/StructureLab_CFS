@@ -171,9 +171,9 @@ Properties ---------------------------> catalog verification / QA gate
 AISI_Dimensions ----------------------> M7 and future normative design
 
 ResolvedMember + permitted coherent M3 bundle + M7 eligibility
-    -> future EWM global buckling
-    -> future Appendix 1 effective widths / effective area
-    -> future E2 / E3.1 / applicable E4 result
+    -> M8B EWM global buckling
+    -> Appendix 1 effective widths / effective area
+    -> E2 / E3.1 / applicable analytical E4 result
     -> M6 trace and generic results
 ```
 
@@ -212,7 +212,17 @@ the design-property set.
 
 `DesignExecutionPurpose` separates `CAPACITY` from `DEMAND_CHECK`. Capacity
 support does not require ETABS demands. Demand checking continues to require
-the paired M4 source and M5 section-axis demand sets. No resistance or
-utilization operation is implemented by this boundary. See
+the paired M4 source and M5 section-axis demand sets. M8B consumes the CAPACITY
+boundary for axial EWM resistance; utilization remains separate. See
 `docs/21_AISI_MATERIAL_QUALIFICATION_M8A2.md` and
 `docs/22_DESIGN_INPUT_BOUNDARY_M8A2.md`.
+
+## M8B axial EWM design layer
+
+`cfs_design.design.ewm` consumes no Excel, YAML, ETABS, report, DSM, or
+pyCUFSM API. Its public capacity function retains global flexural and coupled
+flexural-torsional quantities, E2 and E3.1 results, analytical E4 for eligible
+lipped C sections, every nominal candidate, governing E1 selection, LRFD
+factor, design strength, diagnostics, and a complete M6 trace. Low-level
+equations remain focused module functions and each has one production
+implementation. Demand utilization remains separate and unimplemented.

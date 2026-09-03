@@ -63,16 +63,17 @@ software workflow condition only.
 
 ```text
 MemberDesignInput(CAPACITY)
-    -> future capacity engine
-    -> one reusable MemberResistanceResult
+    -> M8B EWM compression capacity engine
+    -> one reusable EWMCompressionResistance
 
 MemberResistanceResult + SectionDemandPoint
     -> future demand checker
     -> utilization/result
 ```
 
-M8A.2 implements neither downstream arrow. The separation permits one future
-capacity result to be reused across multiple combinations and stations.
+M8B implements the first downstream arrow for EWM axial compression. The
+separation permits one capacity result to be reused across multiple
+combinations and stations; the demand-check arrow remains unimplemented.
 
 ## E4 and current production readiness
 
@@ -83,12 +84,12 @@ flanges remain software `UNSUPPORTED` and point to the unimplemented Appendix
 
 The production project correctly remains non-executable because its scope
 evidence is unknown, its material qualification is absent, its AISI dimension
-sheet has no production rows, and its production `Lm` cells are blank. Tests
-use explicitly labeled synthetic evidence and calculate no resistance.
+sheet has no production rows, and its production `Lm` cells are blank. M8B
+tests use explicitly labeled synthetic evidence for resistance calculations;
+production data remains unchanged and blocked.
 
 ## Prohibited content
 
 `MemberDesignInput` has no fields for `Fe`, `Fn`, `Pn`, `Mn`, resistance
 factors, effective width/area, DSM strength, or utilization. M8A.2 adds no
 pyCUFSM dependency or adapter.
-

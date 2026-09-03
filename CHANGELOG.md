@@ -114,13 +114,26 @@ design use.
   eligibility without duplicating engineering values.
 - `DesignExecutionPurpose` separation: CAPACITY has no ETABS prerequisite;
   DEMAND_CHECK retains the paired M4/M5 demand/provenance requirement.
+- Milestone 8B S100-24 LRFD EWM concentric-compression capacity engine using
+  `MemberDesignInput`, coherent M3 mechanics, prescribed elastic constants,
+  and explicit standard dimensions.
+- Appendix 2 singly symmetric global buckling, E2 column strength, Appendix 1
+  stiffened/unstiffened/simple-lip widths, E3.1 effective area/strength, and
+  the equal-flange analytical E4 route with explicit sourced `Lm`.
+- Immutable EWM compression result retaining every nominal candidate,
+  governing E1 limit state, `Pn`, `phi_c`, `phi_c Pn`, diagnostics, and a
+  reconstruction-grade M6 trace.
+- Controlled no-hole normative interpretation
+  `S10024-A1-1_3A-XREF-001`, preserving the published and interpreted
+  Appendix 1 references without claiming an official erratum.
+- Independent synthetic unlipped/lipped benchmarks, governing and
+  non-governing E4 cases, equation/branch/tolerance tests, production blocking,
+  and EWM dependency guards.
 
 ### Not implemented
 
 - Curved-bend and ambiguous dimension-convention conversion, governing demand
-  selection, calculation-engine population of traces/results, AISI resistance
-  equations, EWM/DSM design engines, pyCUFSM integration, serialization, and
-  reporting calculations. Normative facts absent from the current domain stay
-  explicitly INDETERMINATE. M8B remains stopped and no resistance validation
-  benchmark is claimed until trusted dimensions and production qualification
-  evidence are approved.
+  selection, demand utilization, flexural EWM, DSM, pyCUFSM integration,
+  serialization, and reporting calculations. Normative facts absent from the
+  current domain stay explicitly INDETERMINATE, and the supplied production
+  project remains blocked. M9 has not started.

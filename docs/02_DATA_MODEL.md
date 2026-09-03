@@ -253,3 +253,13 @@ support inside the domain itself. M7 consumes valid resolved values to perform
 those separate evaluations. Catalog activity/verification, ETABS mapping
 quality, governing demand, resistance, utilization, buckling, effective width,
 and design status remain outside intrinsic domain construction.
+
+## M8B compression result
+
+`EWMCompressionResistance` is a small immutable design result layered on M6.
+It references structured global buckling, global-column, identified plate
+widths, effective-area, optional E4, and nominal-candidate records. It stores
+governing `Pn`, `phi_c`, and `phi_c Pn` separately and requires a matching
+`CalculationTrace`. A non-completed result cannot retain widths, candidates,
+or strength values. This is not a second generic result framework and it does
+not contain demands or utilization.

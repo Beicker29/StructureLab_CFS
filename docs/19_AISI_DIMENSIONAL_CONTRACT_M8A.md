@@ -146,10 +146,10 @@ the verified provision prescribes them.
 
 E1 requires the least applicable strength from E2 through E4. E4 expressly
 addresses open C sections with edge-stiffened flanges; its exception does not
-remove distortional buckling of the edge-stiffened flange. Therefore a future
+remove distortional buckling of the edge-stiffened flange. Therefore a
 complete `C_LIPPED` EWM axial-compression result must include E4. M8A records
-the required `h_o` input but implements no E4 equation. M8B is incomplete until
-E4 and its verified elastic distortional input are implemented and validated.
+the required `h_o` input but itself implements no E4 equation. M8B now
+implements and independently validates the approved analytical equation chain.
 
 ## Project-level applicability gap resolved by M8A.1
 

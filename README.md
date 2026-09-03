@@ -5,20 +5,19 @@ reproducible cold-formed steel member design workflows. The approved v0.1
 target is ANSI/SDI AISI S100-24 LRFD for catalogued lipped and unlipped C
 sections under axial compression and strong-axis flexure.
 
-> **Development warning:** M8A-M8A.2 provide versioned S100-24 dimensional,
-> scope, material-qualification, and design-input contracts, but production
-> qualification/dimension evidence remains absent. The package does not
-> calculate or select a governing demand, resistance, utilization, effective
-> width, or elastic buckling. It is not suitable for engineering use.
+> **Development warning:** M8B calculates S100-24 LRFD EWM axial-compression
+> resistance only for fully eligible supported inputs. Production
+> qualification/dimension/scope evidence remains absent, so the supplied
+> project stays blocked. Demand utilization, flexure, DSM, pyCUFSM, and reports
+> are not implemented. The package is not suitable for engineering use.
 
-## Planned design architecture
+## Design architecture
 
-Two independent future routes will consume the same resolved material,
+Two independent routes consume the same resolved material,
 section, member, restraints, and demand objects:
 
-- Effective Width Method (EWM), implemented from authorized AISI S100-24
-  provisions.
-- Direct Strength Method (DSM), consuming normalized elastic buckling results
+- Effective Width Method (EWM); M8B implements its axial-compression capacity.
+- Future Direct Strength Method (DSM), consuming normalized elastic buckling results
   from a dedicated pyCUFSM adapter.
 
 Comparison mode will present EWM and DSM results without allowing either
@@ -68,7 +67,7 @@ pyCUFSM is deliberately not an M8 dependency.
 - `src/cfs_design/`: core infrastructure, the shared domain model, catalog
   loading/validation, M3A/M3B section mechanics, the M4 ETABS IO boundary, M5
   project resolution, shared M6 results/traces, M7 normative eligibility, and
-  reserved stability, design, and report boundaries.
+  M8B axial EWM design, and reserved stability and report boundaries.
 - `validation/`: future benchmarks and independently verified examples.
 - `tests/`: automated package and data-contract tests.
 - `docs/`: scope, architecture, schemas, validation, and roadmap decisions.
@@ -152,17 +151,17 @@ never invents a conversion or proxy. The PDFs are development authorities, not r
 engines. See [M7 Normative Map](docs/15_AISI_NORMATIVE_MAP_M7.md) and
 [M7 Applicability](docs/16_APPLICABILITY_M7.md).
 
-## Implemented M8A-M8A.2 input readiness — stopped before resistance
+## Implemented M8A-M8B EWM compression path
 
 Section-catalog schema `0.2.0` adds a separate `AISI_Dimensions` worksheet and
 immutable edition-keyed records; schema `0.1.0` remains readable. No value is
 derived from `MIDLINE`, and no illustrative dimension was fabricated. M7 can
 evaluate B4.1 from an explicit record and otherwise stays indeterminate.
 
-M5 exposes M3A/M3B as one coherent future design-property set behind the
+M5 exposes M3A/M3B as one coherent design-property set behind the
 catalog-verification QA gate. The normative layer centralizes S100-24's
 prescribed `E`, `G`, and `mu` without overwriting material data. A complete
-future lipped-C axial EWM result must include E4. Project-level A1.1/A1.2.3
+lipped-C axial EWM result includes E4. Project-level A1.1/A1.2.3
 evidence and explicit member `Lm` are typed without inferred production facts.
 
 M8A.2 adds edition-keyed material qualification evidence and an immutable
@@ -172,17 +171,29 @@ still requires the preserved M4/M5 pair. The production material workbook is
 now schema `0.2.0` with a header-only 25-column qualification sheet; no
 production qualification evidence was fabricated.
 
-No resistance, effective width, buckling force, utilization, DSM, or pyCUFSM
-integration is implemented. See [M8A Dimensional Contract](docs/19_AISI_DIMENSIONAL_CONTRACT_M8A.md),
+M8B consumes `MemberDesignInput` and calculates global flexural and
+flexural-torsional buckling, E2 global strength, Appendix 1 effective widths,
+E3.1 effective area/strength, and analytical E4 for eligible equal-lipped C
+sections. It retains every nominal candidate, selects the E1 minimum, applies
+the verified LRFD factor once, and emits a complete trace. The public capacity
+API does not require ETABS. The authorized no-hole Section 1.3 cross-reference
+interpretation is recorded as `S10024-A1-1_3A-XREF-001` and is not an official
+AISI erratum.
+
+Production data remains unchanged and blocked; successful calculations use
+controlled synthetic validation fixtures. No demand utilization, DSM,
+pyCUFSM, flexure, or report calculation is implemented. See
+[M8A Dimensional Contract](docs/19_AISI_DIMENSIONAL_CONTRACT_M8A.md),
 [M8A.2 Material Qualification](docs/21_AISI_MATERIAL_QUALIFICATION_M8A2.md),
 [M8A.2 Design Input](docs/22_DESIGN_INPUT_BOUNDARY_M8A2.md), and the historical
-[M8 Normative Map](docs/17_EWM_COMPRESSION_NORMATIVE_MAP_M8.md).
+[M8 Normative Map](docs/17_EWM_COMPRESSION_NORMATIVE_MAP_M8.md), and
+[M8B Validation](docs/18_EWM_COMPRESSION_VALIDATION_M8.md).
 
 ## Validation philosophy
 
-Engineering validation is planned in four levels: focused equation/unit tests,
+Engineering validation uses four levels: focused equation/unit tests,
 mechanics and pyCUFSM benchmarks, independently verified AISI examples, and
-end-to-end regression. Numerical execution alone will not constitute
+end-to-end regression. Numerical execution alone does not constitute
 validation. Unsupported or inapplicable cases will return explicit statuses
 rather than forced resistance values.
 

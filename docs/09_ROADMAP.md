@@ -33,9 +33,10 @@ Each milestone requires separate authorization and proportionate validation.
     A3.1/A3.2 evidence model, M7 material evaluation, coherent shared
     `MemberDesignInput`, CAPACITY/DEMAND_CHECK separation, and the controlled
     header-only materials-catalog schema-0.2 migration.
-13. **M8B - EWM Compression:** remains blocked until trusted production section
-    dimensions and material-specific A3 qualification evidence exist; a
-    complete lipped-C result must include verified E4.
+13. **M8B - EWM Compression:** implemented S100-24 LRFD concentric-compression
+    EWM for eligible singly symmetric lipped/unlipped C sections, including
+    global buckling, Appendix 1 widths, E3.1, analytical E4, governing
+    selection, and trace. Incomplete production evidence remains blocked.
 14. **M9 - DSM Compression + pyCUFSM:** adapter, benchmarks, and authorized DSM
     provisions.
 15. **M10 - EWM/DSM Comparison:** independent result comparison.
@@ -45,7 +46,8 @@ Each milestone requires separate authorization and proportionate validation.
 18. **M13 - Reporting / Calculation Memory:** presentation from result and trace
     objects with no recalculation.
 
-The calculation implementation still stops before M8B. M8A provides exact
-standard-specific fields without changing M3 geometry; production rows remain
-absent until traceable values are approved. Result strength fields remain
-unpopulated. Curved-bend and geometry-convention conversions remain deferred.
+The implementation stops after M8B; M9 has not started. M8A provides exact
+standard-specific fields without changing M3 geometry, and production rows
+remain absent until traceable values are approved. Controlled synthetic
+fixtures validate M8B resistance. Curved-bend and geometry-convention
+conversions remain deferred.

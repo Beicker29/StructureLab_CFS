@@ -125,3 +125,9 @@ For `C_LIPPED` EWM axial compression, software support now also requires the
 exact equal-flange analytical configuration and explicit `Lm`. Unequal
 flanges are `UNSUPPORTED` because the Appendix 2 Section 2.2 numerical route
 is not implemented. This never changes normative applicability.
+
+M8B also narrows its global elastic solution to singly symmetric C sections.
+For EWM axial compression the software gate therefore requires exact equality
+of the paired MIDLINE flange values and, for lipped sections, paired lip
+values. This capability conclusion is independent of the normative result and
+does not approximate an unequal section.

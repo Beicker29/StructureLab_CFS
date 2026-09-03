@@ -63,9 +63,24 @@ S100-24 references include the registered primary source ID and SHA-256 in
 `notes`; no duplicate normative-reference class was introduced.
 
 M7 applicability checks are not calculation steps and do not fabricate empty
-calculation traces. Future authorized calculations may reuse their references
-and eligibility diagnostics when constructing a trace, while reports continue
-to consume stored records only.
+calculation traces. M8B reuses their eligibility conclusion and diagnostics
+when constructing an EWM compression trace, while reports continue to consume
+stored records only.
+
+## M8B EWM compression trace
+
+A completed M8B trace records normative identity and PDF hash, member and
+independent global/`Lm` lengths, the coherent M3 property set, prescribed
+elastic constants, material strengths, Appendix 2 global quantities, E2,
+explicit AISI dimensions, identified plate calculations, `Ae`, E3.1,
+analytical E4 where applicable, all candidates, E1 governing selection,
+`phi_c`, and `phi_c Pn`. Each normative step carries exact clause/equation or
+table identity.
+
+When `S10024-A1-1_3A-XREF-001` is actually used, a separate non-standard
+reference records the published and interpreted cross-references, rationale,
+corroboration, no-hole restriction, decision metadata, and supersession rule.
+Blocked and failed calculations contain diagnostics and no claimed strength.
 
 ## Diagnostics and metadata
 

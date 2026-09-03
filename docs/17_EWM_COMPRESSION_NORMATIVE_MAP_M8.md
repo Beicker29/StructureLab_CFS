@@ -1,24 +1,25 @@
-# M8 EWM Compression Normative Map and Stop Record
+# M8/M8B EWM Compression Normative Map and Stop Record
 
 ## Status
 
-**M8 engineering implementation is stopped before resistance code.** The
-S100-24 calculation chain was mapped from the registered primary PDF, but the
-approved inputs do not establish several quantities and policies required to
-execute that chain without an unapproved interpretation.
+**M8B implementation is complete for engineering review.** M8A, M8A.1, and M8A.2 resolved
+the dimensional, mechanics-authority, project-scope, distortional-length, and
+material-qualification contracts. The owner accepted the M8B primary-source
+stop and authorized the controlled interpretation recorded below for the
+Appendix 1 Section 1.3 cross-reference.
 
-No EWM equation, resistance factor, buckling calculation, effective-width
-calculation, effective-area calculation, design result, or report calculation
-was implemented. No approved schema was changed.
+At the instant this map and interpretation record were frozen, no M8B
+resistance formula had been implemented and no approved schema had changed.
 
-This is the M8 stop condition required by the milestone: documenting the gap is
-safer than treating `MIDLINE` dimensions as AISI flat or exterior dimensions.
+The controlled interpretation resolves the project decision without claiming
+an official AISI erratum and without reopening the dimensional decisions
+approved in M8A.
 
-M8A subsequently approved and implemented the dimensional/data-basis
-decisions, while still stopping before resistance. The controlling current
-contract is [`19_AISI_DIMENSIONAL_CONTRACT_M8A.md`](19_AISI_DIMENSIONAL_CONTRACT_M8A.md).
-The findings below remain the historical primary-source record that led to
-that migration.
+The controlling dimensional contract remains
+[`19_AISI_DIMENSIONAL_CONTRACT_M8A.md`](19_AISI_DIMENSIONAL_CONTRACT_M8A.md).
+The original findings below remain the historical primary-source record that
+led to that migration; the M8B implementation map and current disposition supersede
+the old "before M8B" status statements.
 
 ## Primary authority inspected
 
@@ -33,10 +34,11 @@ The cited page numbers in this document are the printed specification page
 numbers, not PDF viewer indexes. All descriptions below are short original
 paraphrases. The PDF remains the normative authority.
 
-## Contract preservation audit
+## Historical M8 contract preservation audit
 
-The M8 audit did not modify any approved input or standard file. Hashes after
-the documentation change are:
+The original M8 audit did not modify any approved input or standard file. The
+hashes in this historical table predate the approved M8A/M8A.1/M8A.2 physical
+migrations and are not the current approved hashes:
 
 | Approved file | SHA-256 |
 |---|---|
@@ -64,10 +66,69 @@ A1 and B4 applicability
 For pure axial compression, Appendix 1 states that the element stress is
 `Fn`. The effective widths therefore follow directly after E2; no
 effective-area/stress iteration was identified for this uniform compression
-case. That conclusion does not authorize implementing the chain while its
-required geometry remains unresolved.
+case. M8B implements that non-iterative chain only after the existing
+eligibility boundary confirms explicit dimensions and all other required
+evidence.
 
-## Normative equation map
+## M8B normative implementation map
+
+This map was frozen from the registered primary PDF before any M8B formula was
+written. The Appendix 1 Section 1.3 cross-reference is governed by controlled
+interpretation `S10024-A1-1_3A-XREF-001`. Units are the repository's canonical
+`N`, `mm`, and `MPa` system.
+
+| Design stage | Clause | Equation/table | Purpose | Required variables and units | Applicability | Production function | Independent validation |
+|---|---|---|---|---|---|---|---|
+| Eligibility | A1.1, A1.2.3, A3, B4.1 | Table B4.1-1 | Admit only qualified S100-24 LRFD EWM input | resolved scope, qualification, family; `w,b,bo,d,do,t,R` in mm and dimensionless ratios | all M8B inputs | existing M7/M8A.2 eligibility gate | existing M7/M8A.2 tests and production-block regression |
+| Effective lengths | Appendix 2 2.3.1 | definitions for Eqs. 2.3.1-1 to -3 | Resolve `KxLx`, `KyLy`, `KtLt` | member `L,Kx,Ky,Kt` or explicit `Lx,Ly,Lt`, mm | all supported C compression | `global_buckling.resolve_effective_lengths` | K-factor/explicit-length equivalence and sensitivity |
+| Gross polar radius | Appendix 2 2.3.1 | Eq. 2.3.1-7 | Radius about shear center | `Ix,Iy` mm4; `Ag` mm2; `xo,yo` mm | singly symmetric C | `global_buckling.calculate_global_buckling` | direct arithmetic and mirror-sign test |
+| Flexural elastic loads | Appendix 2 2.3.1 | Eqs. 2.3.1-1, 2.3.1-2 | Euler candidates about x and y | `E` MPa; `Ix,Iy` mm4; effective lengths mm | all supported C compression | `global_buckling.calculate_global_buckling` | independent x/y benchmarks and length trend |
+| Torsional elastic load | Appendix 2 2.3.1 | Eq. 2.3.1-3 | Torsional part of coupled buckling | `G` MPa; `J` mm4; `E` MPa; `Cw` mm6; `ro,Lt` mm | singly symmetric C | `global_buckling.calculate_global_buckling` | independent arithmetic and `Lt` trend |
+| Coupling coefficient | Appendix 2 2.3.1 | Eq. 2.3.1-4 | x-symmetry-axis flexural-torsional coupling | `xo,ro,Lt,Lx` mm | current C centerline convention | `global_buckling.calculate_global_buckling` | centered and eccentric shear-center cases |
+| Pure flexural candidate | Appendix 2 2.3.1.1.1 | Eq. 2.3.1.1.1-1 | Retain least x/y flexural load | `Pex,Pey` N | all supported C compression | `global_buckling.calculate_global_buckling` | x-controlled and y-controlled cases |
+| Flexural-torsional candidate | Appendix 2 2.3.1.1.2 | Eq. 2.3.1.1.2-1 | Coupled elastic load for singly symmetric C | `Pex,Pt` N; `beta` dimensionless | current C symmetry about x | `global_buckling.calculate_global_buckling` | independent stable-quadratic benchmark |
+| Governing elastic stress | Appendix 2 2.3.1.1 | Eq. 2.3.1.1-1 | Convert least required elastic load to `Fcre` | `Pcre` N; `Ag` mm2 | all supported C compression | `global_buckling.calculate_global_buckling` | force/stress dimensional check |
+| Global slenderness | E2 | Eq. E2-4 | Compute column slenderness | `Fy,Fcre` MPa | all supported C compression | `compression.calculate_global_column_strength` | independent branch benchmarks |
+| Global column stress | E2 | Eqs. E2-2, E2-3 | Compute `Fn` on both column-curve branches | `lambda_c` dimensionless; `Fy` MPa | transition at `lambda_c=1.5` | `compression.calculate_global_column_strength` | below/at/above transition and continuity |
+| Global nominal load | E2 | Eq. E2-1 | Compute `Pne` | `Ag` mm2; `Fn` MPa | all supported C compression | `compression.calculate_global_column_strength` | independent full-precision arithmetic |
+| Basic plate elastic stress | Appendix 1 1.1(a) | Eq. 1.1-4 | Compute `Fcrl` | `k`; `E` MPa; `mu`; `t,w` mm | web, unlipped flange, lip, and lipped flange once `k` is known | `effective_width.calculate_uniform_effective_width` | stiffened/unstiffened direct benchmarks |
+| Plate slenderness | Appendix 1 1.1(a) | Eq. 1.1-3 | Compute `lambda` at compression stress | `f=Fn`, `Fcrl` MPa | axial uniform compression | same function | stocky/slender/invalid-domain tests |
+| Plate reduction | Appendix 1 1.1(a) | Eq. 1.1-2 | Compute `rho` | `lambda` dimensionless | branches at `lambda=0.673` | same function | below/at/above transition and continuity |
+| Basic effective width | Appendix 1 1.1(a) | Eq. 1.1-1 | Compute `b=rho*w` | `rho`; flat `w` mm | web with `k=4`; elsewhere only where explicitly directed | same function | physical-bound and scale tests |
+| Unstiffened flange/lip | Appendix 1 1.2.1(a) | Section 1.1(a), `k=0.43` | Effective width of supported-free plate | flat `w` mm; `t` mm; `Fn,E` MPa | C_UNLIPPED flanges and simple-lip stiffener `d's` | `effective_width.calculate_unstiffened_effective_width` | stocky/slender/transition cases |
+| Simple-lip stocky branch | Appendix 1 1.3(a) | Eqs. 1.3-1, 1.3-2, 1.3-3, 1.3-7 | Full flange and lip when no stiffener is needed | flange `w`, lip `d`, `t` mm; `E,f` MPa | `w/t <= 0.328S` | `effective_width.calculate_simple_lip_effective_width` | threshold and stocky benchmark |
+| Simple-lip stiffness demand | Appendix 1 1.3(a) | Eq. 1.3-8 | Required stiffener inertia `Ia` | `w,t,S` in mm/dimensionless | slender simple-lip branch | same function | both `Ia` upper-bound branches |
+| Simple-lip stiffness supply | Appendix 1 1.3(a) | Eq. 1.3-10 | Actual lip inertia `Is` | lip flat `d`, `t` mm; `theta` | simple lip, 40 to 140 degrees | same function | orthogonal direct arithmetic |
+| Stiffener adequacy | Appendix 1 1.3(a) | Eq. 1.3-9 | Compute `RI=Is/Ia`, limited to one | `Is,Ia` mm4 | slender simple-lip branch | same function | capped/uncapped tests |
+| Simple-lip coefficient | Appendix 1 1.3(a) | Eq. 1.3-11; Table 1.3-1 | Compute exponent `n` and flange plate coefficient `k` | `D/w,w/t,S,RI`; `D,w,t` mm | `D/w <= 0.8`, simple lip | same function | both table ranges and boundaries |
+| Reduced flange/lip widths | Appendix 1 1.3(a) | Eqs. 1.3-4, 1.3-5, 1.3-6 | Allocate flange widths and reduce lip width | `b,w,RI,d's` mm | slender no-hole simple-lip branch | same function | independent lipped benchmark; `b` uses controlled interpretation `S10024-A1-1_3A-XREF-001` |
+| Effective area | E3.1 | text following Eq. E3.1-1 | Sum thickness times each effective component width | element widths and `t` mm; `Ag` mm2 bound | supported sharp-corner C without holes | `effective_area.calculate_effective_area` | independent element-by-element assembly |
+| Local/global nominal load | E3.1 | Eq. E3.1-1 | Compute `Pnl=Ae Fn`, limited by `Pne` | `Ae,Ag` mm2; `Fn` MPa; `Pne` N | all supported C compression | `compression.calculate_local_global_strength` | independent unlipped/lipped section benchmarks |
+| Distortional flange properties | Appendix 2 2.3.3.1 | Table 2.3.3-1 | Compute flange-plus-lip section terms | M3 midline `b,d`, `t` mm; `theta` | equal simple-lip C only | `e4.calculate_flange_lip_properties` | term-by-term analytical benchmark |
+| Distortional critical length | Appendix 2 2.3.3.1 | Eq. 2.3.3.1-7 | Compute `Lcrd` | `ho,b,d,t` mm; table properties; `E,mu` | analytical equal-flange route | `e4.calculate_distortional_buckling` | independent arithmetic and scale check |
+| Distortional stiffness terms | Appendix 2 2.3.3.1 | Eqs. 2.3.3.1-3 to -6 | Compute flange, web, and geometric stiffness terms | `Ld,E,G,mu,ho,t` plus table properties; clause-permitted `k_phi=0` | analytical equal-flange route | same function | each term independently checked |
+| Distortional elastic stress/load | Appendix 2 2.3.3.1 | Eqs. 2.3.3.1-2, 2.3.3.1-1 | Compute `Fcrd` and `Pcrd` | stiffness numerator/denominator; `Ag` mm2 | `Ld=min(Lcrd,Lm)` with explicit `Lm` | same function | independent E4 benchmark and `Lm` sensitivity |
+| Distortional slenderness/yield load | E4 | Eqs. E4-2, E4-3 | Compute `lambda_d` and `Py` | `Pcrd` N; `Ag` mm2; `Fy` MPa | edge-stiffened C, `lambda_d <= 5` | `e4.calculate_e4_strength` | transition/domain benchmarks |
+| Distortional nominal load | E4 | Eq. E4-1 | Compute distinct `Pnd`, limited by `Py` | `Py` N; `lambda_d` | edge-stiffened C in analytical support | same function | governing and non-governing cases |
+| Governing nominal load | E1 | Sections E2 through E4 as applicable | Retain all candidates and select the minimum | `Pne,Pnl` and, for C_LIPPED, `Pnd`, N | all eligible supported M8B inputs | `compression.calculate_ewm_compression_resistance` | full unlipped/lipped benchmarks |
+| LRFD available strength | E2, E3, E4 | stated `phi_c=0.85` in each clause | Apply factor exactly once after nominal selection | `Pn` N and `phi_c` | LRFD only | same function | candidate/final-strength trace audit |
+
+## M8B implementation disposition
+
+The mapped equations are implemented once in the focused
+`cfs_design.design.ewm` modules. `MemberDesignInput` is the only public
+calculation boundary, `ResolvedSectionMechanics` is the only mechanical
+property source, and `StandardSectionDimensions` is the only Appendix 1/B4.1
+dimension source. Capacity execution has no ETABS prerequisite.
+
+The result retains global, E2, E3.1, and applicable E4 structures; every
+nominal candidate; the governing E1 selection; `phi_c`; `phi_c Pn`; structured
+diagnostics; and a reconstruction-grade `CalculationTrace`. Missing production
+evidence remains blocked upstream and produces no nominal or design strength.
+See [`18_EWM_COMPRESSION_VALIDATION_M8.md`](18_EWM_COMPRESSION_VALIDATION_M8.md)
+for benchmarks, tolerances, and the completed equation audit.
+
+## Historical M8 equation map
 
 The implementation targets are proposed locations only. None exists as an M8
 calculation implementation at this stop point.
@@ -284,16 +345,57 @@ M8A resolves the choice: a complete future `C_LIPPED` axial EWM member result
 must include E4. M8A implements no E4 equation; M8B cannot be declared complete
 without the verified E4 route and benchmark.
 
-## Remaining conditions before M8B resistance resumes
+## Controlled interpretation: S10024-A1-1_3A-XREF-001
 
-1. Populate each production section's schema-0.2 AISI dimensional row from a
-   trusted, traceable source; absence must continue blocking execution.
-2. Populate the M8A.2 material-specific A1.1/A3 qualification contract from
-   verified production evidence; the empty/missing record remains
-   `INDETERMINATE`.
-3. Implement every applicable E2/E3.1/E4 component from the primary source,
-   with CalculationTrace coverage and independent benchmarks.
+The printed S100-24 Appendix 1 page 1-13 directs the effective flange width
+`b` used in Eqs. 1.3-4 and 1.3-5 to **Section 1.1.1**. In the same primary
+document, Section 1.1.1 is "Uniformly Compressed Stiffened Elements With
+Circular or Noncircular Holes." Its strength equations require hole geometry
+and hole-dependent checks. M8B expressly excludes holes, and a no-hole
+simple-lip flange does not supply those variables.
 
-Only after those decisions can the equation-level implementation, trace,
-independent benchmark, and `docs/18_EWM_COMPRESSION_VALIDATION_M8.md` be
-created without guessing.
+This is not the same citation as Appendix 1 Section 1.1(a), which contains
+Eqs. 1.1-1 through 1.1-4 and is the general uniformly compressed stiffened-
+element procedure. Substituting Section 1.1(a), or treating "1.1.1" as a
+typographical rendering of Eq. 1.1-1, would be a normative interpretation not
+authorized by the primary PDF.
+
+The conflict was cross-checked against the official AISI errata listing on
+2026-09-02. That listing did not provide an S100-24 correction. The official
+S100-16(R2020) with Supplement 3 text also contains the same cross-reference,
+so the older edition does not independently resolve it.
+
+Interpretation record:
+
+1. **Missing/ambiguous quantity:** the governing no-hole procedure for flange
+   effective width `b` in the slender simple-lip branch.
+2. **Exact provision:** Appendix 1 Section 1.3(a), Eqs. 1.3-4 and 1.3-5,
+   sentence immediately before Table 1.3-1, which cites Section 1.1.1.
+3. **Why the architecture cannot supply it:** Section 1.1.1 requires hole
+   inputs that correctly do not exist in the approved no-hole contracts;
+   selecting Section 1.1(a) instead would change the normative instruction,
+   not resolve an input value.
+4. **Classification:** normative ambiguity. It does not require a material,
+   section, member, or project schema change.
+5. **Authorized interpretation:** for StructureLab_CFS M8B only, calculate the
+   no-hole simple-lip flange width `b` using Appendix 1 Section 1.1(a), Eqs.
+   1.1-1 through 1.1-4, with `k` from Section 1.3/Table 1.3-1.
+6. **Corroborating internal cross-reference:** Appendix 1 Section 1.1.4 reuses
+   Eqs. 1.3-4 and 1.3-5 and explicitly directs its corresponding flange width
+   calculation to Section 1.1(a).
+7. **Applicable geometry:** `C_LIPPED`, simple orthogonal lip, current approved
+   sharp-corner MIDLINE mechanics, explicit standard dimensions, no holes.
+8. **Restriction:** this decision must never be applied to an element with a
+   circular or noncircular hole.
+9. **Decision metadata:** project `StructureLab_CFS`; date `2026-09-02`;
+   status `CONTROLLED_ENGINEERING_INTERPRETATION`; owner authorization in the
+   M8B continuation record.
+10. **Supersession:** an official AISI correction supersedes this project
+    interpretation and requires review of the related regression tests.
+
+Calculation traces must retain the published reference, interpreted reference,
+interpretation ID, status, no-hole restriction, and owner-decision date.
+
+Missing production dimensions, qualification, scope evidence, or `Lm` are not
+development blockers; they continue to block only the corresponding production
+calculation through the existing eligibility boundary.

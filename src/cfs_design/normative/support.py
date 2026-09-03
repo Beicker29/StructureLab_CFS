@@ -490,6 +490,56 @@ def _action_checks(
     return tuple(checks)
 
 
+def _ewm_axial_symmetry_checks(
+    member: ResolvedMember,
+    method: DesignMethod,
+    action: DesignAction,
+) -> tuple[SoftwareSupportCheck, ...]:
+    """Gate the M8B singly symmetric C global-instability route."""
+
+    if method is not DesignMethod.EWM or action is not DesignAction.AXIAL_COMPRESSION:
+        return ()
+
+    geometry = member.section.geometry
+    flange_pair_equal = (
+        geometry.b2_mm is not None and geometry.b1_mm == geometry.b2_mm
+    )
+    lip_pair_equal = True
+    if geometry.section_type is SectionFamily.C_LIPPED:
+        lip_pair_equal = (
+            geometry.d1_mm is not None
+            and geometry.d2_mm is not None
+            and geometry.d1_mm == geometry.d2_mm
+        )
+    supported = flange_pair_equal and lip_pair_equal
+    return (
+        _binary_support_check(
+            method=method,
+            action=action,
+            capability_id="EWM_AXIAL_SINGLE_SYMMETRY",
+            topic="M8B axial global-instability geometry",
+            supported=supported,
+            observed=(
+                MetadataEntry("midline_flange_1_mm", geometry.b1_mm),
+                MetadataEntry("midline_flange_2_mm", geometry.b2_mm),
+                MetadataEntry("midline_lip_1_mm", geometry.d1_mm),
+                MetadataEntry("midline_lip_2_mm", geometry.d2_mm),
+                MetadataEntry("paired_midline_values_equal", supported),
+                MetadataEntry("exact_equality_tolerance_mm", 0.0),
+            ),
+            requirement=(
+                "M8B implements the Appendix 2 singly symmetric C-section "
+                "global-instability route only."
+            ),
+            diagnostic_code="EWM_AXIAL_NONSYMMETRIC_UNSUPPORTED",
+            diagnostic_message=(
+                "Unequal paired MIDLINE dimensions are outside the implemented "
+                "M8B global-instability route"
+            ),
+        ),
+    )
+
+
 def _e4_analytical_route_checks(
     member: ResolvedMember,
     method: DesignMethod,
@@ -663,6 +713,7 @@ def evaluate_software_support(
         + _context_checks(context, method, action)
         + _section_checks(member, method, action)
         + _e4_analytical_route_checks(member, method, action)
+        + _ewm_axial_symmetry_checks(member, method, action)
         + _action_checks(member, method, action)
     )
     return SoftwareSupportResult(

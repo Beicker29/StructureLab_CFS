@@ -98,25 +98,21 @@ M7 is not an end-to-end design validation: governing-demand selection,
 EWM/DSM resistance, authorized AISI equation benchmarks, and pyCUFSM benchmarks
 remain future levels.
 
-M8 completed a primary-source mapping audit, not a numerical validation. It
-verified the required E1, E2, E3.1, applicable E4, Appendix 1, Appendix 2, and
-Table B4.1-1 chain and then activated the milestone stop condition. The current
-M8A now provides the versioned typed contract for those dimensional bases but
-does not populate the illustrative production sections. Its Level 1 coverage
-checks new/legacy schemas, row completeness, keys/references, strict numeric
-values, unsupported editions, provenance, no MIDLINE inference, M7 present/
-absent behavior, coherent M3 property authority, QA gating, and immutable
-normative constants. Consequently, no M8 resistance equation test,
-hand-calculated capacity benchmark, or
-`docs/18_EWM_COMPRESSION_VALIDATION_M8.md` is claimed. Those artifacts must not
-be created until trusted production dimensions, remaining M7 project evidence,
-and the M8B equation/benchmark scope in
-`docs/19_AISI_DIMENSIONAL_CONTRACT_M8A.md` are satisfied.
+M8 first completed the primary-source mapping audit for E1, E2, E3.1,
+applicable E4, Appendix 1, Appendix 2, and Table B4.1-1. M8A then provided the
+versioned dimensional and mechanics-authority contracts without populating
+illustrative production rows. M8B now adds direct branch and domain tests, two
+complete synthetic C-section benchmarks, governing and non-governing E4 cases,
+length/material/symmetry sanity checks, structured failure regressions, a
+production-block regression, exact-reference trace audits, and dependency
+guards. Results and the equation audit are recorded in
+`docs/18_EWM_COMPRESSION_VALIDATION_M8.md`.
 
 M8A.1 adds project-scope and explicit `Lm` contract tests. M8A.2 adds material
 schema 0.1/0.2 compatibility, exact keys/references, controlled A3 routes and
 states, required provenance, route-specific completeness, formula rejection,
 M7 qualified/unqualified/missing behavior, immutable design-input assembly,
 coherent M3 property authority, QA blocking, CAPACITY without member demands,
-and DEMAND_CHECK with and without the preserved M4/M5 pair. These remain input
-and eligibility tests; they contain no resistance benchmark.
+and DEMAND_CHECK with and without the preserved M4/M5 pair. M8B preserves those
+boundaries and adds resistance benchmarks only through controlled synthetic
+fixtures.

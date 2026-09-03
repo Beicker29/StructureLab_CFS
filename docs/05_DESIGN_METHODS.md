@@ -2,9 +2,10 @@
 
 ## Effective Width Method
 
-The future EWM route will implement authorized ANSI/SDI AISI S100-24 LRFD
-provisions and produce its own result and trace. It will consume the common
-resolved member and will not use a DSM resistance.
+M8B implements authorized ANSI/SDI AISI S100-24 LRFD concentric-compression
+capacity for eligible supported C sections. It consumes `MemberDesignInput`,
+produces its own immutable result and trace, and does not use a DSM resistance.
+Flexure and demand utilization remain future work.
 
 ## Direct Strength Method
 
@@ -22,5 +23,6 @@ The comparison layer will not become a third calculation engine.
 M7 identifies the verified S100-24 clause routes for EWM and DSM applicability
 and records them with M6 references. It implements no AISI strength equation,
 coefficient, resistance-factor calculation, pyCUFSM call, or member resistance.
-Exact future calculation implementations require separate authorization,
+M8B is the separately authorized EWM axial implementation. All other future
+calculation implementations still require separate authorization,
 equation-level traceability, and validation.
