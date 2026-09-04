@@ -1,0 +1,70 @@
+{
+  "reference_kind": "FCFSM_REFERENCE",
+  "case_id": "OFFICIAL_CUFSM_V566_FCFSM_C_120X80X15X1_FULL_CURVE",
+  "source_repository": "https://github.com/thinwalled/cufsm-git",
+  "source_release": "v5.66",
+  "source_archive_sha256": "e43d66ccc5b024ea40ba48c369f88b92c60fb7f0e11c6ce8e06b06f6b62b9104",
+  "reference_runtime": "GNU Octave 4.4.1 executing official MATLAB CUFSM .m source",
+  "functions": ["stripmain_fcFSM.m", "SecAnal_fcFSM.m", "base_column.m", "base_update.m"],
+  "wavelength_count": 145,
+  "comparison_meaning": "Official fcFSM constrained family curves are compared with the StructureLab-owned automatic family interpretation of the validated unconstrained FSM curve. StructureLab does not expose or use constrained fcFSM curves in production.",
+  "families": {
+    "LOCAL": {
+      "official_critical_load_factor": 68.75528810652064,
+      "official_critical_half_wavelength_mm": 99.34862496587871,
+      "structurelab_critical_load_factor": 68.66905767672417,
+      "structurelab_critical_half_wavelength_mm": 99.34862496587871,
+      "load_factor_difference_percent": -0.1254164329,
+      "half_wavelength_difference_percent": 0.0,
+      "critical_region_maximum_difference_percent": 0.1754313078,
+      "critical_mode_shape_mac": 0.999966623811,
+      "acceptance": "VALIDATED",
+      "critical_region": {
+        "half_wavelengths_mm": [91.1030907805, 95.1365692002, 99.3486249659, 103.7471643721, 108.3404437550],
+        "official_curve": [69.3208671921, 68.8982745699, 68.7552881065, 68.8897203332, 69.3014921770],
+        "structurelab_curve": [69.2587139849, 68.8252190399, 68.6690576767, 68.7875292059, 69.1799156629]
+      }
+    },
+    "DISTORTIONAL": {
+      "official_critical_load_factor": 126.89118603557179,
+      "official_critical_half_wavelength_mm": 829.9773149766452,
+      "structurelab_critical_load_factor": 123.46517309204225,
+      "structurelab_critical_half_wavelength_mm": 829.9773149766452,
+      "load_factor_difference_percent": -2.6999613216,
+      "half_wavelength_difference_percent": 0.0,
+      "critical_region_maximum_difference_percent": 3.1715785702,
+      "critical_mode_shape_mac": 0.998200742052,
+      "acceptance": "PARTIALLY_VALIDATED",
+      "investigation": "The 2-5 percent band is explained and retained: fcFSM curveD is a force-based constrained family eigenproblem, whereas StructureLab identifies the DISTORTIONAL minimum on the independently validated unconstrained curve. The family, critical wavelength, curve neighborhood, and mode shape agree; no fcFSM constrained value is substituted into production.",
+      "critical_region": {
+        "half_wavelengths_mm": [761.0925536017, 794.7889997270, 829.9773149766, 866.7235500396, 905.0966799188],
+        "official_curve": [128.9563421156, 127.4889593060, 126.8911860356, 127.1592568081, 128.2958039447],
+        "structurelab_curve": [124.8663904041, 123.7758865539, 123.4651730920, 123.9450129374, 125.2285480630]
+      }
+    },
+    "GLOBAL": {
+      "official_critical_load_factor": 9.127757239129688,
+      "official_critical_half_wavelength_mm": 10240.0,
+      "structurelab_critical_load_factor": 9.127513769180517,
+      "structurelab_critical_half_wavelength_mm": 10240.0,
+      "load_factor_difference_percent": -0.0026673578,
+      "half_wavelength_difference_percent": 0.0,
+      "critical_region_maximum_difference_percent": 0.0048568747,
+      "critical_mode_shape_mac": 0.999999993869,
+      "acceptance": "VALIDATED",
+      "design_authority": "QA diagnostic only; M8B/AISI E2 remains authoritative for global compression design.",
+      "critical_region": {
+        "half_wavelengths_mm": [9390.1214024158, 9805.8575943534, 10240.0],
+        "official_curve": [10.3550186819, 9.7155807312, 9.1277572391],
+        "structurelab_curve": [10.3545157516, 9.7152281004, 9.1275137692]
+      }
+    }
+  },
+  "interaction_evidence": {
+    "half_wavelength_mm": 257.67845311,
+    "official_fcfsm_percent_global_distortional_local_closure": [0.206965, 6.45255, 93.3405, 0.0],
+    "official_classical_percent_global_distortional_local_other": [0.495704, 13.6290, 85.7599, 0.115385],
+    "structurelab_disposition": "ENGINEERING_REVIEW_REQUIRED",
+    "review_reasons": ["LOCAL_DISTORTIONAL_INTERACTION", "REFERENCE_DISAGREEMENT"]
+  }
+}

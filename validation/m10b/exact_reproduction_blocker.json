@@ -1,0 +1,106 @@
+{
+  "milestone": "M10B",
+  "status": "CUFSM_EXAMPLE_REPRODUCTION_DISCREPANCY_FOUND_STOP",
+  "date": "2026-09-04",
+  "example": {
+    "example_id": "CUFSM_V566_C120X80X15X1",
+    "official_name": "C_120X80X15X1",
+    "classification_type": "AUTOMATIC_CUFSM_EXAMPLE",
+    "official_repository": "https://github.com/thinwalled/cufsm-git",
+    "official_release": "v5.66",
+    "official_source_path": "examples/fcFSM_examples/C_120X80X15X1/modelData.m",
+    "source_archive_sha256": "e43d66ccc5b024ea40ba48c369f88b92c60fb7f0e11c6ce8e06b06f6b62b9104",
+    "model_data_sha256": "3540d3ee6f3ac0fcdbda6e8410945140b9e4d4b298df90a9b257805bfffe3991",
+    "m9a_runtime_capture_sha256": "773ef1eada5bc9cc61e14a4f16a8b4811a66db8ca26f00224720be83e803d94c"
+  },
+  "input_parity": {
+    "geometry": "17 official centerline nodes and 16 sequential official strip elements, in mm",
+    "thickness_mm": 1.0,
+    "elastic_modulus_mpa": 210000.0,
+    "poisson_ratio": 0.3,
+    "reference_stress_mpa": 1.0,
+    "boundary_condition": "S-S",
+    "springs": 0,
+    "constraints": 0,
+    "longitudinal_terms": [1],
+    "half_wavelength_definition": "MATLAB logspace(log10(20), log10(10240), 145)",
+    "half_wavelength_count": 145,
+    "requested_eigenvalue_count": 10,
+    "official_options": {
+      "ospace": 1,
+      "couple": 1,
+      "orth": 2,
+      "norm": 1
+    },
+    "parity_status": "PROVEN_THROUGH_SOLVER_CALL_BOUNDARY"
+  },
+  "expected": {
+    "official_execution": "COMPLETED",
+    "official_curve_shape_per_wavelength": [10, 2],
+    "official_mode_count_at_wavelength_index_132": 10,
+    "official_half_wavelength_mm_at_index_132": 5830.597809954256
+  },
+  "actual": {
+    "structurelab_dependency": "pycufsm==0.2.0",
+    "numpy": "2.2.6",
+    "scipy": "1.18.1",
+    "python": "3.12.10",
+    "first_failure_wavelength_index_1_based": 132,
+    "first_failure_half_wavelength_mm": 5830.597809954256,
+    "single_wavelength_exception_type": "ValidationError",
+    "single_wavelength_exception_message": "pyCUFSM curve shape (1, 9) differs from (1, 10)",
+    "multi_wavelength_exception_type": "ValueError",
+    "multi_wavelength_exception_message": "could not broadcast input array from shape (9,) into shape (10,)",
+    "pycufsm_location": "pycufsm/fsm.py:471 uniform_curve assignment",
+    "structurelab_detection_location": "src/cfs_design/stability/pycufsm_adapter/_solver.py expected-shape validation"
+  },
+  "first_divergence_layer": "ANALYSIS_OPTION_AND_SOLVER_OUTPUT_PARITY",
+  "likely_cause": "pyCUFSM 0.2.0 returns a variable count of positive modes at long wavelengths and its public multi-wavelength result normalization assumes the requested count is available at every wavelength.",
+  "prohibited_workarounds_not_applied": [
+    "No substitution of eigenvalue_count=1 for official neigs=10",
+    "No pyCUFSM patch or monkey patch",
+    "No StructureLab adapter relaxation",
+    "No production classifier or threshold change"
+  ],
+  "recommended_next_investigation_requiring_owner_authorization": [
+    "Evaluate an independently released pyCUFSM version that preserves neigs=10 output parity, as a controlled dependency upgrade.",
+    "Alternatively define an explicit benchmark-only deviation allowing first-mode replay with neigs=1; this would no longer be an exact settings reproduction and must be labeled accordingly.",
+    "Do not change M9A/M9B production behavior without a separate authorized correction milestone."
+  ],
+  "partial_manual_reference_observation": {
+    "example_id": "DSM_GUIDE_2006_CWLIP_P",
+    "status": "PRELIMINARY_ONLY_NOT_A_COMPLETED_M10B_SUITE",
+    "exact_neigs_10_run": "COMPLETED",
+    "maximum_relative_difference_all_recorded_modes_percent": 0.009072377122709696,
+    "local_6_6_in": {
+      "cufsm_load_factor": 0.12423504562509796,
+      "structurelab_load_factor": 0.12423505668517497,
+      "difference_percent": 0.000008902541903665906,
+      "mac_after_exact_in_to_mm_dof_conversion": 0.9999999999999981
+    },
+    "distortional_28_5_in": {
+      "published_annotation_in": 28.52,
+      "cufsm_load_factor": 0.26981411938126676,
+      "structurelab_load_factor": 0.26981412882282924,
+      "difference_percent": 0.0000034992840625136523,
+      "mac_after_exact_in_to_mm_dof_conversion": 0.9999999999999973
+    },
+    "normative_status": "LEGACY_NOT_EQUIVALENT",
+    "normative_note": "The guide uses AISI 2002 / Appendix 1 AISI 2004 DSM equations. It is not an S100-24 postprocessor."
+  },
+  "tmp_cleanup": {
+    "absolute_path": "D:\\Users\\byomayusa\\Documents\\GitHub\\StructureLab_CFS\\tmp",
+    "size_bytes_before": 2401484427,
+    "size_gib_before": 2.237,
+    "performed": false,
+    "space_recovered_bytes": 0,
+    "reasons_not_performed": [
+      "The M10B permanent executable benchmark evidence was not completed before the required STOP.",
+      "git ls-files -- tmp reports tracked files, so the explicit no-tracked-files cleanup precondition is false.",
+      "Unique official execution material remains under tmp pending an owner decision on the reproduction blocker."
+    ]
+  },
+  "production_changes": false,
+  "tests_run": [],
+  "full_regression_run": false
+}

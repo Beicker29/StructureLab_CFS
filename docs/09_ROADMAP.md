@@ -37,17 +37,29 @@ Each milestone requires separate authorization and proportionate validation.
     EWM for eligible singly symmetric lipped/unlipped C sections, including
     global buckling, Appendix 1 widths, E3.1, analytical E4, governing
     selection, and trace. Incomplete production evidence remains blocked.
-14. **M9 - DSM Compression + pyCUFSM:** adapter, benchmarks, and authorized DSM
-    provisions.
-15. **M10 - EWM/DSM Comparison:** independent result comparison.
-16. **M11 - Flexure:** strong-axis EWM and DSM design within approved scope.
-17. **M12 - Future Interactions:** reserved for separately approved scope;
+14. **M9A - Elastic Buckling and Modal Identification:** implemented the
+    pyCUFSM 0.2.0 unconstrained adapter, StructureLab-owned modal
+    identification/tracking, automatic/review policy, MATLAB CUFSM/fcFSM
+    benchmarks, and mesh/wavelength convergence.
+15. **M9B - DSM Axial Compression:** implemented S100-24 E3.2/E4 DSM axial
+    resistance using shared M8B/E2 global behavior and frozen M9A LOCAL/DISTORTIONAL
+    results, including explicit engineering-review handling and traceability.
+16. **M10 - EWM/DSM Axial Comparison:** implemented run-mode routing, direct
+    M8B/M9B result integration, point-level axial utilization, informational
+    capacity metrics, partial-comparison states, and composed traceability.
+17. **M11 - Flexure:** strong-axis EWM and DSM design within approved scope.
+18. **M12 - Future Interactions:** reserved for separately approved scope;
     P-M interaction remains outside v0.1.
-18. **M13 - Reporting / Calculation Memory:** presentation from result and trace
+19. **M13 - Reporting / Calculation Memory:** presentation from result and trace
     objects with no recalculation.
 
-The implementation stops after M8B; M9 has not started. M8A provides exact
+The implementation stops after M10; M11 has not started. M8A provides exact
 standard-specific fields without changing M3 geometry, and production rows
 remain absent until traceable values are approved. Controlled synthetic
-fixtures validate M8B resistance. Curved-bend and geometry-convention
+fixtures validate M8B resistance. M9A supplies elastic LOCAL/DISTORTIONAL
+evidence only when its automatic gates pass; global compression remains
+M8B/AISI E2-owned. M9B converts eligible M9A LOCAL/DISTORTIONAL evidence into
+DSM axial resistance. M10 compares direct M8B/M9B design strengths for one
+resolved simultaneous compression-demand point without recalculation or a
+code-required minimum-method policy. Curved-bend and geometry-convention
 conversions remain deferred.

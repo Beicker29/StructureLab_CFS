@@ -1,0 +1,44 @@
+{
+  "benchmark_id": "M9B-S10024-HAND-001",
+  "benchmark_type": "INDEPENDENT_HAND_CALCULATION_FROM_PRIMARY_STANDARD",
+  "standard": "ANSI/SDI AISI S100-2024",
+  "standard_sha256": "6ec32742f056d08a0823557d9ce58b69d84312e64a6e656b8ba4b3b10cf4b4ca",
+  "scope": "No-hole LRFD axial compression equation fixture",
+  "references": [
+    "E1",
+    "E2",
+    "E3.2-1",
+    "E3.2-2",
+    "E4-1",
+    "E4-2",
+    "E4-3",
+    "Appendix 2 Eq. 2.1-1"
+  ],
+  "inputs_n": {
+    "Pne": 50000.0,
+    "Pcrl": 20000.0,
+    "Py": 69000.0,
+    "Pcrd": 30000.0
+  },
+  "independent_arithmetic": {
+    "lambda_l_squared": "50000/20000 = 5/2",
+    "Pnl": "50000 * 1.2 * (1 + 0.10 * 5/2) / (1 + 0.55 * 5/2) = 600000/19 N",
+    "lambda_d_squared": "69000/30000 = 23/10",
+    "Pnd": "69000 * 1.2 * (1 + 0.05 * 23/10) / (1 + 0.67 * 23/10) = 30774000/847 N",
+    "Pn": "min(Pnl, Pnd) = Pnl",
+    "phiPn": "0.85 * 600000/19 = 510000/19 N"
+  },
+  "expected": {
+    "lambda_l": 1.5811388300841898,
+    "Pnl_n": 31578.947368421053,
+    "local_branch": "LOCAL_REDUCTION",
+    "lambda_d": 1.51657508881031,
+    "Pnd_n": 36332.93978748524,
+    "distortional_branch": "DISTORTIONAL_REDUCTION",
+    "Pn_n": 31578.947368421053,
+    "governing_limit_state": "LOCAL_GLOBAL_INTERACTION",
+    "phi": 0.85,
+    "phiPn_n": 26842.105263157893
+  },
+  "notes": "Expected values derive from exact rational arithmetic shown above, not from StructureLab output. This fixture does not use historical 2006 DSM constants."
+}

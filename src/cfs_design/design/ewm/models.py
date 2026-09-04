@@ -4,23 +4,19 @@ from dataclasses import dataclass
 from enum import Enum
 
 from cfs_design.core.exceptions import ValidationError
+from cfs_design.design.models import (
+    ColumnCurveBranch,
+    EffectiveLengths,
+    GlobalBucklingMode,
+    GlobalBucklingResult,
+    GlobalColumnStrength,
+)
 from cfs_design.results import (
     ApplicabilityStatus,
     CalculationStatus,
     CalculationTrace,
     EngineeringDiagnostic,
 )
-
-
-class GlobalBucklingMode(str, Enum):
-    FLEXURAL_X = "FLEXURAL_X"
-    FLEXURAL_Y = "FLEXURAL_Y"
-    FLEXURAL_TORSIONAL = "FLEXURAL_TORSIONAL"
-
-
-class ColumnCurveBranch(str, Enum):
-    INELASTIC = "LAMBDA_C_LE_1_5"
-    ELASTIC = "LAMBDA_C_GT_1_5"
 
 
 class PlateElementId(str, Enum):
@@ -42,38 +38,6 @@ class NominalLimitState(str, Enum):
     E2_YIELDING_GLOBAL = "E2_YIELDING_GLOBAL"
     E3_1_LOCAL_GLOBAL = "E3_1_LOCAL_GLOBAL"
     E4_DISTORTIONAL = "E4_DISTORTIONAL"
-
-
-@dataclass(frozen=True, slots=True)
-class EffectiveLengths:
-    lx_mm: float
-    ly_mm: float
-    lt_mm: float
-    source: str
-
-
-@dataclass(frozen=True, slots=True)
-class GlobalBucklingResult:
-    effective_lengths: EffectiveLengths
-    ro_mm: float
-    p_ex_n: float
-    p_ey_n: float
-    p_t_n: float
-    beta: float
-    p_flexural_n: float
-    flexural_mode: GlobalBucklingMode
-    p_flexural_torsional_n: float
-    p_cre_n: float
-    f_cre_mpa: float
-    governing_mode: GlobalBucklingMode
-
-
-@dataclass(frozen=True, slots=True)
-class GlobalColumnStrength:
-    lambda_c: float
-    fn_mpa: float
-    p_ne_n: float
-    branch: ColumnCurveBranch
 
 
 @dataclass(frozen=True, slots=True)

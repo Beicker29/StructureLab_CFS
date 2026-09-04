@@ -1,0 +1,80 @@
+{
+  "milestone": "M10B",
+  "status": "STOPPED_ON_EXACT_REPRODUCTION_DISCREPANCY",
+  "inventory_date": "2026-09-04",
+  "official_repository": "https://github.com/thinwalled/cufsm-git",
+  "official_release": "v5.66",
+  "source_archive_sha256": "e43d66ccc5b024ea40ba48c369f88b92c60fb7f0e11c6ce8e06b06f6b62b9104",
+  "candidates": [
+    {
+      "example_id": "CUFSM_V566_C120X80X15X1",
+      "official_source_path": "examples/fcFSM_examples/C_120X80X15X1/modelData.m",
+      "classification": "AUTOMATIC_CUFSM_EXAMPLE",
+      "scope": "C_LIPPED; axial compression; sharp-corner centerline; S-S",
+      "structurelab_support": "SUPPORTED_PHYSICAL_SCOPE",
+      "m10b_disposition": "EXACT_REPLAY_BLOCKED",
+      "reason": "The official neigs=10 run returns ten modes at every wavelength, while pyCUFSM 0.2.0 returns only nine at wavelength index 132 and cannot normalize the exact multi-wavelength run."
+    },
+    {
+      "example_id": "DSM_GUIDE_2006_CWLIP_P",
+      "official_source_path": "examples/2006_dsm_design_guide/files_and_scripts/cwlip_P.mat",
+      "classification": "MANUAL_ENGINEERING_SELECTION_EXAMPLE",
+      "additional_classification": "LEGACY_DSM_EQUATION_EXAMPLE",
+      "scope": "C_LIPPED; axial compression; segmented corner contour; S-S",
+      "structurelab_support": "VALIDATION_ONLY_EXACT_SEGMENTED_CONTOUR",
+      "m10b_disposition": "PRELIMINARY_ELASTIC_REPLAY_SUCCEEDED_BUT_SUITE_NOT_FINALIZED_AFTER_STOP",
+      "manual_points": [
+        {
+          "family": "LOCAL",
+          "half_wavelength_in": 6.6,
+          "matlab_index_1_based": 27
+        },
+        {
+          "family": "DISTORTIONAL",
+          "half_wavelength_in": 28.5,
+          "published_annotation_half_wavelength_in": 28.52,
+          "matlab_index_1_based": 48
+        }
+      ],
+      "normative_classification": "LEGACY_NOT_EQUIVALENT"
+    },
+    {
+      "example_id": "DSM_GUIDE_2006_CNOLIP_P",
+      "official_source_path": "examples/2006_dsm_design_guide/files_and_scripts/cnolip_P.mat",
+      "classification": "MANUAL_ENGINEERING_SELECTION_EXAMPLE",
+      "additional_classification": "LEGACY_DSM_EQUATION_EXAMPLE",
+      "scope": "C_UNLIPPED; axial compression; segmented corner contour; S-S",
+      "structurelab_support": "UNLIPPED_ELASTIC_SUPPORTED; LEGACY_DISTORTIONAL_TREATMENT_NOT_S10024_APPLICABLE",
+      "m10b_disposition": "UNSUITABLE_FOR_DIRECT_FINAL_DSM_REPRODUCTION",
+      "reason": "The guide conservatively assigns the same mixed minimum to local and distortional buckling. M9B correctly treats distortional buckling as not applicable to unlipped C under S100-24. The exact neigs=10 replay also encounters the pyCUFSM variable-positive-mode-count defect."
+    },
+    {
+      "example_id": "CUFSM_V566_C200X90X20X2_CURVED_CORNER",
+      "official_source_path": "examples/fcFSM_examples/C_200X90X20X2_CurvedConer/modelData.m",
+      "classification": "OUT_OF_SCOPE_FOR_STRUCTURELAB_V0_1",
+      "m10b_disposition": "REFERENCE_ONLY",
+      "reason": "Curved-corner production geometry is outside the frozen sharp-corner M3 contract."
+    },
+    {
+      "example_id": "M9A_SHARP_C100_REFERENCE_CASES",
+      "official_source_path": "validation/m9a/official_cufsm_v566_classical_additional.json",
+      "classification": "UNSUITABLE_FOR_DIRECT_REPRODUCTION",
+      "m10b_disposition": "RETAIN_AS_M9A_VALIDATION_EVIDENCE",
+      "reason": "These were generated validation inputs solved with official CUFSM functions, not original examples distributed in the official example tree."
+    },
+    {
+      "example_id": "M10_NUMERICAL_FIXTURES",
+      "official_source_path": "tests/design/comparison/conftest.py::make_m10_request",
+      "classification": "SYNTHETIC_INTEGRATION_FIXTURE",
+      "m10b_disposition": "NOT_CUFSM_VALIDATION_EVIDENCE",
+      "reason": "PcrL and PcrD are controlled injected values for integration testing."
+    },
+    {
+      "example_id": "OTHER_DSM_GUIDE_2006_CASES",
+      "official_source_path": "examples/2006_dsm_design_guide",
+      "classification": "OUT_OF_SCOPE_FOR_STRUCTURELAB_V0_1",
+      "m10b_disposition": "NOT_REPRODUCED",
+      "reason": "Beams, Z sections, angles, hats, panels, rack posts, sigma sections, holes, built-up members, springs, and non-v0.1 boundary conditions were excluded."
+    }
+  ]
+}

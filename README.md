@@ -5,11 +5,11 @@ reproducible cold-formed steel member design workflows. The approved v0.1
 target is ANSI/SDI AISI S100-24 LRFD for catalogued lipped and unlipped C
 sections under axial compression and strong-axis flexure.
 
-> **Development warning:** M8B calculates S100-24 LRFD EWM axial-compression
-> resistance only for fully eligible supported inputs. Production
-> qualification/dimension/scope evidence remains absent, so the supplied
-> project stays blocked. Demand utilization, flexure, DSM, pyCUFSM, and reports
-> are not implemented. The package is not suitable for engineering use.
+> **Development warning:** M8B and M9B calculate S100-24 LRFD EWM and DSM
+> axial-compression resistance, and M10 compares them at one resolved demand
+> point. Production qualification/dimension/scope evidence remains absent, so
+> the supplied project stays blocked. Flexure and production reports are not
+> implemented. The package is not suitable for engineering use.
 
 ## Design architecture
 
@@ -17,11 +17,11 @@ Two independent routes consume the same resolved material,
 section, member, restraints, and demand objects:
 
 - Effective Width Method (EWM); M8B implements its axial-compression capacity.
-- Future Direct Strength Method (DSM), consuming normalized elastic buckling results
-  from a dedicated pyCUFSM adapter.
+- Direct Strength Method (DSM) axial compression, consuming normalized M9A
+  elastic buckling results from the dedicated pyCUFSM adapter.
 
-Comparison mode will present EWM and DSM results without allowing either
-design engine to use the other engine's resistance. pyCUFSM will be an elastic
+Comparison mode presents direct EWM and DSM results without allowing either
+design engine to use the other engine's resistance. pyCUFSM is an elastic
 buckling analysis dependency only; it will not provide final member design
 resistance.
 
@@ -67,7 +67,8 @@ pyCUFSM is deliberately not an M8 dependency.
 - `src/cfs_design/`: core infrastructure, the shared domain model, catalog
   loading/validation, M3A/M3B section mechanics, the M4 ETABS IO boundary, M5
   project resolution, shared M6 results/traces, M7 normative eligibility, and
-  M8B axial EWM design, and reserved stability and report boundaries.
+  M8B axial EWM design, M9A stability, M9B axial DSM design, M10 axial
+  comparison, and the reserved report boundary.
 - `validation/`: future benchmarks and independently verified examples.
 - `tests/`: automated package and data-contract tests.
 - `docs/`: scope, architecture, schemas, validation, and roadmap decisions.
@@ -181,13 +182,36 @@ interpretation is recorded as `S10024-A1-1_3A-XREF-001` and is not an official
 AISI erratum.
 
 Production data remains unchanged and blocked; successful calculations use
-controlled synthetic validation fixtures. No demand utilization, DSM,
-pyCUFSM, flexure, or report calculation is implemented. See
+controlled synthetic validation fixtures. M9A supplies validated normalized
+elastic buckling evidence, M9B implements DSM axial compression, and M10 owns
+point-level demand utilization and informational EWM/DSM comparison. No report
+calculation is implemented. See
 [M8A Dimensional Contract](docs/19_AISI_DIMENSIONAL_CONTRACT_M8A.md),
 [M8A.2 Material Qualification](docs/21_AISI_MATERIAL_QUALIFICATION_M8A2.md),
 [M8A.2 Design Input](docs/22_DESIGN_INPUT_BOUNDARY_M8A2.md), and the historical
 [M8 Normative Map](docs/17_EWM_COMPRESSION_NORMATIVE_MAP_M8.md), and
 [M8B Validation](docs/18_EWM_COMPRESSION_VALIDATION_M8.md).
+
+## Implemented M9A-M9B DSM compression path
+
+M9A confines pyCUFSM 0.2.0 to the unconstrained eigensolver and returns
+StructureLab-owned LOCAL/DISTORTIONAL evidence with modal classification,
+convergence, MAC tracking, and explicit engineering-review status. M9B reuses
+the M8B/AISI E2 global calculation, applies current S100-24 E3.2 and E4 axial
+DSM equations, selects the E1 minimum, and applies the centralized LRFD
+compression factor once. See [M9A Adapter](docs/23_PYCUFSM_ADAPTER_M9A.md),
+[M9A Validation](docs/24_ELASTIC_BUCKLING_VALIDATION_M9A.md), and
+[M9B DSM Axial Compression](docs/25_DSM_AXIAL_COMPRESSION_M9B.md).
+
+## Implemented M10 axial comparison
+
+M10 routes `ewm`, `dsm`, and `compare` without executing unrequested engines.
+It uses the canonical compression-positive simultaneous demand point, copies
+factored strengths directly from M8B/M9B, evaluates each utilization, and
+reports signed capacity differences without declaring either AISI method more
+correct. DSM review or unsupported states produce a partial comparison without
+fabricated capacity or governing-method claim. See
+[M10 EWM/DSM Axial Comparison](docs/26_EWM_DSM_COMPARISON_M10.md).
 
 ## Validation philosophy
 

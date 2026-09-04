@@ -162,6 +162,7 @@ for normative decisions.
   procedure because Appendix 1 evaluates widths at the already established
   `Fn`; therefore there is no convergence policy or last-iterate fallback.
 - DSM, pyCUFSM, flexure, demand utilization, P-M interaction, and reports are
-  not part of M8B. M9 has not started.
+  not part of M8B. M9A now supplies only elastic-buckling evidence; M9B DSM
+  resistance has not started.
 - Current production records intentionally lack executable evidence and remain
   blocked; only controlled synthetic fixtures produce strengths.

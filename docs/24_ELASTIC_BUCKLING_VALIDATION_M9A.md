@@ -1,231 +1,207 @@
-# M9A Elastic Buckling Validation — Independent Benchmark Stop Record
+# M9A Elastic Buckling and Modal Identification Validation
 
-## Status and controlled environment
+## Reference provenance
 
-M9A is **stopped, not approved**. The former GLOBAL-only cFSM acceptance
-requirement was withdrawn by the engineering owner. Continuation reached the
-independent constrained-mode validation gate, where the available official
-CUFSM DISTORTIONAL-only fixture did not reproduce. No production adapter is
-exposed. Tests in this audit used:
+The independent references use official CUFSM v5.66 source. The pristine
+downloaded archive SHA-256 is
+`e43d66ccc5b024ea40ba48c369f88b92c60fb7f0e11c6ce8e06b06f6b62b9104`.
 
-- CPython 3.12.10;
-- `pycufsm==0.2.0`, AFL-3.0;
-- `numpy==2.2.6`;
-- SciPy 1.18.1;
-- simply supported strips with one longitudinal half-wave;
-- explicit uniform compressive nodal reference stress;
-- StructureLab M3A/M3B section properties.
+Reference families remain separate:
 
-The benchmark was the synthetic sharp-corner lipped channel
-`H=100 mm, B1=B2=40 mm, D1=D2=10 mm, t=1 mm`. The deterministic mesh divided
-each centerline primitive with `ceil(segment_length / target_size)` equal
-segments and preserved the M3 contour order.
+- `CLASSICAL_CFSM_REFERENCE`: `classify.m`, `base_column.m`, `base_update.m`,
+  `mode_class.m`, and official unconstrained `stripmain.m`;
+- `FCFSM_REFERENCE`: `stripmain_fcFSM.m`, `SecAnal_fcFSM.m`, and their official
+  basis dependencies.
 
-## Reference-stress normalization
+A licensed MATLAB runtime was unavailable, so official `.m` source was
+executed with GNU Octave 4.4.1. The original archive remained unchanged. In a
+temporary extracted execution tree only, the MATLAB
+`eigs(...,'SM','Display',0)` spelling in `stripmain.m` and
+`stripmain_fcFSM.m` was replaced by Octave's equivalent options structure with
+`disp=0`. Matrices, eigensolver target, mode count, and formulation were not
+changed. Pristine and temporary hashes plus exact substitutions are in
+`validation/m9a/official_cufsm_v566_source_manifest.json`. No shim is production
+code and no pyCUFSM source was modified.
 
-The same LOCAL and DISTORTIONAL analyses were run with reference stresses of
-1 MPa and 10 MPa. Multiplying the returned load factors by their respective
-reference stresses produced invariant elastic stresses to floating-point
-precision. For example, the LOCAL 50 mm values were
-`133.69566117634275 MPa` and `133.69566117636165 MPa`; the DISTORTIONAL 250 mm
-values were `394.421651237991 MPa` and `394.4216512379904 MPa`.
+## pyCUFSM capability matrix
 
-This confirms the approved normalization for the audited path:
+| Capability | LOCAL | DISTORTIONAL | GLOBAL |
+|---|---|---|---|
+| Unconstrained FSM | VALIDATED | VALIDATED | VALIDATED |
+| Constrained cFSM `orth=1` | NOT_VALIDATED | NOT_VALIDATED | NOT_VALIDATED |
+| Constrained cFSM `orth=2` | SOFTWARE_BLOCKED | SOFTWARE_BLOCKED | SOFTWARE_BLOCKED |
 
-`Fcr = pyCUFSM load factor * reference stress`.
+For executable `orth=1, norm=1, ospace=ST, couple=1`, the identical MATLAB
+comparison produced critical-load differences of 17.1903, 29.6198, and
+457.8378 percent for LOCAL, DISTORTIONAL, and GLOBAL. The `orth=2` public path
+stops on the list-to-NumPy-array API defect before any family result exists.
+`orth=1` is additional evidence only and is not generalized to `orth=2`.
 
-## `Sect_Props` sensitivity
+## Unconstrained solver parity
 
-At half-wavelengths `10, 50, 100, 250, 1000, 2500, 5000, 10000 mm`, the
-complete LOCAL-only and DISTORTIONAL-only curves were bit-for-bit unchanged
-under these controlled substitutions:
+Official example `C_120X80X15X1` uses E=210000 MPa, nu=0.3, t=1 mm,
+17 nodes, S-S ends, and uniform 1 MPa reference compression.
 
-| Field | Baseline | Variants | Maximum observed curve difference |
-|---|---:|---:|---:|
-| `Cw` | M3B `Cw` | `0`, `10 * M3B_Cw` | `0 MPa` |
-| `J` | M3 `J` | `0`, `10 * M3_J` | `0 MPa` |
-| `B1` | neutral `0` | `1e9` | `0 MPa` |
-| `B2` | neutral `0` | `-1e9` | `0 MPa` |
-| `wn` | neutral `None`/empty | every node set to `1e9` | `0 MPa` |
+| Half-wavelength (mm) | Official CUFSM | StructureLab/pyCUFSM | Relative difference |
+|---:|---:|---:|---:|
+| 20.0000 | 503.4277613994 | 503.4277613990 | -6.87e-13 |
+| 70.2501 | 78.0960708393 | 78.0960708455 | 7.88e-11 |
+| 257.6785 | 148.3672912553 | 148.3672912635 | 5.57e-11 |
+| 945.1687 | 127.3320265898 | 127.3320276238 | 8.12e-9 |
+| 3466.8942 | 58.0666018789 | 58.0665989270 | -5.08e-8 |
+| 10240.0000 | 9.1275146357 | 9.1275139485 | -7.53e-8 |
 
-The numerical result agrees with the source audit: none of these fields is
-read in the approved constrained axial path. The test values are sensitivity
-probes, not proposed section properties.
+The maximum absolute relative difference is `7.53e-8`. After the documented
+reverse-contour mapping, mode-shape MAC at all six points exceeds
+`0.99999999999998`. This validates eigenvalues and eigenvectors without using
+pyCUFSM constrained cFSM.
 
-## Mesh and wavelength behavior
+## Classical automatic classification
 
-Three logarithmic refinement passes bracketed each constrained minimum. All
-reported minima were interior to the `10–2000 mm` initial wavelength range.
+All classical results use `ospace=1, couple=1, orth=2, norm=1`. Percentages are
+G/D/L/O. Direct-sum residuals are below `1e-12`.
 
-| Maximum strip width (mm) | Nodes | LOCAL wavelength (mm) | LOCAL Fcr (MPa) | DIST wavelength (mm) | DIST Fcr (MPa) |
-|---:|---:|---:|---:|---:|---:|
-| 10.0 | 21 | 69.5185 | 116.74997 | 354.7920 | 321.89291 |
-| 5.0 | 41 | 67.8926 | 121.50615 | 354.8547 | 321.89293 |
-| 2.5 | 81 | 67.0111 | 124.44750 | 354.7293 | 321.89157 |
-| 1.25 | 161 | 66.5511 | 126.09175 | 355.4191 | 321.86967 |
-| 0.625 | 321 | 66.3325 | 126.96231 | 353.5534 | 321.89847 |
-| 0.3125 | 641 | 66.3325 | 127.41103 | not run | not run |
+### Official C120x80x15x1
 
-The continuation selected every available constrained basis column rather
-than treating a one-entry modal vector as the whole class. For the complete
-LOCAL subspace, the stress change from the 0.625 mm to 0.3125 mm mesh was
-0.3534%, and the sampled critical wavelength was unchanged. This satisfies
-the owner's successive-mesh limits of 0.5% stress and 1.0% wavelength for
-that controlled grid. DISTORTIONAL was already well inside both limits.
+| Wavelength (mm) | Official MATLAB G/D/L/O (%) | StructureLab G/D/L/O (%) | Max. difference (pp) |
+|---:|---|---|---:|
+| 20.0000 | 0.300905 / 0.019248 / 99.385191 / 0.294657 | 0.300903 / 0.019248 / 99.385107 / 0.294789 | 0.000132 |
+| 70.2501 | 0.110117 / 0.209182 / 99.593349 / 0.087352 | 0.110115 / 0.209181 / 99.592792 / 0.087912 | 0.000560 |
+| 257.6785 | 0.495704 / 13.629044 / 85.759867 / 0.115385 | 0.495701 / 13.629019 / 85.759720 / 0.115561 | 0.000147 |
+| 945.1687 | 1.391543 / 95.621653 / 2.961632 / 0.025173 | 1.391541 / 95.621843 / 2.961638 / 0.024977 | 0.000196 |
+| 3466.8942 | 98.531206 / 1.424258 / 0.035928 / 0.008608 | 98.531178 / 1.424256 / 0.035929 / 0.008636 | 0.000029 |
+| 10240.0000 | 99.987594 / 0.010716 / 0.000713 / 0.000977 | 99.987598 / 0.010715 / 0.000714 / 0.000973 | 0.000013 |
 
-These values remain exploratory rather than a production configuration. The
-0.3125 mm local mesh required 641 nodes and 1,278 local basis columns; even a
-13-point focused wavelength grid took approximately two minutes in the audit
-environment. The full wavelength-refinement and expanded-interval gates were
-not completed after the independent benchmark stop triggered.
+Dominant family agrees at every point. The 257.6785 mm point is automatically
+recognized as L/D interaction rather than forced into an accepted family.
 
-## Independent constrained-mode benchmark failure
+### Additional supported sharp-corner cases
 
-The highest-available independent source found was the official MATLAB CUFSM
-repository maintained by the original CUFSM project. Its saved
-`sigma_P_D.mat` result is a DISTORTIONAL-only cFSM analysis created in MATLAB
-and contains the input mesh, material, wavelengths, mode selections, and
-expected curve. The audit used official CUFSM repository commit
-`d16e28195d3963ee218be0768e19159b0777fdee`; the fixture SHA-256 was
-`15aefa13deb4ac062e02d09b1a06b557cc762b69d679f90bca99383c2b4dc9a4`.
-The pyCUFSM release tag was commit
-`0c45defae65eaa3de99ad8f40f8a9610e7c30f08` (`v0.2.0`).
+Official CUFSM functions were also run independently for sharp
+`C100x40x10x1` and sharp unlipped `C100x40x1` inputs. Six wavelengths per case
+cover LOCAL, DISTORTIONAL where applicable, GLOBAL, and L/D transition regions.
 
-The stored first-mode curve has its minimum load factor at:
+| Case | Points | Max. load-factor relative difference | Max. participation difference | Minimum MAC | Dominant-family agreement |
+|---|---:|---:|---:|---:|---|
+| C100x40x10x1 | 6 | 8.46e-8 | 0.009846 pp | 0.99999999999997 | all points |
+| C100x40x1 | 6 | 7.57e-8 | 0.000070 pp | 0.99999999999979 | all points |
 
-- half-wavelength: `65.8` source length units;
-- load factor: `0.7956149759822446`.
+The automatic MATLAB percentages, StructureLab percentages, MAC values, exact
+basis options, normalization, orthogonalization, and other-space definition are
+preserved in
+`validation/m9a/official_cufsm_v566_classical_additional.json`. No manual DSM
+Guide label is an automatic target.
 
-With `pycufsm==0.2.0`, the same saved material, nodes, elements, wavelengths,
-simply-supported boundary condition, and all 11 distortional selections gave:
+Translation by `(137,-419) mm`, x-mirroring, eigenvector sign reversal, and
+nonzero scaling preserve the validated results within recorded floating-point
+tolerances.
 
-- half-wavelength: `49.8` source length units;
-- load factor: `1.0226565085710555`.
+## Official fcFSM validation
 
-The critical load factor differs by 28.54% and the critical wavelength by
-24.32%; the maximum absolute first-mode curve difference is
-`28.896166166719595`. This is not an acceptable numerical tolerance. The
-fixture's sigma section is also outside the supported v0.1 C-section family,
-so it cannot replace a supported-family fixture even if it passed.
+The full 145-wavelength official C120 fcFSM curves and shapes were generated,
+not merely six selected probes. StructureLab values below are the validated
+unconstrained curve interpreted by the owned classifier; official `curveL`,
+`curveD`, and `curveG` remain validation references and are never substituted
+into production.
 
-The official pyCUFSM v0.2.0 test suite contains MATLAB CUFSM signature-curve
-fixtures, including a lipped-C compression example, but its test helper
-explicitly turns off every cFSM class before comparing curves. It therefore
-supports unconstrained solver QA only and does not provide the independently
-verified constrained LOCAL and DISTORTIONAL results required here.
+| Family | Official fcFSM LF @ wavelength | StructureLab LF @ wavelength | LF difference | Critical-region max. | MAC | Decision |
+|---|---:|---:|---:|---:|---:|---|
+| LOCAL | 68.75529 @ 99.3486 mm | 68.66906 @ 99.3486 mm | -0.1254% | 0.1754% | 0.999967 | VALIDATED |
+| DISTORTIONAL | 126.89119 @ 829.9773 mm | 123.46517 @ 829.9773 mm | -2.7000% | 3.1716% | 0.998201 | PARTIALLY_VALIDATED |
+| GLOBAL | 9.127757 @ 10240 mm | 9.127514 @ 10240 mm | -0.0027% | 0.0049% | 1.000000 | VALIDATED, QA only |
 
-No independent constrained LOCAL reference was established before this stop.
-The acceptance conditions say to stop if an independent local or
-distortional benchmark fails; production implementation therefore did not
-begin.
+The DISTORTIONAL difference is investigated rather than hidden. Official
+fcFSM `curveD` is a force-based constrained-family eigenproblem; StructureLab
+identifies the D minimum on the independently validated unconstrained curve.
+The family, critical wavelength, curve neighborhood, and mode shape agree, and
+the 2.70 percent difference lies in the required 2-5 percent documented band.
+No constrained fcFSM value enters production.
 
-## Global solver QA and retained GLOBAL-only limitation
+At 257.6785 mm, official fcFSM reports 93.3405 percent LOCAL while classical
+CUFSM reports 85.7599 percent LOCAL and 13.6290 percent DISTORTIONAL.
+StructureLab preserves `ENGINEERING_REVIEW_REQUIRED` with L/D-interaction and
+reference-disagreement evidence.
 
-The independent M8B analytical calculation for equal effective lengths of
-2500 mm gives:
+The official curved-corner `C_200X90X20X2_CurvedConer` example independently
+shows LOCAL, DISTORTIONAL, and GLOBAL regions. It remains an
+`FCFSM_REFERENCE`: curved-corner MIDLINE geometry is outside the approved M3
+sharp-corner contract and is not converted or passed into production.
 
-- `Fcre = 60.736047377025045 MPa`;
-- governing analytical mode: flexural-torsional.
+## Mesh convergence
 
-At the same 2500 mm half-wavelength, unconstrained FSM converged toward the
-same result:
+For the C120 reference:
 
-| Maximum strip width (mm) | Unconstrained FSM Fcr (MPa) |
-|---:|---:|
-| 10.0 | 60.78841 |
-| 5.0 | 60.68065 |
-| 2.5 | 60.65371 |
+| Family | Practical 10 mm | Reference 7.5 mm | Stress difference | Wavelength difference | Shared-vertex MAC |
+|---|---:|---:|---:|---:|---:|
+| LOCAL | 68.655972 MPa @ 99.3486 mm | 68.655223 MPa @ 99.3486 mm | 0.001091% | 0% | 0.999999999550 |
+| DISTORTIONAL | 122.026677 MPa @ 829.9773 mm | 122.020218 MPa @ 829.9773 mm | 0.005293% | 0% | 0.999999999711 |
 
-The 2.5 mm result differs from M8B by approximately 0.136%, establishing that
-the mesh, material constants, loading sign, and load-factor normalization can
-represent the mechanically equivalent global response.
+Families and participation remain stable. The 20 mm mesh differs by 1.18419
+percent in DISTORTIONAL stress and is rejected by the 0.5 percent production
+gate. Subdivision patterns at 6, 5, and 2.5 mm make the classical basis
+numerically rank-deficient and fail the reconstruction gate; they are retained
+as NOT_VALIDATED limits, not selected as reference meshes.
 
-GLOBAL-only cFSM does not reproduce it:
+The 10/7.5 mm pair is an audited recommendation for this case. Every production
+case must preserve its actual practical/reference widths and pass its own
+comparison.
 
-| Maximum strip width (mm) | GLOBAL-only cFSM Fcr at 2500 mm (MPa) |
-|---:|---:|
-| 10.0 | 545.49873 |
-| 5.0 | 545.49928 |
-| 2.5 | 545.49985 |
+## Wavelength convergence
 
-The discrepancy is approximately 798% and is mesh-stable. Selecting the four
-global basis vectors one at a time showed that one component produces no valid
-positive eigenvalue at the long wavelengths; pyCUFSM then fails while packing
-the empty result. Supplying CUTWP-generated properties produced the identical
-GLOBAL curve, so this is not caused by the StructureLab `Sect_Props` mapping
-or by M3B `Cw`.
+The C120 initial logarithmic grid contained 145 points from 20 to 10240 mm.
+Adaptive critical-neighborhood refinement evaluated 157 points in three
+iterations and resolved all LOCAL/DISTORTIONAL boundaries.
 
-The engineering owner subsequently assigned design-authoritative global
-buckling to StructureLab's existing analytical E2/M8B path. The agreeing
-unconstrained long-wave value remains solver-health evidence for geometry,
-thickness, elastic constants, compression sign, normalization, and global FSM
-mechanics. GLOBAL-only constrained cFSM remains a documented third-party
-diagnostic limitation and must never be used as the future DSM `Pcre` input.
+| Family | Refined stress | Refined wavelength | Last stress change | Last location change | MAC | Status |
+|---|---:|---:|---:|---:|---:|---|
+| LOCAL | 68.655773 MPa | 99.888078 mm | 0.000291% | 0.5401% | 0.999999 | AUTOMATIC_ACCEPTED |
+| DISTORTIONAL | 122.000734 MPa | 821.036810 mm | 0% | 0% | 1.000000 | AUTOMATIC_ACCEPTED |
 
-Selecting all four requested global columns rather than a one-entry vector did
-not alter the audited 2.5 mm result (`545.49980 MPa`), because the additional
-columns did not supply a lower valid positive eigenvalue. The failed
-experiment is therefore preserved, but it is no longer an M9A blocker by
-itself.
+The implementation also has an executable regression proving that a falling
+L/D minimum at a search boundary expands the range. All refinement points,
+iteration counts, boundary flags, and comparison diagnostics are preserved in
+`WavelengthSearchEvidence` and `CalculationTrace`.
 
-The source-path review also found that `y_dofs()` constructs distortional
-columns through null spaces relative to the global columns before the later
-mode selection. That dependency means the global behavior cannot be assumed
-irrelevant to the DISTORTIONAL subspace. The failed official constrained
-DISTORTIONAL comparison prevents a numerical non-contamination conclusion.
+## Engineering review and manual cases
 
-## NumPy compatibility result
+The 2006 DSM Guide `cwlip_P.mat` selections are
+`ENGINEERING_REFERENCE_CASES`, never automatic gates:
 
-The exact `numpy==2.2.6` environment executes CUTWP, unconstrained FSM, and the
-LOCAL/DISTORTIONAL/GLOBAL cFSM calls described above. Repeating with NumPy
-2.4.3 and the same pyCUFSM/SciPy versions fails in:
+| Manual point | Official / StructureLab LF | Shape MAC | Official classical G/D/L/O (%) | StructureLab disposition |
+|---|---:|---:|---|---|
+| 6.6 in, labeled LOCAL | 0.124235046 / 0.124235057 | 1.000000 | 0.609598 / 53.567599 / 45.629847 / 0.192956 | ENGINEERING_REVIEW_REQUIRED; L/D interaction |
+| 28.5 in (`28.52 in` annotation), engineering D selection | 0.269814119 / 0.269814129 | 1.000000 | 3.745045 / 89.753041 / 6.442518 / 0.059396 | ENGINEERING_REVIEW_REQUIRED; no automatic dominance, deficient basis rank, reconstruction error |
 
-- CUTWP, when a one-element `np.diff` array is assigned to a scalar; and
-- compiled FSM assembly, when a one-element `argwhere` array is converted to
-  `int`.
+StructureLab reproduces their unconstrained FSM curve and relevant shapes,
+detects ambiguity, and exposes candidates and provenance. The exact official
+segmented contour is used only by adapter-internal reference QA; this does not
+add curved-corner production support. At 28.5 in the basis rank is 147/148 and
+the `2.17e-5` residual independently forces review. StructureLab does not
+fabricate `PcrL` or `PcrD`. A future confirmed `EngineeringSelection` remains
+distinguishable from an automatic result.
 
-The selected reproducible constraint is therefore `numpy==2.2.6`; no broader
-compatible interval is claimed without evidence.
+## Test coverage and remaining limitations
 
-## Controlled project text normalization
+M9A tests cover unconstrained eigenvalue and mode-shape parity; classical
+participation for three supported sharp C cases; official fcFSM LOCAL,
+DISTORTIONAL, GLOBAL, and L/D interaction evidence; direct-sum reconstruction;
+sign, scale, translation, and mirror invariance; MAC assignment, crossing,
+branch transition, and L/D morphing; accepted, review-required, and non-unique
+cases; production/reference mesh stress, wavelength, family, and MAC; adaptive
+wavelength refinement and boundary expansion; exact dependency and
+MATLAB/Octave provenance; the executable pyCUFSM `orth=2` blocker; adapter
+isolation; no raw NumPy/pyCUFSM escape; and full M0-M8B regression.
 
-`projects/PRJ_001/project.yaml` underwent an explicitly authorized
-`CONTROLLED_TEXT_NORMALIZATION`, not an `INPUT_CONTRACT_CHANGE`.
+Known limitations are the exact pyCUFSM/NumPy pins, unsupported constrained
+pyCUFSM cFSM, unsupported curved corners and non-S-S features, numerical-rank
+limits for certain fine-mesh patterns, QA-only global FSM results, manual DSM
+Guide selections requiring engineering review, and absence of every M9B DSM
+resistance calculation.
 
-- old working-tree SHA-256:
-  `b4e094554d70d5b2dd7421af14a3592fc583f2c82a0a99ba1e68938beed591f2`;
-- canonical approved SHA-256:
-  `a2e13a538d086e1048035d8b47b4f6d53f6d3d41196d6a98ff431aac36c94d42`;
-- reason: CRLF to LF only.
+## Final repository verification
 
-Before/after verification confirmed identical UTF-8 text after newline
-normalization, 112 lines in each representation, equal parsed YAML objects and
-top-level key order, identical indentation signatures, and a byte delta
-consisting only of replacing 112 CRLF pairs with LF. Reconstructing CRLF from
-the canonical bytes reproduced the old SHA exactly. The existing expected
-fingerprint test was not changed. `.gitattributes` now contains only the
-additional explicit rule
-`projects/PRJ_001/project.yaml text eol=lf` for this protected text artifact.
-
-After normalization and before further M9A audit work, the complete suite
-passed: `556 passed in 22.81s`.
-
-## Acceptance checklist at stop
-
-- [x] Proposed `Sect_Props` mapping is deterministic from M3A/M3B.
-- [x] M3B is the authoritative `Cw`; CUTWP `Cw` is rejected.
-- [x] Actual field use and internal warping reconstruction are audited.
-- [x] `Cw`, `J`, `B1`, `B2`, and `wn` sensitivities are understood.
-- [x] Absolute shear-center and principal-axis mappings are verified.
-- [x] Exact NumPy compatibility environment is reproducible.
-- [x] Reference-stress normalization is verified at two levels.
-- [x] LOCAL successive-mesh criterion met on the controlled focused grid.
-- [x] DISTORTIONAL successive-mesh criterion met on the controlled focused grid.
-- [ ] Expanded-interval wavelength convergence is approved.
-- [ ] Independent constrained LOCAL benchmark passes.
-- [ ] Independent constrained DISTORTIONAL benchmark passes — **STOP**.
-- [x] Unconstrained long-wave global QA agrees with M8B within about 0.136%.
-- [x] GLOBAL-only cFSM limitation retained as diagnostic, not design input.
-- [ ] `ElasticBucklingResult` is exposed — intentionally not implemented.
-
-M9B remains deferred.
+The editable package installation completed successfully with the frozen
+dependencies. The complete repository suite then completed with `590 passed`
+and no failures. The emitted warnings are retained deprecation warnings from
+the pinned pyCUFSM 0.2.0/NumPy execution path; they were not suppressed and do
+not change any validation status recorded above.

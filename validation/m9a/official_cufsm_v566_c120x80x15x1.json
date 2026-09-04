@@ -1,0 +1,82 @@
+{
+  "case_id": "OFFICIAL_CUFSM_V566_FCFSM_C_120X80X15X1",
+  "classification_reference": "CLASSICAL_CFSM_REFERENCE",
+  "fcfsm_reference": "FCFSM_REFERENCE",
+  "fcfsm_vector_definition": ["global_energy_percent", "distortional_energy_percent", "local_energy_percent", "closure_error_percent"],
+  "source_repository": "https://github.com/thinwalled/cufsm-git",
+  "source_release": "v5.66",
+  "source_archive_sha256": "e43d66ccc5b024ea40ba48c369f88b92c60fb7f0e11c6ce8e06b06f6b62b9104",
+  "source_example": "examples/fcFSM_examples/C_120X80X15X1",
+  "material": {
+    "E_mpa": 210000.0,
+    "nu": 0.3
+  },
+  "geometry_mm": {
+    "web": 120.0,
+    "flange_1": 80.0,
+    "flange_2": 80.0,
+    "lip_1": 15.0,
+    "lip_2": 15.0,
+    "thickness": 1.0,
+    "maximum_strip_width": 20.0,
+    "node_count": 17
+  },
+  "classical_options": {
+    "ospace": 1,
+    "couple": 1,
+    "orth": 2,
+    "norm": 1
+  },
+  "reference_runtime": "GNU Octave 4.4.1 executing official MATLAB .m source",
+  "runtime_note": "A temporary Octave-only eigs display-option shim was applied to stripmain_fcFSM.m. The downloaded source archive remained pristine and no pyCUFSM source was modified.",
+  "points": [
+    {
+      "half_wavelength_mm": 20.0,
+      "unconstrained_load_factor": 503.4277613993734,
+      "unconstrained_mode_shape_mac": 0.9999999999999977,
+      "classical_percent": [0.300904734, 0.0192476615, 99.3851910, 0.294656623],
+      "fcfsm_percent": [0.00108607, 0.0000463999, 99.9989, 0.0],
+      "fcfsm_curves": {"local": 503.433, "distortional": 36953.0, "global": 56860.2}
+    },
+    {
+      "half_wavelength_mm": 70.2500864072,
+      "unconstrained_load_factor": 78.09607083934641,
+      "unconstrained_mode_shape_mac": 0.9999999999999983,
+      "classical_percent": [0.110117, 0.209182, 99.5933, 0.0873524],
+      "fcfsm_percent": [0.013457, 0.0201968, 99.9663, 0.0],
+      "fcfsm_curves": {"local": 78.1221, "distortional": 6781.92, "global": 26645.3}
+    },
+    {
+      "half_wavelength_mm": 257.67845311,
+      "unconstrained_load_factor": 148.3672912552694,
+      "unconstrained_mode_shape_mac": 0.999999999999998,
+      "classical_percent": [0.495704, 13.6290, 85.7599, 0.115385],
+      "fcfsm_percent": [0.206965, 6.45255, 93.3405, 0.0],
+      "fcfsm_curves": {"local": 156.76, "distortional": 613.854, "global": 7181.42}
+    },
+    {
+      "half_wavelength_mm": 945.1687334,
+      "unconstrained_load_factor": 127.33202658981236,
+      "unconstrained_mode_shape_mac": 0.9999999999999962,
+      "classical_percent": [1.39154, 95.6217, 2.96163, 0.0251728],
+      "fcfsm_percent": [0.401886, 97.5524, 2.0457, 0.0],
+      "fcfsm_curves": {"local": 1657.41, "distortional": 130.31, "global": 730.824}
+    },
+    {
+      "half_wavelength_mm": 3466.89420016,
+      "unconstrained_load_factor": 58.06660187893454,
+      "unconstrained_mode_shape_mac": 0.999999999999994,
+      "classical_percent": [98.5312, 1.42426, 0.035928, 0.00860784],
+      "fcfsm_percent": [99.2267, 0.749268, 0.024052, 0.0],
+      "fcfsm_curves": {"local": 21877.0, "distortional": 1007.31, "global": 58.5132}
+    },
+    {
+      "half_wavelength_mm": 10240.0,
+      "unconstrained_load_factor": 9.127514635671869,
+      "unconstrained_mode_shape_mac": 0.9999999999999861,
+      "classical_percent": [99.9876, 0.0107158, 0.000713, 0.000977],
+      "fcfsm_percent": [99.9973, 0.00221391, 0.000440381, 0.0],
+      "fcfsm_curves": {"local": 190591.0, "distortional": 8736.55, "global": 9.12776}
+    }
+  ]
+}

@@ -87,8 +87,23 @@ S100_24_ELASTIC_CONSTANTS = S100ElasticConstants(
     ),
 )
 
+S100_24_LRFD_COMPRESSION_RESISTANCE_FACTOR = NormativeConstant(
+    value=EngineeringValue(
+        name="s100_lrfd_compression_resistance_factor",
+        symbol="phi_c",
+        value=0.85,
+        unit=EngineeringUnit.DIMENSIONLESS,
+        description="S100-24 LRFD resistance factor for axial compression",
+    ),
+    reference=s100_24_reference(
+        clause="E2; E3; E4",
+        title="LRFD axial-compression resistance factor",
+    ),
+)
+
 __all__ = [
     "NormativeConstant",
     "S100ElasticConstants",
     "S100_24_ELASTIC_CONSTANTS",
+    "S100_24_LRFD_COMPRESSION_RESISTANCE_FACTOR",
 ]

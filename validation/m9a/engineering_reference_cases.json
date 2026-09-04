@@ -1,0 +1,37 @@
+{
+  "reference_kind": "ENGINEERING_REFERENCE_CASES",
+  "source": "CUFSM v5.66 examples/2006_dsm_design_guide/files_and_scripts/cwlip_P.mat",
+  "policy": "Manual DSM Guide selections are not automatic-classification acceptance gates.",
+  "structurelab_reference_method": "The exact official segmented contour was converted from inches to millimetres without geometric reinterpretation and used only through the adapter-internal unconstrained/reference QA path. Translational eigenvector DOFs were dimensionally converted before MAC. This does not add curved-corner production support.",
+  "cases": [
+    {
+      "description": "DSM Design Guide point labeled LOCAL",
+      "half_wavelength_in": 6.6,
+      "unconstrained_load_factor": 0.12423504562509796,
+      "classical_percent": [0.6095975768612989, 53.5675994307408, 45.62984717077409, 0.19295582162381666],
+      "structurelab_unconstrained_load_factor": 0.12423505668518987,
+      "structurelab_mode_shape_mac": 0.999999999999998,
+      "structurelab_classical_percent": [0.7292182436028205, 48.09351498063123, 50.94644757303227, 0.23081920273367298],
+      "structurelab_reconstruction_residual": 1.3425168741471182e-15,
+      "structurelab_basis_rank": 148,
+      "structurelab_basis_dimension": 148,
+      "review_reasons": ["NO_DOMINANT_FAMILY", "LOCAL_DISTORTIONAL_INTERACTION"],
+      "required_workflow_status": "ENGINEERING_REVIEW_REQUIRED"
+    },
+    {
+      "description": "Lcrd by manual solutions",
+      "half_wavelength_in": 28.5,
+      "published_annotation_half_wavelength_in": 28.52,
+      "unconstrained_load_factor": 0.26981411938126676,
+      "classical_percent": [3.7450454974863976, 89.75304069205595, 6.442517942482133, 0.059395867975528406],
+      "structurelab_unconstrained_load_factor": 0.2698141289738834,
+      "structurelab_mode_shape_mac": 0.9999999999999971,
+      "structurelab_classical_percent": [4.162576134798265, 89.1520437845607, 6.619536290526653, 0.06584379011437935],
+      "structurelab_reconstruction_residual": 0.000021660741632785724,
+      "structurelab_basis_rank": 147,
+      "structurelab_basis_dimension": 148,
+      "review_reasons": ["NO_DOMINANT_FAMILY", "RECONSTRUCTION_ERROR", "BASIS_SENSITIVE"],
+      "required_workflow_status": "ENGINEERING_REVIEW_REQUIRED"
+    }
+  ]
+}

@@ -139,6 +139,7 @@ def make_design_input(
     valid_scope: bool = True,
     design_use_permitted: bool = True,
     fy_mpa: float = 345.0,
+    method: DesignMethod = DesignMethod.EWM,
 ) -> MemberDesignInput:
     """Build an executable or deliberately blocked immutable design boundary."""
 
@@ -290,12 +291,13 @@ def make_design_input(
         section=resolved_section,
         material=material,
     )
+    run_mode = RunMode.EWM if method is DesignMethod.EWM else RunMode.DSM
     context = DesignContext(
         standard_id="ANSI_SDI_AISI_S100",
         standard_edition=2024,
         design_format=DesignFormat.LRFD,
-        methods=(DesignMethod.EWM,),
-        run_mode=RunMode.EWM,
+        methods=(method,),
+        run_mode=run_mode,
         canonical_units="SI",
     )
     scope = _scope(
@@ -306,7 +308,7 @@ def make_design_input(
     eligibility = evaluate_design_eligibility(
         member,
         context,
-        DesignMethod.EWM,
+        method,
         DesignAction.AXIAL_COMPRESSION,
         scope,
         selected_qualification,
@@ -325,7 +327,7 @@ def make_design_input(
         material_qualification=selected_qualification,
         design_context=context,
         scope_evidence=scope,
-        method=DesignMethod.EWM,
+        method=method,
         action=DesignAction.AXIAL_COMPRESSION,
         purpose=DesignExecutionPurpose.CAPACITY,
         eligibility=eligibility,
