@@ -1,15 +1,41 @@
-# M9A pyCUFSM Adapter Audit — Stopped at Global QA
+# M9A pyCUFSM Adapter Audit — Independent Validation Stop
 
 ## Status
 
-M9A is **not approved** and no production adapter is exposed. The revised
-StructureLab-owned `Sect_Props` boundary is technically viable for LOCAL and
-DISTORTIONAL constrained FSM, but the mandatory GLOBAL cFSM QA gate fails in
-`pycufsm==0.2.0`. See
+M9A is **not approved** and no production adapter is exposed. The engineering
+owner's revised responsibility is accepted: StructureLab's analytical
+Appendix 2/E2 calculation remains authoritative for global axial buckling,
+while pyCUFSM's proposed production responsibility is limited to LOCAL and
+DISTORTIONAL elastic section buckling. The earlier GLOBAL-only cFSM failure is
+retained as a third-party diagnostic and is no longer itself an acceptance
+blocker.
+
+Continuation stopped at the still-mandatory independent validation gate. A
+saved DISTORTIONAL-only result from the official MATLAB CUFSM repository did
+not reproduce in `pycufsm==0.2.0`, and an independent constrained LOCAL
+reference has not been established. See
 `docs/24_ELASTIC_BUCKLING_VALIDATION_M9A.md`.
 
-No DSM equation, resistance, resistance factor, utilization, or EWM/DSM
-comparison is implemented by this audit.
+No production adapter, DSM equation, resistance, resistance factor,
+utilization, or EWM/DSM comparison is implemented by this audit.
+
+## Revised global responsibility and normative confirmation
+
+Direct review of the verified ANSI/SDI AISI S100-2024 source confirmed the
+owner's split of responsibilities:
+
+- E2 determines `Pne` for yielding/global buckling from `Ag`, `Fy`, and
+  Appendix 2 global elastic buckling stress `Fcre`;
+- E3.2 uses E2 `Pne` together with local elastic buckling force `Pcrℓ` from
+  Appendix 2;
+- E4 uses yield force `Py = Ag Fy` together with distortional elastic buckling
+  force `Pcrd` from Appendix 2; and
+- Appendix 2 Section 2.1 permits numerical elastic buckling and defines the
+  compression conversion `Pcr = Ag Fcr`.
+
+The exact equation map is recorded in
+`docs/25_DSM_COMPRESSION_NORMATIVE_MAP_M9B_PREPARATION.md`. That document is
+preparation only; M9B equations are not implemented.
 
 ## Dependency and ownership boundary
 
@@ -84,6 +110,16 @@ because `strip()` builds the complete natural modal basis before selecting a
 LOCAL, DISTORTIONAL, or GLOBAL subspace. `J`, `Cw`, `B1`, `B2`, and `wn` are
 present in the TypedDict but are not read by this execution path.
 
+### Modal-vector selection correction
+
+The `glob`, `dist`, `local`, and `other` arrays select individual basis
+columns. A one-entry value such as `local=[1]` selects only the first local
+column; it does not mean “select the complete local class.” Any future adapter
+must first obtain the actual mode counts and select every column in the
+requested class. Repeating the lipped-C audit with all 318 local columns on the
+1.25 mm mesh changed the refined-grid result only slightly, from the previous
+single-column value, but this API distinction is mandatory for correctness.
+
 ## cFSM internal warping reconstruction
 
 `strip()` calls `cfsm.y_dofs()` whenever any constrained mode is selected.
@@ -115,9 +151,32 @@ or modified. M3B remains authoritative because its independent exact
 sectorial-integration benchmarks, translation, mirror, and dimensional-scaling
 tests were already approved in M3B.
 
-## Remaining limitation
+## Global-basis path and independent-validation stop
 
-The `Sect_Props` dependency audit is closed without fabricating `B1`, `B2`, or
-`wn`. Production adapter work remains stopped because the 0.2.0 constrained
-GLOBAL basis did not reproduce the mechanically equivalent analytical global
-buckling result. No raw pyCUFSM output or provisional elastic value is exposed.
+The source path creates global and distortional longitudinal-displacement
+bases together in `y_dofs()`. In particular, the distortional basis is formed
+from null spaces constructed relative to the global columns before modal
+selection. Local columns are appended separately in `base_vectors()`, but the
+complete natural basis is still assembled before selection. Consequently the
+known GLOBAL-only behavior cannot be declared harmless to DISTORTIONAL solely
+from code inspection; numerical evidence is required.
+
+The official MATLAB CUFSM repository contains a saved constrained
+DISTORTIONAL fixture, `sigma_P_D.mat`. Its stored solution has a minimum load
+factor `0.7956149759822446` at `65.8` length units. Running
+`pycufsm==0.2.0` with the same material, nodes, elements, wavelengths,
+simply-supported condition, and all 11 stored distortional-mode selections
+gave `1.0226565085710555` at `49.8` length units. Those differ by 28.54% in
+critical load factor and 24.32% in critical wavelength. The maximum absolute
+difference over the stored first-mode curve was `28.896166166719595`.
+
+The fixture is an official solver-level constrained reference, but its sigma
+section is outside the v0.1 C-section production family. It therefore both
+fails as a solver benchmark and cannot substitute for the still-missing
+supported-family benchmark. The difference could not be attributed
+unambiguously to a controlled input transformation. Under the owner's stop
+conditions, M9A stops here rather than expose provisional results.
+
+The `Sect_Props` dependency audit itself remains closed without fabricating
+`B1`, `B2`, or `wn`. No raw pyCUFSM output or provisional elastic value is
+exposed.
