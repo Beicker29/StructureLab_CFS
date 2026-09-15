@@ -1,23 +1,85 @@
-# M9A pyCUFSM Adapter Audit — Independent Validation Stop
+# M9A pyCUFSM Adapter Audit — Unconstrained Classification Research Stop
 
 ## Status
 
-M9A is **not approved** and no production adapter is exposed. The engineering
-owner's revised responsibility is accepted: StructureLab's analytical
-Appendix 2/E2 calculation remains authoritative for global axial buckling,
-while pyCUFSM's proposed production responsibility is limited to LOCAL and
-DISTORTIONAL elastic section buckling. The earlier GLOBAL-only cFSM failure is
-retained as a third-party diagnostic and is no longer itself an acceptance
-blocker.
+M9A is **stopped, not approved**, and no production adapter is exposed. The
+engineering owner has rejected pyCUFSM 0.2.0 constrained cFSM as a
+design-authoritative LOCAL or DISTORTIONAL source. The 28.54% failed official
+MATLAB DISTORTIONAL comparison is preserved below.
 
-Continuation stopped at the still-mandatory independent validation gate. A
-saved DISTORTIONAL-only result from the official MATLAB CUFSM repository did
-not reproduce in `pycufsm==0.2.0`, and an independent constrained LOCAL
-reference has not been established. See
+The authorized continuation investigated an unconstrained-only route:
+
+`M3 geometry -> pyCUFSM unconstrained FSM -> StructureLab classification -> LOCAL/DISTORTIONAL candidates`
+
+Raw unconstrained eigenvalues and eigenvectors reproduced the official CUFSM
+MATLAB fixtures to essentially floating-point agreement. The continuation
+nevertheless reached a new stop condition: for the official lipped-C
+compression benchmark, the lowest unconstrained branch changes continuously
+from LOCAL to DISTORTIONAL while its eigenvalue increases. The published
+`Pcrd` point is selected from deformation character, not from an interior
+minimum of a separately identifiable distortional curve. A classifier
+threshold can select that point, but the selected wavelength changes under
+mesh refinement. Robust automated classification and minimum extraction are
+therefore not yet defensible. See
 `docs/24_ELASTIC_BUCKLING_VALIDATION_M9A.md`.
 
 No production adapter, DSM equation, resistance, resistance factor,
 utilization, or EWM/DSM comparison is implemented by this audit.
+
+## Revised unconstrained responsibility boundary
+
+For any future continuation, pyCUFSM may provide only the ordinary
+unconstrained finite-strip eigenvalues and eigenvectors. It must not activate
+cFSM constraints. StructureLab would own mode features, classification,
+confidence, modal tracking, minimum selection, convergence, and provenance.
+Classification terminology is limited to `LOCAL`, `DISTORTIONAL`, `GLOBAL`,
+`MIXED`, and `UNCLASSIFIED`; it must not be described as creating restricted
+modes. GLOBAL design input remains the analytical M8B/E2 result.
+
+The research prototype investigated a transparent C-section feature set:
+
+- a length-weighted rigid-cross-section least-squares residual for GLOBAL;
+- web plate bow relative to its displaced end chord for LOCAL behavior;
+- flange/lip assembly displacement relative to the web-flange junction and
+  web chord rotation for DISTORTIONAL behavior;
+- a nested rigid / C-distortional kinematic projection using cubic-Hermite
+  web bending and rigid flange-lip subassemblies; and
+- full-vector MAC for continuity only, never for family assignment.
+
+All ratios are dimensionless and were numerically invariant to eigenvector
+scale and sign, coordinate translation, and mechanically equivalent x-mirror
+orientation. These are proposed research features, not accepted production
+rules. Thresholds separating the families were not validated independently.
+
+The official lipped-C mode at `6.6 in` had assembly-to-web-bow ratio `0.07852`
+and was visually LOCAL. The official `28.5 in` mode had ratio `0.80127` and was
+visually DISTORTIONAL. Between them, the ratio changes smoothly: `0.62048` at
+`23.1 in`, `0.68898` at `24.8 in`, and `0.74954` at `26.6 in`. Selecting the
+published point therefore requires a classification boundary near `0.8`, not
+a mechanically separated eigenbranch.
+
+Under twofold and fourfold element subdivision, that same `0.8` boundary
+moved from `28.5 in` to `27.0 in` and `26.5 in`. This violates the required
+mesh-stable classification condition. The official unlipped-C fixture labels
+its short-wave minimum “Local/Distortional”; the prototype ratio `0.34732`
+correctly exposes ambiguity but does not add a clear independent family
+benchmark.
+
+Adjacent-wavelength MAC demonstrates why tracking alone cannot resolve the
+lipped-C transition. The first branch stays at the first eigenvalue and has
+MAC at least `0.99566` through `20.1–35.1 in` while its physical character
+changes. Conversely, the sigma diagnostic has first-to-second-mode crossings
+with MAC `0.86822` and `0.89708`. A future tracker must use assignment plus
+subspace handling for near-degenerate modes and must terminate uncertain
+tracks rather than force continuity.
+
+Ten eigenpairs reproduce all ten modes in the official lipped-C saved file.
+No universal `n_eigs` is justified. In the official unlipped-C sweep, asking
+the pyCUFSM multi-wavelength wrapper for 8 or more eigenpairs fails when a
+long-wave station returns only six positive modes; one-wavelength calls retain
+the available modes without modifying pyCUFSM. A future adapter would need
+per-wavelength collection and an eigenpair-count convergence rule, neither of
+which is exposed here.
 
 ## Revised global responsibility and normative confirmation
 
@@ -170,12 +232,46 @@ gave `1.0226565085710555` at `49.8` length units. Those differ by 28.54% in
 critical load factor and 24.32% in critical wavelength. The maximum absolute
 difference over the stored first-mode curve was `28.896166166719595`.
 
+### Issue #25 corner-topology audit
+
+The exact saved mesh has 45 nodes, 44 elements, 15 cFSM main nodes, 13 corner
+nodes, 30 subnodes, and 11 available/selected distortional columns. Three of
+its main-node classifications are artifacts of rounded decimal coordinates on
+two intended straight diagonal flats: intermediate points miss pyCUFSM's
+`1e-7 rad` collinearity test.
+
+A controlled `n_r=1`-style variant retained all 45 nodes and 44 elements, but
+snapped only those intermediate flat nodes onto their endpoint-defined lines.
+The largest coordinate adjustment was `0.0075` source length units. That
+produced 12 main nodes, 10 corner nodes, 33 subnodes, and 8 available/selected
+distortional columns. Its result was
+`1.0226550814002098` at `49.8`, compared with
+`1.0226565085710555` at `49.8` for the exact mesh. The A-to-B relative load
+change was `0.0001396%`, wavelength change was zero, and full-vector modal
+assurance criterion (MAC) was `0.9999992362`.
+
+Thus the controlled topology change removes the extra cFSM classifications
+but does not restore or materially improve MATLAB parity. Upstream issue #25
+is relevant to mode counting in general, but it is not demonstrated as the
+cause of this benchmark discrepancy.
+
+At their respective minima, the MATLAB-to-pyCUFSM full-vector MAC was
+`0.55936`. Comparing at the MATLAB critical wavelength (`65.8`) increased the
+best MAC only to `0.66968`. Normalized transverse fold-node patterns also
+differed mechanically: the MATLAB mode was dominated by opposing outer and
+central fold-line motions, while pyCUFSM's first mode was dominated by one
+outer return. The mode shapes are not defensibly equivalent.
+
 The fixture is an official solver-level constrained reference, but its sigma
 section is outside the v0.1 C-section production family. It therefore both
 fails as a solver benchmark and cannot substitute for the still-missing
 supported-family benchmark. The difference could not be attributed
-unambiguously to a controlled input transformation. Under the owner's stop
-conditions, M9A stops here rather than expose provisional results.
+to corner topology, incomplete modal selection, normalization, or a controlled
+input transformation. pyCUFSM's constrained solver was added after v0.1.7;
+the official v0.2.0 tests deliberately disable cFSM when comparing saved
+MATLAB curves, so no release-level constrained parity evidence resolves the
+difference. Under the owner's stop conditions, M9A stops here rather than
+expose provisional results.
 
 The `Sect_Props` dependency audit itself remains closed without fabricating
 `B1`, `B2`, or `wn`. No raw pyCUFSM output or provisional elastic value is
