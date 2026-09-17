@@ -1,0 +1,90 @@
+{
+  "package": "pycufsm",
+  "version": "0.2.0",
+  "license": "AFL-3.0",
+  "scope": "M9A compression, simply supported, m=1, uniform reference stress",
+  "production_decision": "Only the unconstrained FSM eigensolver is design-path eligible. No pyCUFSM constrained cFSM result is authoritative.",
+  "capability_matrix": {
+    "unconstrained_fsm": {
+      "status": "VALIDATED",
+      "benchmark": "OFFICIAL_CUFSM_V566_FCFSM_C_120X80X15X1",
+      "maximum_relative_load_factor_difference": 7.53e-8,
+      "minimum_recorded_mode_shape_mac": 0.999999999999
+    },
+    "constrained_cfsm_orth_1": {
+      "configuration": {"ospace": "ST", "couple": 1, "orth": 1, "norm": 1},
+      "reference": "Official MATLAB CUFSM v5.66 with the identical configuration",
+      "LOCAL": {
+        "status": "NOT_VALIDATED",
+        "matlab_critical_load_factor": 68.7668003919,
+        "matlab_half_wavelength_mm": 99.3486249659,
+        "pycufsm_critical_load_factor": 80.5880141046,
+        "pycufsm_half_wavelength_mm": 87.2406186132,
+        "load_factor_difference_percent": 17.1902919,
+        "half_wavelength_difference_percent": -12.187392,
+        "critical_mode_shape_mac": 0.916400586076
+      },
+      "DISTORTIONAL": {
+        "status": "NOT_VALIDATED",
+        "matlab_critical_load_factor": 130.501067165,
+        "matlab_half_wavelength_mm": 866.72355004,
+        "pycufsm_critical_load_factor": 169.155216666,
+        "pycufsm_half_wavelength_mm": 761.092553602,
+        "load_factor_difference_percent": 29.6197957,
+        "half_wavelength_difference_percent": -12.187392,
+        "critical_mode_shape_mac": 0.536976128511
+      },
+      "GLOBAL": {
+        "status": "NOT_VALIDATED",
+        "matlab_critical_load_factor": 9.74468410341,
+        "matlab_half_wavelength_mm": 10240.0,
+        "pycufsm_critical_load_factor": 54.3595279143,
+        "pycufsm_half_wavelength_mm": 10240.0,
+        "load_factor_difference_percent": 457.837764,
+        "half_wavelength_difference_percent": 0.0,
+        "critical_mode_shape_mac": 0.670209655742
+      }
+    },
+    "constrained_cfsm_orth_2": {
+      "configuration": {"ospace": "ST", "couple": 1, "orth": 2, "norm": 1},
+      "LOCAL": "SOFTWARE_BLOCKED",
+      "DISTORTIONAL": "SOFTWARE_BLOCKED",
+      "GLOBAL": "SOFTWARE_BLOCKED",
+      "public_api_failure": "TypeError: Argument 'm_a' has incorrect type (expected numpy.ndarray, got list)",
+      "failure_path": "cfsm.base_update -> analysis.k_kg_global",
+      "disposition": "No patch, monkey-patch, alternate backend, or substituted orthogonality configuration is permitted. orth=1 evidence is not generalized to orth=2."
+    }
+  },
+  "translated_source_defects": [
+    {
+      "function": "base_update",
+      "defect": "The modal-orthogonalization path passes m_a=[m_i] to a compiled API requiring numpy.ndarray.",
+      "status": "ACTIVE",
+      "effect": "Blocks the public constrained cFSM orth=2 execution before LOCAL, DISTORTIONAL, or GLOBAL results exist."
+    },
+    {
+      "function": "constr_xz_y",
+      "defect": "The second element-direction reversal tests the element number instead of its direction flag.",
+      "status": "ACTIVE",
+      "effect": "Changes GLOBAL/DISTORTIONAL constraint vectors for affected contour orientations."
+    },
+    {
+      "function": "base_vectors",
+      "defect": "Edge-node adjacency is reduced to a Boolean before nonzero indexing.",
+      "status": "ACTIVE",
+      "effect": "Can select element zero instead of the actual adjacent element in the natural local/other basis."
+    },
+    {
+      "function": "base_vectors",
+      "defect": "Already zero-based node numbers are decremented again in other-mode assembly.",
+      "status": "ACTIVE",
+      "effect": "Wraps node zero to a negative index and invalidates OTHER-space vectors."
+    },
+    {
+      "function": "mode_class",
+      "defect": "The full numpy.linalg.lstsq return tuple and floating-point DOF indexes are used as though they were MATLAB coefficient arrays and integer indexes.",
+      "status": "ACTIVE",
+      "effect": "The translated automatic modal-classification routine is not executable/reliable."
+    }
+  ]
+}

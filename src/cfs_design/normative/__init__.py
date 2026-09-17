@@ -5,6 +5,7 @@ from .constants import (
     NormativeConstant,
     S100ElasticConstants,
     S100_24_ELASTIC_CONSTANTS,
+    S100_24_LRFD_COMPRESSION_RESISTANCE_FACTOR,
 )
 from .eligibility import evaluate_design_eligibility
 from .enums import (
@@ -65,6 +66,7 @@ __all__ = [
     "S100_24_STANDARD_ID",
     "S100_24_STANDARD_EDITION",
     "S100_24_ELASTIC_CONSTANTS",
+    "S100_24_LRFD_COMPRESSION_RESISTANCE_FACTOR",
     "S100ElasticConstants",
     "SOURCE_AUTHORITY_ORDER",
     "SOFTWARE_SCOPE_VERSION",

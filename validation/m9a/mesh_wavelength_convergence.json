@@ -1,0 +1,57 @@
+{
+  "case_id": "OFFICIAL_CUFSM_V566_FCFSM_C_120X80X15X1",
+  "scope": "M9A production-mesh and adaptive half-wavelength validation",
+  "mesh_study": {
+    "practical_production_mesh": {
+      "target_strip_width_mm": 10.0,
+      "node_count": 33,
+      "LOCAL": {"critical_stress_mpa": 68.6559722082, "critical_half_wavelength_mm": 99.3486249659, "global_percent": 0.120255140, "distortional_percent": 0.547098340, "local_percent": 99.255214476},
+      "DISTORTIONAL": {"critical_stress_mpa": 122.026676919, "critical_half_wavelength_mm": 829.977314977, "global_percent": 1.107472559, "distortional_percent": 95.003891194, "local_percent": 3.858727842}
+    },
+    "reference_mesh": {
+      "target_strip_width_mm": 7.5,
+      "node_count": 43,
+      "LOCAL": {"critical_stress_mpa": 68.6552231822, "critical_half_wavelength_mm": 99.3486249659, "global_percent": 0.116972804, "distortional_percent": 0.516281985, "local_percent": 99.291331400},
+      "DISTORTIONAL": {"critical_stress_mpa": 122.020218490, "critical_half_wavelength_mm": 829.977314977, "global_percent": 1.159118735, "distortional_percent": 94.731256503, "local_percent": 4.078649447}
+    },
+    "practical_vs_reference": {
+      "LOCAL": {"stress_difference_percent": 0.0010909964, "half_wavelength_difference_percent": 0.0, "dominant_family_agreement": true, "shared_M3_vertex_mode_shape_mac": 0.999999999550},
+      "DISTORTIONAL": {"stress_difference_percent": 0.0052929166, "half_wavelength_difference_percent": 0.0, "dominant_family_agreement": true, "shared_M3_vertex_mode_shape_mac": 0.999999999711}
+    },
+    "rejected_coarser_mesh": {
+      "target_strip_width_mm": 20.0,
+      "reason": "The DISTORTIONAL stress differs by 1.18419 percent from the 7.5 mm reference, exceeding the frozen 0.5 percent production-mesh gate.",
+      "LOCAL_stress_difference_percent": 0.0201506802,
+      "DISTORTIONAL_stress_difference_percent": 1.1841927671
+    },
+    "finer_mesh_limit": {
+      "target_strip_widths_mm": [6.0, 5.0, 2.5],
+      "status": "NOT_VALIDATED",
+      "reason": "For these subdivision patterns the classical full basis becomes numerically rank-deficient (condition number approximately 3e16 to 5e16). Stable least-squares family participation remains DISTORTIONAL, but reconstruction residuals exceed the 1e-8 automatic gate. A finer mesh is not presumed superior when the modal basis loses numerical rank."
+    },
+    "production_rule": "10 mm is the validated practical recommendation for this reference C section only. Production analyses must supply an explicitly finer reference_strip_width_mm and pass stress, wavelength, family, reconstruction, and shared-vertex MAC gates; no global finest mesh is hard-coded."
+  },
+  "wavelength_study": {
+    "initial_search": {"count": 145, "minimum_mm": 20.0, "maximum_mm": 10240.0, "spacing": "logarithmic"},
+    "adaptive_search": {"evaluated_count": 157, "refinement_iterations": 3, "boundary_resolution_satisfied_for_LOCAL_and_DISTORTIONAL": true},
+    "refinement_method": "Geometric midpoints are inserted on both sides of each detected LOCAL/DISTORTIONAL critical neighborhood. A falling LOCAL/DISTORTIONAL boundary minimum expands the corresponding range geometrically. GLOBAL boundary behavior is diagnostic and remains M8B-owned.",
+    "LOCAL": {
+      "critical_stress_mpa": 68.6557726311,
+      "critical_half_wavelength_mm": 99.8880781751,
+      "successive_grid_stress_change_ratio": 0.00000290693,
+      "successive_grid_wavelength_change_ratio": 0.00540057652,
+      "dominant_family_agreement": true,
+      "mode_shape_mac": 0.999999179136,
+      "status": "AUTOMATIC_ACCEPTED"
+    },
+    "DISTORTIONAL": {
+      "critical_stress_mpa": 122.000733549,
+      "critical_half_wavelength_mm": 821.036810290,
+      "successive_grid_stress_change_ratio": 0.0,
+      "successive_grid_wavelength_change_ratio": 0.0,
+      "dominant_family_agreement": true,
+      "mode_shape_mac": 1.0,
+      "status": "AUTOMATIC_ACCEPTED"
+    }
+  }
+}

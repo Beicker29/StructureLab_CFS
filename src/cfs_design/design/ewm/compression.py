@@ -3,12 +3,20 @@
 from math import isfinite
 
 from cfs_design.core.exceptions import ValidationError
+from cfs_design.design.global_compression import (
+    GLOBAL_SLENDERNESS_TRANSITION,
+    SECTION_SYMMETRY_I_XY_ABSOLUTE_TOLERANCE_MM4,
+    SECTION_SYMMETRY_Y0_ABSOLUTE_TOLERANCE_MM,
+    calculate_global_column_strength,
+    require_singly_symmetric_c,
+)
 from cfs_design.design.inputs import MemberDesignInput
 from cfs_design.domain import DesignFormat, DesignMethod, SectionFamily
 from cfs_design.normative import (
     DesignAction,
     PRIMARY_S100_24,
     S100_24_ELASTIC_CONSTANTS,
+    S100_24_LRFD_COMPRESSION_RESISTANCE_FACTOR,
     S100_24_STANDARD_EDITION,
     S100_24_STANDARD_ID,
     SoftwareSupportStatus,
@@ -30,7 +38,7 @@ from cfs_design.results import (
     make_trace_id,
 )
 
-from ._validation import EWMCalculationError, positive, positive_result, square_root
+from ._validation import EWMCalculationError, positive, positive_result
 from .e4 import calculate_distortional_buckling, calculate_e4_strength
 from .effective_area import calculate_effective_area
 from .effective_width import (
@@ -41,7 +49,6 @@ from .effective_width import (
 from .global_buckling import calculate_global_buckling
 from .interpretations import S10024_A1_1_3A_XREF_001
 from .models import (
-    ColumnCurveBranch,
     EWMCompressionResistance,
     EffectiveWidthResult,
     GlobalColumnStrength,
@@ -51,10 +58,9 @@ from .models import (
 )
 
 
-LRFD_COMPRESSION_RESISTANCE_FACTOR = 0.85
-GLOBAL_SLENDERNESS_TRANSITION = 1.5
-SECTION_SYMMETRY_I_XY_ABSOLUTE_TOLERANCE_MM4 = 1.0e-9
-SECTION_SYMMETRY_Y0_ABSOLUTE_TOLERANCE_MM = 1.0e-9
+LRFD_COMPRESSION_RESISTANCE_FACTOR = (
+    S100_24_LRFD_COMPRESSION_RESISTANCE_FACTOR.value.value
+)
 _TRACE_LIMIT_STATE = LimitStateId(
     "EWM_AXIAL_COMPRESSION",
     "S100-24 LRFD EWM concentric axial-compression resistance",
@@ -85,30 +91,6 @@ def _value(
     symbol: str | None = None,
 ) -> EngineeringValue:
     return EngineeringValue(name=name, value=value, unit=unit, symbol=symbol)
-
-
-def calculate_global_column_strength(
-    *, gross_area_mm2: float, yield_stress_mpa: float, f_cre_mpa: float
-) -> GlobalColumnStrength:
-    """Apply S100-24 Eqs. E2-1 through E2-4."""
-
-    area = positive(gross_area_mm2, "Ag")
-    fy = positive(yield_stress_mpa, "Fy")
-    f_cre = positive(f_cre_mpa, "Fcre")
-    lambda_c = positive_result(square_root(fy / f_cre, "Fy/Fcre"), "lambda_c")
-    if lambda_c <= GLOBAL_SLENDERNESS_TRANSITION:
-        fn = positive_result(0.658 ** (lambda_c**2) * fy, "Fn")
-        branch = ColumnCurveBranch.INELASTIC
-    else:
-        fn = positive_result(0.877 / (lambda_c**2) * fy, "Fn")
-        branch = ColumnCurveBranch.ELASTIC
-    p_ne = positive_result(area * fn, "Pne")
-    return GlobalColumnStrength(
-        lambda_c=lambda_c,
-        fn_mpa=fn,
-        p_ne_n=p_ne,
-        branch=branch,
-    )
 
 
 def calculate_local_global_strength(
@@ -232,27 +214,12 @@ def _preflight_diagnostic(
 
 
 def _require_singly_symmetric_c(design_input: MemberDesignInput) -> None:
-    geometry = design_input.resolved_member.section.geometry
-    gross = design_input.section_mechanics.gross
-    advanced = design_input.section_mechanics.advanced
-    symmetric_dimensions = (
-        geometry.b2_mm is not None and geometry.b1_mm == geometry.b2_mm
+    require_singly_symmetric_c(
+        design_input.resolved_member.section.geometry,
+        design_input.section_mechanics,
+        error_code="EWM_GLOBAL_NONSYMMETRIC_UNSUPPORTED",
+        owner="M8B",
     )
-    if geometry.section_type is SectionFamily.C_LIPPED:
-        symmetric_dimensions = (
-            symmetric_dimensions
-            and geometry.d1_mm is not None
-            and geometry.d1_mm == geometry.d2_mm
-        )
-    if (
-        not symmetric_dimensions
-        or abs(gross.ixy_mm4) > SECTION_SYMMETRY_I_XY_ABSOLUTE_TOLERANCE_MM4
-        or abs(advanced.y0_mm) > SECTION_SYMMETRY_Y0_ABSOLUTE_TOLERANCE_MM
-    ):
-        raise EWMCalculationError(
-            "EWM_GLOBAL_NONSYMMETRIC_UNSUPPORTED",
-            "M8B global buckling implements the singly symmetric C-section route only",
-        )
 
 
 def _calculate_elements(

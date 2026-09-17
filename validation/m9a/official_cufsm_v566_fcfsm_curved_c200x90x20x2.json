@@ -1,0 +1,17 @@
+{
+  "case_id": "OFFICIAL_CUFSM_V566_FCFSM_C_200X90X20X2_CURVED_CORNER",
+  "reference_kind": "FCFSM_REFERENCE",
+  "fcfsm_vector_definition": ["global_energy_percent", "distortional_energy_percent", "local_energy_percent", "closure_error_percent"],
+  "source_repository": "https://github.com/thinwalled/cufsm-git",
+  "source_release": "v5.66",
+  "source_example": "examples/fcFSM_examples/C_200X90X20X2_CurvedConer",
+  "software_support_note": "Reference-only case. Curved-corner MIDLINE geometry is outside the approved StructureLab M3A sharp-corner contract and is not passed into production analysis.",
+  "points": [
+    {"half_wavelength_mm": 20.0, "unconstrained": 1943.68, "local": 1943.7, "distortional": 17707.1, "global": 40791.7, "fcfsm_percent": [0.00057134, 0.00000148806, 99.9994, -2.84217e-14]},
+    {"half_wavelength_mm": 70.2501, "unconstrained": 208.053, "local": 208.278, "distortional": 4177.01, "global": 15942.0, "fcfsm_percent": [0.0854083, 0.0243206, 99.8903, -9.9476e-14]},
+    {"half_wavelength_mm": 246.754, "unconstrained": 138.362, "local": 139.616, "distortional": 1330.56, "global": 16431.5, "fcfsm_percent": [0.051286, 0.937283, 99.0114, 2.98428e-12]},
+    {"half_wavelength_mm": 829.977, "unconstrained": 193.547, "local": 941.014, "distortional": 212.0, "global": 1936.7, "fcfsm_percent": [1.26956, 89.8885, 8.84195, -1.06439e-9]},
+    {"half_wavelength_mm": 2915.3, "unconstrained": 172.402, "local": 11077.2, "distortional": 1175.66, "global": 173.532, "fcfsm_percent": [99.3249, 0.646493, 0.0285733, 2.35021e-8]},
+    {"half_wavelength_mm": 10240.0, "unconstrained": 21.2768, "local": 136150.0, "distortional": 14561.7, "global": 21.2769, "fcfsm_percent": [99.9997, 0.00002481, 0.000289539, -1.10461e-6]}
+  ]
+}

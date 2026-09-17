@@ -490,14 +490,17 @@ def _action_checks(
     return tuple(checks)
 
 
-def _ewm_axial_symmetry_checks(
+def _axial_global_symmetry_checks(
     member: ResolvedMember,
     method: DesignMethod,
     action: DesignAction,
 ) -> tuple[SoftwareSupportCheck, ...]:
-    """Gate the M8B singly symmetric C global-instability route."""
+    """Gate the shared M8B singly symmetric C global-instability route."""
 
-    if method is not DesignMethod.EWM or action is not DesignAction.AXIAL_COMPRESSION:
+    if (
+        method not in (DesignMethod.EWM, DesignMethod.DSM)
+        or action is not DesignAction.AXIAL_COMPRESSION
+    ):
         return ()
 
     geometry = member.section.geometry
@@ -516,7 +519,11 @@ def _ewm_axial_symmetry_checks(
         _binary_support_check(
             method=method,
             action=action,
-            capability_id="EWM_AXIAL_SINGLE_SYMMETRY",
+            capability_id=(
+                "EWM_AXIAL_SINGLE_SYMMETRY"
+                if method is DesignMethod.EWM
+                else "DSM_AXIAL_SINGLE_SYMMETRY"
+            ),
             topic="M8B axial global-instability geometry",
             supported=supported,
             observed=(
@@ -531,7 +538,11 @@ def _ewm_axial_symmetry_checks(
                 "M8B implements the Appendix 2 singly symmetric C-section "
                 "global-instability route only."
             ),
-            diagnostic_code="EWM_AXIAL_NONSYMMETRIC_UNSUPPORTED",
+            diagnostic_code=(
+                "EWM_AXIAL_NONSYMMETRIC_UNSUPPORTED"
+                if method is DesignMethod.EWM
+                else "DSM_AXIAL_NONSYMMETRIC_UNSUPPORTED"
+            ),
             diagnostic_message=(
                 "Unequal paired MIDLINE dimensions are outside the implemented "
                 "M8B global-instability route"
@@ -713,7 +724,7 @@ def evaluate_software_support(
         + _context_checks(context, method, action)
         + _section_checks(member, method, action)
         + _e4_analytical_route_checks(member, method, action)
-        + _ewm_axial_symmetry_checks(member, method, action)
+        + _axial_global_symmetry_checks(member, method, action)
         + _action_checks(member, method, action)
     )
     return SoftwareSupportResult(

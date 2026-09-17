@@ -1,0 +1,48 @@
+{
+  "reference_kind": "CLASSICAL_CFSM_REFERENCE",
+  "source_repository": "https://github.com/thinwalled/cufsm-git",
+  "source_release": "v5.66",
+  "source_archive_sha256": "e43d66ccc5b024ea40ba48c369f88b92c60fb7f0e11c6ce8e06b06f6b62b9104",
+  "reference_runtime": "GNU Octave 4.4.1 executing official MATLAB CUFSM .m source",
+  "reference_input_note": "Sharp-corner node/strip inputs were generated directly from the stated dimensions and 20 mm subdivision rule, then solved and classified only by official CUFSM functions. No StructureLab numerical result was used to generate the reference outputs.",
+  "functions": ["stripmain.m", "classify.m", "base_column.m", "base_update.m", "mode_class.m"],
+  "basis_configuration": {"ospace": 1, "couple": 1, "orth": 2, "norm": 1},
+  "basis_meaning": {
+    "other_space": "ST natural other space",
+    "coupling": "uncoupled m=1 basis",
+    "orthogonalization": "axial modal orthogonalization",
+    "normalization": "Euclidean vector normalization"
+  },
+  "cases": [
+    {
+      "case_id": "SHARP_C100X40X10X1",
+      "family": "C_LIPPED",
+      "geometry_mm": {"web": 100.0, "flange_1": 40.0, "flange_2": 40.0, "lip_1": 10.0, "lip_2": 10.0, "thickness": 1.0, "maximum_strip_width": 20.0},
+      "points": [
+        {"half_wavelength_mm": 15.0, "load_factor": 885.184705718, "matlab_percent": [0.447106625, 0.022747334, 99.1247334, 0.405412607], "structurelab_percent": [0.447106132, 0.022747333, 99.124727321, 0.405419214], "max_difference_percentage_points": 0.0000066073, "dominant_family": "LOCAL", "mode_shape_mac": 0.9999999999999982},
+        {"half_wavelength_mm": 50.0, "load_factor": 131.149120543, "matlab_percent": [0.217673693, 0.434978630, 99.2067283, 0.140619388], "structurelab_percent": [0.217673256, 0.434978688, 99.206741493, 0.140606563], "max_difference_percentage_points": 0.0000132044, "dominant_family": "LOCAL", "mode_shape_mac": 0.9999999999999983},
+        {"half_wavelength_mm": 150.0, "load_factor": 158.316370790, "matlab_percent": [0.897415340, 14.6286569, 84.2892317, 0.184696081], "structurelab_percent": [0.897414324, 14.628654966, 84.289221270, 0.184709440], "max_difference_percentage_points": 0.0000133590, "dominant_family": "LOCAL", "mode_shape_mac": 0.9999999999999979},
+        {"half_wavelength_mm": 500.0, "load_factor": 227.989263706, "matlab_percent": [5.20056070, 87.3260851, 7.41174826, 0.061605914], "structurelab_percent": [5.200045359, 87.317482917, 7.411019929, 0.071451795], "max_difference_percentage_points": 0.009845881, "dominant_family": "DISTORTIONAL", "mode_shape_mac": 0.9999999999999961},
+        {"half_wavelength_mm": 2000.0, "load_factor": 93.6493212328, "matlab_percent": [99.6195055, 0.361238805, 0.006115519, 0.013140200], "structurelab_percent": [99.619181316, 0.361236930, 0.006115876, 0.013465878], "max_difference_percentage_points": 0.000325678, "dominant_family": "GLOBAL", "mode_shape_mac": 0.9999999999999668},
+        {"half_wavelength_mm": 8000.0, "load_factor": 7.46861952208, "matlab_percent": [99.9919416, 0.005883750, 0.000685722, 0.001488907], "structurelab_percent": [99.991796474, 0.005883742, 0.000685721, 0.001634063], "max_difference_percentage_points": 0.000145156, "dominant_family": "GLOBAL", "mode_shape_mac": 0.9999999999999981}
+      ]
+    },
+    {
+      "case_id": "SHARP_C100X40X1",
+      "family": "C_UNLIPPED",
+      "geometry_mm": {"web": 100.0, "flange_1": 40.0, "flange_2": 40.0, "thickness": 1.0, "maximum_strip_width": 20.0},
+      "points": [
+        {"half_wavelength_mm": 15.0, "load_factor": 882.784743965, "matlab_percent": [0.249253889, 0.0, 99.5188734, 0.231872738], "structurelab_percent": [0.249243843, 0.0, 99.518899919, 0.231856238], "max_difference_percentage_points": 0.0000265460, "dominant_family": "LOCAL", "mode_shape_mac": 0.9999999999999979},
+        {"half_wavelength_mm": 50.0, "load_factor": 120.825293883, "matlab_percent": [0.109660522, 0.0, 99.8277012, 0.062638253], "structurelab_percent": [0.109656057, 0.0, 99.827668620, 0.062675323], "max_difference_percentage_points": 0.0000370702, "dominant_family": "LOCAL", "mode_shape_mac": 0.9999999999999970},
+        {"half_wavelength_mm": 150.0, "load_factor": 74.2512275062, "matlab_percent": [0.282688711, 0.0, 99.6864132, 0.030898087], "structurelab_percent": [0.282684932, 0.0, 99.686416135, 0.030898933], "max_difference_percentage_points": 0.0000037789, "dominant_family": "LOCAL", "mode_shape_mac": 0.9999999999999969},
+        {"half_wavelength_mm": 500.0, "load_factor": 264.700729335, "matlab_percent": [9.28151648, 0.0, 90.6623224, 0.056161119], "structurelab_percent": [9.281514972, 0.0, 90.662345087, 0.056139940], "max_difference_percentage_points": 0.0000226857, "dominant_family": "LOCAL", "mode_shape_mac": 0.9999999999999961},
+        {"half_wavelength_mm": 2000.0, "load_factor": 74.8401974968, "matlab_percent": [99.8303655, 0.0, 0.158232288, 0.011402222], "structurelab_percent": [99.830300771, 0.0, 0.158227256, 0.011471973], "max_difference_percentage_points": 0.0000697505, "dominant_family": "GLOBAL", "mode_shape_mac": 0.9999999999997884},
+        {"half_wavelength_mm": 8000.0, "load_factor": 5.1653382572, "matlab_percent": [99.9982222, 0.0, 0.000495587, 0.001282191], "structurelab_percent": [99.998226876, 0.0, 0.000495588, 0.001277536], "max_difference_percentage_points": 0.0000046555, "dominant_family": "GLOBAL", "mode_shape_mac": 0.9999999999999909}
+      ]
+    }
+  ],
+  "maximum_observed_load_factor_relative_difference": 8.4591e-8,
+  "maximum_observed_participation_difference_percentage_points": 0.009845881,
+  "minimum_observed_mode_shape_mac": 0.9999999999997884,
+  "maximum_structurelab_reconstruction_residual": 1e-12
+}

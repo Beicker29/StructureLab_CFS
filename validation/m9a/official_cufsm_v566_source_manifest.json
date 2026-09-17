@@ -1,0 +1,34 @@
+{
+  "repository": "https://github.com/thinwalled/cufsm-git",
+  "release": "v5.66",
+  "source_archive_sha256": "e43d66ccc5b024ea40ba48c369f88b92c60fb7f0e11c6ce8e06b06f6b62b9104",
+  "files": {
+    "analysis/cFSM/classify.m": "f9506feaba8545746209b27b1322a136574f5f73d0ae891beca0c1663c44248d",
+    "analysis/cFSM/base_column.m": "5f08ef119f16cb7f243b948aa0df339cc4814f4fff08c0999f15cf60ada376a1",
+    "analysis/cFSM/base_update.m": "346d8c1ebafb7b8c7d7071f3d07432020dcb4b9121ac013422e65f7a389c798",
+    "analysis/cFSM/mode_class.m": "b70807bc44815ec17436d6d4c1d8052d06d2b504d2b5d00f2e3c4f6dc41dc0c2",
+    "analysis/stripmain.m": "94a3cef0c4200db765f339bcf3e256535fc9465a4bc159bbf6eb5f0e8eb9a828",
+    "analysis/fcFSM/SecAnal_fcFSM.m": "a7d714e8209f6abfdbe1c265306e0185334340e3830bb66d7bb0acc47a88c6a1",
+    "analysis/fcFSM/stripmain_fcFSM.m": "ad5956969975660dcbccd645c0759e9b341d1db95848259b39582f3a2fb8ce8a"
+  },
+  "runtime": "GNU Octave 4.4.1",
+  "runtime_compatibility_shims": [
+    {
+      "file": "analysis/stripmain.m",
+      "pristine_sha256": "94a3cef0c4200db765f339bcf3e256535fc9465a4bc159bbf6eb5f0e8eb9a828",
+      "temporary_extracted_sha256": "e83de1ab1954b85012fa55202d9e0bb0d55d0afe691e5da196c6fa9896d099c4",
+      "original": "[modes,lf]=eigs(Kff,(Kgff+Kgff')/2,N,'SM','Display',0);",
+      "temporary": "octave_eigs_options.disp=0; [modes,lf]=eigs(Kff,(Kgff+Kgff')/2,N,'SM',octave_eigs_options);",
+      "effect": "Octave API spelling only; stiffness matrices, geometric-stiffness matrices, eigensolver target, requested mode count, and mathematical formulation are unchanged."
+    },
+    {
+      "file": "analysis/fcFSM/stripmain_fcFSM.m",
+      "pristine_sha256": "ad5956969975660dcbccd645c0759e9b341d1db95848259b39582f3a2fb8ce8a",
+      "temporary_extracted_sha256": "9cddfa019062e3d204f6dae17ba0b9b74dd5ceac9a8141b2922b975bd9523f26",
+      "original": "[modes,lf]=eigs(Kff,(Kgff+Kgff')/2,N,'SM','Display',0);",
+      "temporary": "octave_eigs_options.disp=0; [modes,lf]=eigs(Kff,(Kgff+Kgff')/2,N,'SM',octave_eigs_options);",
+      "effect": "Octave API spelling only; stiffness matrices, geometric-stiffness matrices, eigensolver target, requested mode count, and mathematical formulation are unchanged."
+    }
+  ],
+  "archive_disposition": "The downloaded CUFSM archive remained byte-for-byte pristine. Shims existed only in the temporary extracted execution tree and are not StructureLab production code."
+}
