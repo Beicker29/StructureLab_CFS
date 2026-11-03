@@ -12,3 +12,4 @@ results/
 references/*
 !references/README.md
 *.pdf
+~$*
