@@ -1,7 +1,8 @@
 # Arquitectura
 
 Las capas repiten las de StructureLab_HFS y añaden dos propias del acero formado en frío:
-`sections/` calcula las propiedades de pared delgada desde la geometría y `buckling/` produce
+`sections/` lee las propiedades brutas del catálogo `data/Sections.xlsx` y calcula desde la
+geometría las que faltan, o todas si la sección no está en el catálogo (DC-7), y `buckling/` produce
 las cargas críticas elásticas (global, local, distorsional) que DSM y EWM consumen.
 
 Marcado: **[M0]** existe hoy; el resto entra en el hito indicado.
@@ -14,7 +15,7 @@ src/cfs_design/
 ├── engine.py              [M0] una comprobación por demanda → PASS / FAIL / INCOMPLETE
 ├── execution.py           [M0] ejecución en memoria de un miembro (CLI y web)
 ├── run.py                 [M0] CLI: JSON a stdout; archivos solo con --output
-├── data/                  [M0] Materiales.xlsx; [M1] Secciones.xlsx (solo dimensiones)
+├── data/                  [M0] Materiales.xlsx; Sections.xlsx (dimensiones y propiedades, C y Z)
 ├── sections/              [M1] shapes, thin_walled, elements, loader, repository
 ├── codes/aisi_s100_24/    fórmulas puras con id de ecuación y φ
 │   ├── appendix_2.py      [M2] Fcre, Mcre, Fcrl, Fcrd, Mcrd, Vcr
@@ -34,7 +35,9 @@ src/cfs_design/
 ## Flujo
 
 1. `engine.run_member(member)` valida la entrada y resuelve el material del catálogo.
-2. [M1] `sections/` construye la línea media desde las dimensiones y calcula las propiedades.
+2. [M1] `sections/` toma del catálogo las propiedades brutas y `t_design_mm`, o las calcula
+   desde la geometría si la sección no está en el catálogo, y calcula anchos planos, ejes
+   principales, Sy en ambas fibras y Zx, Zy. Reporta el origen (`catalog` o `geometry`).
 3. [M3] `domain/applicability.py` comprueba la Tabla B4.1-1 para el método pedido; fuera de
    límites → `INCOMPLETE` con la variable y el límite.
 4. [M2] `buckling/` obtiene Pcre/Mcre, Pcrl/Mcrl y Pcrd/Mcrd.

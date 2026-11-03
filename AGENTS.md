@@ -21,8 +21,10 @@
   `codes/aisi_s100_24/<capítulo>.py`; propiedades de pared delgada en `sections/`; cargas
   críticas elásticas en `buckling/`; selección y cálculo en `domain/<capítulo>.py`; límites de
   B4.1 en `domain/applicability.py`; obligaciones independientes en `domain/coverage.py`.
-- Las propiedades de sección se calculan desde la geometría; el catálogo guarda dimensiones,
-  nunca propiedades.
+- Las propiedades brutas de los perfiles de catálogo y su `t_design_mm` se leen de
+  `data/Sections.xlsx` (DC-7). `sections/` calcula desde la geometría lo que el Excel no trae y,
+  para secciones fuera del catálogo, todas las propiedades; el resultado reporta su origen
+  (`catalog` o `geometry`). Por ahora el alcance son perfiles C y Z con labio.
 - Las interfaces (CLI, web) llaman a `engine`/`execution`; nunca calculan capacidades.
 - No fusionar ecuaciones por parecido algebraico; exigir equivalencia de norma, dominio,
   unidades y estado límite.

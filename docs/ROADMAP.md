@@ -5,9 +5,9 @@ externo documentado y su `docs/chapter-<x>.md` actualizado. Unidades: mm, MPa, k
 
 | Hito | Entrega | Criterio de cierre | Estado |
 | --- | --- | --- | --- |
-| M0 Esqueleto | Reglas, `.claude/`, pyproject, CI, modelos de entrada y salida, errores, catálogo de aceros, motor y CLI que devuelven `INCOMPLETE` | CI verde en Windows y Ubuntu | Verificado en local; CI pendiente del primer push |
-| M1 Secciones | `sections/`: C con labio, U, Z con labio; esquinas redondeadas; línea media; A, I, S, r, J, Cw, xo, j; anchos planos | Oráculo de secciones; ejemplos del Manual ±0,5 % | Siguiente |
-| M2 Pandeo analítico | `codes/aisi_s100_24/appendix_2.py` y `buckling/analytical.py`: Fcre, Mcre, Fcrl, Fcrd, Mcrd, Vcr | Oráculo del Apéndice 2; Pcrd frente a CUFSM documentado | |
+| M0 Esqueleto | Reglas, `.claude/`, pyproject, CI, modelos de entrada y salida, errores, catálogo de aceros, motor y CLI que devuelven `INCOMPLETE` | CI verde en Windows y Ubuntu | Cerrado (2026-11-03): CI verde en windows-2022 y ubuntu-24.04, run 41641602831 |
+| M1 Secciones | `sections/`: lector de `Sections.xlsx` (C y Z con labio, `t_design_mm`) con validación de esquema; motor geométrico (línea media, esquinas redondeadas): A, I, Ixy, S, r, J, Cw, xo, j, ejes principales de la Z, Sy en ambas fibras, Zx, Zy, anchos planos y relaciones de B4.1-1; origen `catalog`/`geometry` en el resultado | Oráculo de secciones; motor geométrico contra las propiedades del Excel ±0,5 % | Siguiente |
+| M2 Pandeo analítico | `codes/aisi_s100_24/appendix_2.py` y `buckling/analytical.py`: Fcre, Mcre, Fcrl, Fcrd, Mcrd, Vcr; propiedades del ala con labio para el distorsional (Apéndice 2.3.3) | Oráculo del Apéndice 2; Pcrd frente a CUFSM documentado | |
 | M3 Compresión DSM | E2, E2.1, E3.2, E4 y `domain/applicability.py` (Tabla B4.1-1) | Oráculo E; ejemplos DSM del Manual | |
 | M4 Flexión DSM | F2.2, F3.2, F4 y reserva inelástica | Oráculo F; ejemplos DSM del Manual | |
 | M5 Tracción, cortante y web crippling | D2, D3, G2, G3, G5, G6 (tablas de G5 versionadas) | Oráculos D y G | |

@@ -3,8 +3,9 @@
 Motor de cálculo de la **resistencia de miembros de acero formado en frío** según AISI S100-24
 (North American Specification for the Design of Cold-Formed Steel Structural Members, 2024),
 solo LRFD, por los dos métodos de la norma: **Método de Resistencia Directa (DSM)** y **Método
-del Ancho Efectivo (EWM)**. Las propiedades de sección se calculan desde la geometría de pared
-delgada, y las cargas críticas elásticas salen del Apéndice 2 (analítico) o, como extra
+del Ancho Efectivo (EWM)**. Las propiedades de sección de los perfiles C y Z se leen
+del catálogo `data/Sections.xlsx` o, fuera de él, se calculan desde la geometría de pared
+delgada; el resultado indica el origen. Las cargas críticas elásticas salen del Apéndice 2 (analítico) o, como extra
 opcional, de franjas finitas.
 
 > **Estado: hito M0 (esqueleto).** El motor valida la entrada, resuelve el material y asigna
