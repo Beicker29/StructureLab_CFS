@@ -4,7 +4,7 @@ Propiedades de sección de miembros C y Z con labio (DC-9). Código en `src/cfs_
 
 **Estado:** implementado y verificado contra el catálogo y un control en forma cerrada.
 **Pendiente:** el oráculo independiente y el contraste con el AISI Cold-Formed Steel Design
-Manual. Se harán cuando el usuario suba el documento (decisión del 2026-11-03).
+Manual, en espera hasta nuevo aviso del usuario (decisión del 2026-11-03).
 
 ## Base normativa (AISI S100-24)
 
@@ -44,10 +44,12 @@ Se determinó contra `Sections.xlsx`, porque no está definida en otro lado.
 
 | Propiedad | Perfil de catálogo | Sección por geometría |
 | --- | --- | --- |
-| A, xcent, xo, J, Cw, j, Ix, Iy, Ixy, Sx, Sy, rx, ry, ro | Excel | Motor geométrico |
+| A, xcent, xo, J, Cw, j_asym, Ix, Iy, Ixy, Sx, Sy, rx, ry, ro | Excel | Motor geométrico |
 | Sy_web, Sy_tip (C); I1, I2, θp (Z) | Derivadas de Ix, Iy, Ixy y xcent del Excel | Derivadas de las calculadas |
 | Zx, Zy, anchos planos y relaciones de B4.1-1 | Motor geométrico con `t_design_mm` | Motor geométrico |
 
+La propiedad de asimetría j (Ec. 2.3.1-6) se reporta como `j_asym`, para que no choque con
+`J` en lectores de JSON que no distinguen mayúsculas (p. ej. `ConvertFrom-Json` de PowerShell).
 El resultado trae `section.source` = `catalog` o `geometry`. Un perfil de catálogo sin
 `t_design_mm` o una forma fuera de DC-9 dejan el miembro `INCOMPLETE`. Un nombre que no está
 en el catálogo es una entrada inválida y sale con código 2.
@@ -66,7 +68,6 @@ en el catálogo es una entrada inválida y sale con código 2.
 
 ## Pendiente
 
-- Oráculo independiente en `tests/oracles/sections.py`. La definición de `revisor-normativo` ya tiene Write, Edit y PowerShell, y aplica desde la próxima sesión.
-- Contraste con el Manual AISI en `docs/design-examples.md`.
-- Revisar la hoja Notas del Excel: cita la hoja `Acesco_publicado`, que no existe, y deja abierto el espesor de los PAG.
-- `t_design_mm` vacío en PAG C355x110x25-2.0.
+- Oráculo independiente en `tests/oracles/sections.py`, en espera hasta nuevo aviso. La definición de `revisor-normativo` ya tiene Write, Edit y PowerShell.
+- Contraste con el Manual AISI en `docs/design-examples.md`, cuando el usuario suba el documento.
+- Hoja Notas del Excel: sigue citando la hoja `Acesco_publicado`, que no existe, y el "Pendiente de criterio" del espesor de los PAG. Es informativa y no afecta el cálculo.

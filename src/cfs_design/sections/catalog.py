@@ -19,7 +19,7 @@ HEADER = ("name", "shape", "finish", "H_mm", "B_mm", "D_mm", "t_mm", "t_design_m
           "rx_mm", "ry_mm", "ro_mm", "Ixy_mm4")
 SHAPES = ("C_LIPPED", "Z_LIPPED")
 # catalog column -> property key of the result
-PROPERTY_COLUMNS = {"area_mm2": "A", "xcent_mm": "xcent", "xo_mm": "xo", "J_mm4": "J", "Cw_mm6": "Cw", "j_mm": "j",
+PROPERTY_COLUMNS = {"area_mm2": "A", "xcent_mm": "xcent", "xo_mm": "xo", "J_mm4": "J", "Cw_mm6": "Cw", "j_mm": "j_asym",
                     "Ix_mm4": "Ix", "Iy_mm4": "Iy", "Ixy_mm4": "Ixy", "Sx_mm3": "Sx", "Sy_mm3": "Sy", "rx_mm": "rx",
                     "ry_mm": "ry", "ro_mm": "ro"}
 SIGNED = {"xo_mm", "j_mm", "Ixy_mm4"}

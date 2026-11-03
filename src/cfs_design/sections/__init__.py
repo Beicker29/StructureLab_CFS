@@ -5,6 +5,8 @@ everything the catalog does not hold (flat widths, Sy at both fibres of the C, p
 axes of the Z, Zx, Zy) comes from the geometry. A section given by `shape` and dimensions is
 computed entirely from the geometry with the same engine. The result names its `source`.
 Scope (DC-9): C_LIPPED and Z_LIPPED; other shapes are INCOMPLETE.
+The asymmetry property j (Eq. 2.3.1-6) is reported as `j_asym` so that it does not collide
+with J for case-insensitive JSON readers.
 """
 import math
 from dataclasses import dataclass
@@ -44,7 +46,7 @@ def _geometric(shape: str, H: float, B: float, D: float, t: float, R: float, lip
     else:
         xcent = max(g["x_max"] - g["xc"], g["xc"] - g["x_min"])  # centroid to the farthest fibre in x
         sy = g["Iy"] / xcent
-    props = {"A": g["A"], "xcent": xcent, "xo": g["xo"], "J": g["J"], "Cw": g["Cw"], "j": g["j"], "Ix": g["Ix"],
+    props = {"A": g["A"], "xcent": xcent, "xo": g["xo"], "J": g["J"], "Cw": g["Cw"], "j_asym": g["j"], "Ix": g["Ix"],
              "Iy": g["Iy"], "Ixy": g["Ixy"], "Sx": g["Ix"] / (H / 2), "Sy": sy, "rx": g["rx"], "ry": g["ry"], "ro": g["ro"],
              "Zx": g["Zx"], "Zy": g["Zy"]}
     return props, element_widths(geometry, B, D, t, R)

@@ -3,6 +3,9 @@
 No independent oracle yet: validation against the AISI Manual is pending (docs/chapter-sections.md).
 The catalog comparison checks consistency between the two sources of DC-7, not normative accuracy.
 """
+import dataclasses
+import json
+
 import pytest
 
 from cfs_design.errors import IncompleteDataError, RuleNotImplementedError, SectionNotFoundError, ValidationError
@@ -52,7 +55,7 @@ def test_rounded_c_flat_widths():
 
 def test_z_is_point_symmetric():
     props, _ = _geometric("Z_LIPPED", 203, 67, 19, 2, 5, 45)
-    assert abs(props["xo"]) < 1e-9 and abs(props["j"]) < 1e-9
+    assert abs(props["xo"]) < 1e-9 and abs(props["j_asym"]) < 1e-9
     assert props["Ixy"] > 0
 
 
@@ -92,11 +95,20 @@ def test_resolution_errors(section, error):
         resolve_section(SectionInput(**section))
 
 
+def test_output_keys_are_unique_ignoring_case():
+    section = resolve_section(SectionInput(name="PHR C100x50x15-2.0")).to_dict()
+    keys = [k.lower() for k in section["properties"]]
+    assert len(keys) == len(set(keys)) and "j_asym" in section["properties"]
+    assert json.loads(json.dumps(section))["properties"]["J"] == section["properties"]["J"]
+
+
 @pytest.mark.parametrize("section, code", [
-    ({"name": "PAG C355x110x25-2.0"}, "INCOMPLETE_DATA"),                       # empty t_design_mm
+    ({"name": "PHR C100x50x15-2.0"}, "INCOMPLETE_DATA"),                        # t_design_mm emptied below
     ({"shape": "HAT", "H": 160, "B": 60, "D": 20, "t": 2, "R": 5}, "RULE_NOT_IMPLEMENTED"),  # DC-9
 ])
-def test_blocked_section_makes_the_member_incomplete(member_payload, section, code):
+def test_blocked_section_makes_the_member_incomplete(member_payload, monkeypatch, section, code):
+    entry = catalog.find("PHR C100x50x15-2.0")
+    monkeypatch.setattr(catalog, "find", lambda name: dataclasses.replace(entry, t_design=None))
     result = execute_payload({**member_payload, "section": section})
     assert result["status"] == "INCOMPLETE" and result["section"] is None
     assert result["errors"][0]["code"] == code
