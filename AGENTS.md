@@ -6,8 +6,8 @@
   AISI S100-24 (North American Specification, edición 2024), solo LRFD (no añadir ASD ni LSD).
 - Se implementan los dos métodos de la norma: Método de Resistencia Directa (DSM: E3.2, E4,
   F3.2, F4) y Método del Ancho Efectivo (EWM: E3.1, F3.1 y Apéndice 1). Ninguno sustituye al otro.
-- Estado actual: hito M0 (esqueleto). Ningún capítulo está implementado; el motor devuelve
-  `INCOMPLETE`. Los capítulos entran en el orden de la [hoja de ruta](docs/ROADMAP.md), uno por vez.
+- Estado actual: M1 (secciones) implementado y pendiente de oráculo; ningún capítulo de
+  resistencia está implementado y el motor devuelve `INCOMPLETE`. Los capítulos entran en el orden de la [hoja de ruta](docs/ROADMAP.md), uno por vez.
 - Fuente normativa: el PDF de S100-24 en `references/` (ignorada por Git; no versionar PDF).
   El AISI Cold-Formed Steel Design Manual y CUFSM sirven para contrastar, no son norma.
 - Decisiones de proyecto: [decisions.md](docs/decisions.md). Decisiones por capítulo: `docs/chapter-<x>.md`.

@@ -1,0 +1,10 @@
+{
+  "section": {"name": "PHR Z203x67x19-2.0"},
+  "material": "ASTM A653 SS Grade 50 Class 1",
+  "lengths": {"Lx": 6000, "Ly": 1500, "Lz": 1500},
+  "method": "both",
+  "flexure": {"Cb": 1.0, "Lm": 1500},
+  "cases": [
+    {"name": "1.2D + 1.6Lr — correa", "Mux": 6.5, "Vuy": 4.2}
+  ]
+}

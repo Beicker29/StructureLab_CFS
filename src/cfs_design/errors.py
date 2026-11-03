@@ -28,6 +28,12 @@ class MaterialNotFoundError(CfsDesignError):
     default_code = "MATERIAL_NOT_FOUND"
 
 
+class SectionNotFoundError(CfsDesignError):
+    """The section name is not in data/Sections.xlsx."""
+
+    default_code = "SECTION_NOT_FOUND"
+
+
 class CatalogSchemaError(CfsDesignError):
     """A catalog sheet or header does not match the expected schema."""
 

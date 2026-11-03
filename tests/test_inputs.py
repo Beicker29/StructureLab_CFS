@@ -30,6 +30,8 @@ def test_valid_payload_parses(member_payload):
     {"section": {"shape": "C_LIPPED", "H": 200}},
     {"section": {"shape": "C_LIPPED", "t": -1.0}},
     {"section": {"shape": "TUBE", "t": 1.0}},
+    {"section": {"name": "PHR C100x50x15-2.0", "lip_angle": 90}},
+    {"section": {"shape": "Z_LIPPED", "t": 2.0, "lip_angle": 120}},
     {"lengths": {"Lx": 0}},
 ])
 def test_invalid_payloads_are_rejected(member_payload, change):

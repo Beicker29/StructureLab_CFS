@@ -18,7 +18,8 @@ instalada fuera del repositorio.
 | --- | --- |
 | `tests/test_inputs.py` | Rechazo de entradas inválidas o incompletas |
 | `tests/test_materials.py` | Catálogo de aceros contra la Tabla A3.1.1-1 de S100-24; Fu no se supone |
-| `tests/test_engine.py` | Cada demanda va a su capítulo; en M0 todo es `INCOMPLETE` y nunca hay capacidad |
+| `tests/test_engine.py` | Cada demanda va a su capítulo; sin capítulos implementados todo es `INCOMPLETE` y nunca hay capacidad |
+| `tests/test_sections.py` | Motor geométrico contra las 125 filas de `Sections.xlsx` (±0,5 %), control en forma cerrada (C de esquinas rectas), origen `catalog`/`geometry` y bloqueos |
 | `tests/test_interfaces.py` | CLI sin escritura por defecto, `--output`, errores con código 2, ejemplos |
 
 ## Oráculo independiente

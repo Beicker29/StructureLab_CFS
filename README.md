@@ -8,8 +8,9 @@ del catálogo `data/Sections.xlsx` o, fuera de él, se calculan desde la geometr
 delgada; el resultado indica el origen. Las cargas críticas elásticas salen del Apéndice 2 (analítico) o, como extra
 opcional, de franjas finitas.
 
-> **Estado: hito M0 (esqueleto).** El motor valida la entrada, resuelve el material y asigna
-> cada demanda a su capítulo, pero ningún capítulo está implementado: el resultado es siempre
+> **Estado: hito M1 (secciones), pendiente de validación.** El motor valida la entrada,
+> resuelve el material y la sección (propiedades y anchos planos) y asigna cada demanda a su
+> capítulo, pero ningún capítulo de resistencia está implementado: el resultado es siempre
 > `INCOMPLETE` con el motivo y el hito que lo cubrirá. Ver la [hoja de ruta](docs/ROADMAP.md).
 
 > No es una certificación AISI. `PASS` significará que se evaluaron todos los estados límite
@@ -51,7 +52,7 @@ Un archivo por miembro; los datos del miembro van arriba y sus combinaciones en 
 
 | Campo | Descripción |
 | --- | --- |
-| `section` | `name` de catálogo (M1) o `shape` (`C_LIPPED`, `C_UNLIPPED`, `Z_LIPPED`, `HAT`, `ANGLE`, `ANGLE_LIPPED`, `SIGMA`) con dimensiones exteriores `H`, `B`, `D`, `t` y radio interior `R` |
+| `section` | `name` de `data/Sections.xlsx` (p. ej. `PHR Z203x67x19-2.0`) o `shape` con dimensiones exteriores `H`, `B`, `D`, espesor de diseño `t`, radio interior `R` y `lip_angle` (grados; obligatorio en la Z, 90 en la C). Por ahora solo se calculan `C_LIPPED` y `Z_LIPPED`; las demás formas (`C_UNLIPPED`, `HAT`, `ANGLE`, `ANGLE_LIPPED`, `SIGMA`) dan `INCOMPLETE` |
 | `material` | Nombre de `src/cfs_design/data/Materiales.xlsx` (Fy de la Tabla A3.1.1-1); no se aceptan Fy ni Fu numéricos |
 | `lengths` | `Lx`, `Ly`, `Lz`: longitudes no arriostradas (mm) |
 | `factors` | `Kx`, `Ky`, `Kt` (1 por defecto) |
@@ -63,7 +64,9 @@ Un archivo por miembro; los datos del miembro van arriba y sus combinaciones en 
 
 ### Salida
 
-`status` (`PASS`/`FAIL`/`INCOMPLETE`), `ratio`, `governing`, `material` y `cases`, cada uno
+`status` (`PASS`/`FAIL`/`INCOMPLETE`), `ratio`, `governing`, `material`, `section` (origen
+`catalog` o `geometry`, dimensiones, propiedades y anchos planos con las relaciones de la
+Tabla B4.1-1; ver [secciones](docs/chapter-sections.md)) y `cases`, cada uno
 con una comprobación por demanda (`compression`, `tension`, `flexure_x`, `flexure_y`,
 `shear_x`, `shear_y`, `web_crippling`, `torsion`) más `interaction` cuando actúan juntas.
 Cada comprobación trae `chapter`, `demand`, `capacity` (φRn), `ratio`, `method`, `result` y

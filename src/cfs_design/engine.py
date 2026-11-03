@@ -1,13 +1,17 @@
 """Member run: one check per demand (and interaction), then PASS / FAIL / INCOMPLETE.
 
-Milestone M0: no chapter is implemented. Every demand yields an INCOMPLETE check that names
-the AISI S100-24 chapter and the roadmap milestone that will cover it. Never a capacity.
+The section is resolved first (sections/, milestone M1); if it is blocked (missing data or a
+shape out of scope) every check is INCOMPLETE with that reason. No chapter is implemented yet:
+every demand yields an INCOMPLETE check that names the AISI S100-24 chapter and the roadmap
+milestone that will cover it. Never a capacity.
 """
 from collections.abc import Callable
+from typing import Any
 
 from .errors import BLOCKING_ERRORS, CfsDesignError, RuleNotImplementedError
 from .materials import Material, get_material
 from .models import CaseDemand, CaseResult, Check, DesignResult, MemberInput, Status
+from .sections import resolve_section
 
 # check name -> (S100-24 chapter/sections, milestone)
 DEMAND_CHAPTERS: dict[str, tuple[str, str]] = {
@@ -51,8 +55,12 @@ def _not_implemented(member: MemberInput, material: Material, case: CaseDemand, 
 CALCULATORS: dict[str, Calculator] = {name: _not_implemented for name in DEMAND_CHAPTERS}
 
 
-def _run_check(member: MemberInput, material: Material, case: CaseDemand, check: str, demand: float) -> Check:
+def _run_check(member: MemberInput, material: Material, case: CaseDemand, check: str, demand: float,
+               blocked: dict[str, Any] | None) -> Check:
     chapter = DEMAND_CHAPTERS[check][0]
+    if blocked is not None:
+        return Check(check=check, chapter=chapter, demand=demand, status=Status.INCOMPLETE, method=member.method,
+                     errors=[blocked])
     try:
         return CALCULATORS[check](member, material, case, check)
     except BLOCKING_ERRORS as error:
@@ -72,17 +80,24 @@ def _max_ratio(ratios: list[float | None]) -> float | None:
 
 
 def run_member(member: MemberInput) -> DesignResult:
-    """Evaluate every combination of one member. Raises CfsDesignError only for invalid input (e.g. unknown material)."""
+    """Evaluate every combination of one member. Raises CfsDesignError only for invalid input (unknown material or section)."""
     material = get_material(member.material)
+    section: dict[str, Any] | None = None
+    blocked: dict[str, Any] | None = None
+    try:
+        section = resolve_section(member.section).to_dict()
+    except BLOCKING_ERRORS as error:
+        blocked = error.to_dict()
     cases: list[CaseResult] = []
     for case in member.cases:
-        checks = [_run_check(member, material, case, name, demand) for name, demand in demanded_checks(case)]
+        checks = [_run_check(member, material, case, name, demand, blocked) for name, demand in demanded_checks(case)]
         cases.append(CaseResult(name=case.name, status=_aggregate([c.status for c in checks]),
                                 ratio=_max_ratio([c.ratio for c in checks]), checks=checks))
     ratios = [(c.ratio, c.name) for c in cases if c.ratio is not None]
     governing = max(ratios)[1] if ratios else None
     return DesignResult(status=_aggregate([c.status for c in cases]), ratio=_max_ratio([c.ratio for c in cases]),
-                        governing=governing, material=material.to_dict(), cases=cases)
+                        governing=governing, material=material.to_dict(), section=section, cases=cases,
+                        errors=[blocked] if blocked else [])
 
 
 __all__ = ["DEMAND_CHAPTERS", "CfsDesignError", "demanded_checks", "run_member"]

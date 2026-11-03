@@ -2,7 +2,7 @@
 
 Input policy: unknown keys are rejected; a section is given by catalog name or by geometry,
 never by loose properties; a material is a catalog name, never loose Fy/Fu numbers.
-Shape-specific required dimensions are checked by sections/ (milestone M1).
+Shape-specific required dimensions are checked by sections/.
 """
 from enum import Enum
 from typing import Any, Literal
@@ -25,7 +25,8 @@ class _Strict(BaseModel):
 
 
 class SectionInput(_Strict):
-    """Catalog `name`, or `shape` with out-to-out dimensions (DC-3): H depth, B flange, D lip, t thickness, R inside bend radius."""
+    """Catalog `name`, or `shape` with out-to-out dimensions (DC-3): H depth, B flange, D lip, t design thickness,
+    R inside bend radius, lip_angle between lip and flange in degrees (D3: required for Z_LIPPED, 90 for C_LIPPED)."""
 
     name: str | None = None
     shape: ShapeKind | None = None
@@ -34,12 +35,13 @@ class SectionInput(_Strict):
     D: float | None = Field(default=None, gt=0)
     t: float | None = Field(default=None, gt=0)
     R: float | None = Field(default=None, ge=0)
+    lip_angle: float | None = Field(default=None, gt=0, le=90)
 
     @model_validator(mode="after")
     def _name_xor_shape(self) -> "SectionInput":
         if (self.name is None) == (self.shape is None):
             raise ValueError("section needs exactly one of `name` (catalog) or `shape` (geometry)")
-        if self.name is not None and any(v is not None for v in (self.H, self.B, self.D, self.t, self.R)):
+        if self.name is not None and any(v is not None for v in (self.H, self.B, self.D, self.t, self.R, self.lip_angle)):
             raise ValueError("a catalog section takes no dimensions")
         if self.shape is not None and self.t is None:
             raise ValueError("a geometric section needs the thickness `t`")
@@ -155,5 +157,6 @@ class DesignResult(BaseModel):
     ratio: float | None
     governing: str | None
     material: dict[str, Any]
+    section: dict[str, Any] | None = None
     cases: list[CaseResult]
     errors: list[dict[str, Any]] = Field(default_factory=list)

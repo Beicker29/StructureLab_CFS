@@ -45,6 +45,13 @@ def test_cli_invalid_input(tmp_path, content, capsys):
     assert "error" in json.loads(capsys.readouterr().err)
 
 
+def test_cli_unknown_section(tmp_path, member_payload, capsys):
+    source = tmp_path / "m.json"
+    source.write_text(json.dumps({**member_payload, "section": {"name": "PHR C999"}}), encoding="utf-8")
+    assert main([str(source)]) == 2
+    assert json.loads(capsys.readouterr().err)["error"]["code"] == "SECTION_NOT_FOUND"
+
+
 def test_cli_unknown_material(tmp_path, member_payload, capsys):
     source = tmp_path / "m.json"
     source.write_text(json.dumps({**member_payload, "material": "ASTM A36"}), encoding="utf-8")

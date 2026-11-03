@@ -16,7 +16,8 @@ src/cfs_design/
 ├── execution.py           [M0] ejecución en memoria de un miembro (CLI y web)
 ├── run.py                 [M0] CLI: JSON a stdout; archivos solo con --output
 ├── data/                  [M0] Materiales.xlsx; Sections.xlsx (dimensiones y propiedades, C y Z)
-├── sections/              [M1] shapes, thin_walled, elements, loader, repository
+├── sections/              [M1] resolve_section (catálogo o geometría), catalog, geometry,
+│                               thin_walled, elements
 ├── codes/aisi_s100_24/    fórmulas puras con id de ecuación y φ
 │   ├── appendix_2.py      [M2] Fcre, Mcre, Fcrl, Fcrd, Mcrd, Vcr
 │   ├── compression.py     [M3] E2, E2.1, E3.2, E4  ·  [M7] E3.1
@@ -46,15 +47,19 @@ src/cfs_design/
 6. `domain/coverage.py` enumera desde el texto normativo los estados límite obligatorios; si
    falta alguno, el estado es `INCOMPLETE`; si no, `PASS` o `FAIL` según demanda / capacidad.
 
-Hoy (M0) ningún capítulo existe: cada demanda produce un check `INCOMPLETE` con código
-`RULE_NOT_IMPLEMENTED` y el capítulo que la cubrirá.
+Hoy (M1) la sección se resuelve, pero ningún capítulo existe: cada demanda produce un check
+`INCOMPLETE` con código `RULE_NOT_IMPLEMENTED` y el capítulo que la cubrirá. Si la sección queda
+bloqueada (sin `t_design_mm` o con una forma fuera de DC-9), todas las comprobaciones quedan
+`INCOMPLETE` con ese motivo.
 
 ## Responsabilidades (una fuente de verdad por concepto)
 
 | Concepto | Propietario |
 | --- | --- |
 | Ecuaciones y φ de cada capítulo | `codes/aisi_s100_24/<capítulo>.py` |
-| Propiedades de pared delgada | `sections/thin_walled.py` |
+| Propiedades de pared delgada | `sections/thin_walled.py` (geometría en `sections/geometry.py`) |
+| Catálogo de perfiles | `sections/catalog.py` + `data/Sections.xlsx` |
+| Anchos planos y relaciones de B4.1-1 | `sections/elements.py` |
 | Cargas críticas elásticas | `buckling/` (fórmulas en `codes/aisi_s100_24/appendix_2.py`) |
 | Si DSM o EWM aplican al miembro | `domain/applicability.py` |
 | Estados límite obligatorios | `domain/coverage.py` |
