@@ -16,7 +16,7 @@ from ..errors import IncompleteDataError, RuleNotImplementedError, SectionNotFou
 from ..models import SectionInput
 from . import catalog
 from .elements import element_widths
-from .geometry import build, c_lipped, z_lipped
+from .geometry import Geometry, build, c_lipped, z_lipped
 from .thin_walled import gross_properties
 
 SHAPES = ("C_LIPPED", "Z_LIPPED")
@@ -36,9 +36,14 @@ class SectionProperties:
                 "properties": self.properties, "elements": self.elements}
 
 
-def _geometric(shape: str, H: float, B: float, D: float, t: float, R: float, lip_angle: float) -> tuple[dict[str, float], dict[str, float]]:
+def section_geometry(shape: str, H: float, B: float, D: float, t: float, R: float, lip_angle: float) -> Geometry:
+    """Geometry of C_LIPPED (web outer face at x = 0) or Z_LIPPED (web midline at x = 0); y = 0 at mid-depth."""
     vertices = c_lipped(H, B, D, t) if shape == "C_LIPPED" else z_lipped(H, B, D, t, lip_angle)
-    geometry = build(vertices, t, R)
+    return build(vertices, t, R)
+
+
+def _geometric(shape: str, H: float, B: float, D: float, t: float, R: float, lip_angle: float) -> tuple[dict[str, float], dict[str, float]]:
+    geometry = section_geometry(shape, H, B, D, t, R, lip_angle)
     g = gross_properties(geometry, t)
     if shape == "C_LIPPED":
         xcent = g["xc"]                              # centroid to the outer face of the web
@@ -93,4 +98,4 @@ def resolve_section(section: SectionInput) -> SectionProperties:
     return SectionProperties(None, shape, "geometry", dims, {**props, **_derived(shape, dims["B"], props)}, elements)
 
 
-__all__ = ["SectionProperties", "resolve_section"]
+__all__ = ["SectionProperties", "resolve_section", "section_geometry"]

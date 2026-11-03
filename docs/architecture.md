@@ -19,7 +19,8 @@ src/cfs_design/
 ├── sections/              [M1] resolve_section (catálogo o geometría), catalog, geometry,
 │                               thin_walled, elements
 ├── codes/aisi_s100_24/    fórmulas puras con id de ecuación y φ
-│   ├── appendix_2.py      [M2] Fcre, Mcre, Fcrl, Fcrd, Mcrd, Vcr
+│   ├── appendix_1.py      [M2] coeficientes k de placa (1.1, 1.1.2, 1.2.1, 1.2.2)
+│   ├── appendix_2.py      [M2] Pcre/Mcre, Fcr local, Tabla 2.3.3-1, distorsional (Vcr en M5)
 │   ├── compression.py     [M3] E2, E2.1, E3.2, E4  ·  [M7] E3.1
 │   ├── flexure.py         [M4] F2, F3.2, F4  ·  [M7] F2.1.1, F3.1, F3.1.1
 │   ├── tension.py         [M5] D2, D3
@@ -28,7 +29,7 @@ src/cfs_design/
 │   ├── interaction.py     [M6] H1, H2, H3  ·  [M8] H4
 │   ├── appendix_1.py      [M7] anchos efectivos 1.1 a 1.4
 │   └── torsion.py         [M8] G8.1, G8.2
-├── buckling/              [M2] analytical.py  ·  [M8] fsm.py (extra [fsm])
+├── buckling/              [M2] member_buckling, analytical.py  ·  [M8] fsm.py (extra [fsm])
 ├── domain/                selección por capítulo, applicability (B4.1-1), coverage, validation
 └── reporting/             [M6] document, text, pdf, glossary (nunca recalcula)
 ```
@@ -47,7 +48,8 @@ src/cfs_design/
 6. `domain/coverage.py` enumera desde el texto normativo los estados límite obligatorios; si
    falta alguno, el estado es `INCOMPLETE`; si no, `PASS` o `FAIL` según demanda / capacidad.
 
-Hoy (M1) la sección se resuelve, pero ningún capítulo existe: cada demanda produce un check
+Hoy (M2) la sección se resuelve y las cargas críticas elásticas se reportan en `buckling`,
+pero ningún capítulo de resistencia existe: cada demanda produce un check
 `INCOMPLETE` con código `RULE_NOT_IMPLEMENTED` y el capítulo que la cubrirá. Si la sección queda
 bloqueada (sin `t_design_mm` o con una forma fuera de DC-9), todas las comprobaciones quedan
 `INCOMPLETE` con ese motivo.

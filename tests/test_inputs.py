@@ -31,6 +31,8 @@ def test_valid_payload_parses(member_payload):
     {"section": {"shape": "C_LIPPED", "t": -1.0}},
     {"section": {"shape": "TUBE", "t": 1.0}},
     {"section": {"name": "PHR C100x50x15-2.0", "lip_angle": 90}},
+    {"flexure": {"Cb": 1.0, "Lm": 1000}},              # Lm moved to buckling
+    {"buckling": {"k_phi": -1.0}},
     {"section": {"shape": "Z_LIPPED", "t": 2.0, "lip_angle": 120}},
     {"lengths": {"Lx": 0}},
 ])

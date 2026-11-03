@@ -8,6 +8,7 @@ milestone that will cover it. Never a capacity.
 from collections.abc import Callable
 from typing import Any
 
+from .buckling import member_buckling
 from .errors import BLOCKING_ERRORS, CfsDesignError, RuleNotImplementedError
 from .materials import Material, get_material
 from .models import CaseDemand, CaseResult, Check, DesignResult, MemberInput, Status
@@ -83,9 +84,12 @@ def run_member(member: MemberInput) -> DesignResult:
     """Evaluate every combination of one member. Raises CfsDesignError only for invalid input (unknown material or section)."""
     material = get_material(member.material)
     section: dict[str, Any] | None = None
+    buckling: dict[str, Any] | None = None
     blocked: dict[str, Any] | None = None
     try:
-        section = resolve_section(member.section).to_dict()
+        resolved = resolve_section(member.section)
+        section = resolved.to_dict()
+        buckling = member_buckling(member, resolved)
     except BLOCKING_ERRORS as error:
         blocked = error.to_dict()
     cases: list[CaseResult] = []
@@ -96,7 +100,7 @@ def run_member(member: MemberInput) -> DesignResult:
     ratios = [(c.ratio, c.name) for c in cases if c.ratio is not None]
     governing = max(ratios)[1] if ratios else None
     return DesignResult(status=_aggregate([c.status for c in cases]), ratio=_max_ratio([c.ratio for c in cases]),
-                        governing=governing, material=material.to_dict(), section=section, cases=cases,
+                        governing=governing, material=material.to_dict(), section=section, buckling=buckling, cases=cases,
                         errors=[blocked] if blocked else [])
 
 

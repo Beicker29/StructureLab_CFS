@@ -63,16 +63,21 @@ class Factors(_Strict):
 
 
 class BucklingInput(_Strict):
-    """Origin of the elastic critical loads (DC-2). With `fsm`, optional half-wavelengths (mm) for local and distortional."""
+    """Origin of the elastic critical loads (DC-2). With `fsm`, optional half-wavelengths (mm) for local and distortional.
+
+    Lm: distance between discrete restraints that restrict distortional buckling (mm), compression and flexure.
+    k_phi: continuous rotational stiffness at the flange/web juncture (N·mm/mm/rad); S100-24 2.3.3 permits zero (D7).
+    """
 
     source: BucklingSource = "analytical"
     local_half_wavelength: float | None = Field(default=None, gt=0)
     distortional_half_wavelength: float | None = Field(default=None, gt=0)
+    Lm: float | None = Field(default=None, gt=0)
+    k_phi: float | None = Field(default=None, ge=0)
 
 
 class FlexureInput(_Strict):
     Cb: float | None = Field(default=None, gt=0)
-    Lm: float | None = Field(default=None, gt=0)
     inelastic_reserve: bool = False
 
 
@@ -158,5 +163,6 @@ class DesignResult(BaseModel):
     governing: str | None
     material: dict[str, Any]
     section: dict[str, Any] | None = None
+    buckling: dict[str, Any] | None = None
     cases: list[CaseResult]
     errors: list[dict[str, Any]] = Field(default_factory=list)

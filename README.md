@@ -8,9 +8,9 @@ del catálogo `data/Sections.xlsx` o, fuera de él, se calculan desde la geometr
 delgada; el resultado indica el origen. Las cargas críticas elásticas salen del Apéndice 2 (analítico) o, como extra
 opcional, de franjas finitas.
 
-> **Estado: hito M1 (secciones), pendiente de validación.** El motor valida la entrada,
-> resuelve el material y la sección (propiedades y anchos planos) y asigna cada demanda a su
-> capítulo, pero ningún capítulo de resistencia está implementado: el resultado es siempre
+> **Estado: hitos M1 (secciones) y M2 (pandeo elástico), pendientes de validación.** El motor
+> valida la entrada, resuelve el material y la sección, calcula las cargas críticas elásticas y
+> asigna cada demanda a su capítulo, pero ningún capítulo de resistencia está implementado: el resultado es siempre
 > `INCOMPLETE` con el motivo y el hito que lo cubrirá. Ver la [hoja de ruta](docs/ROADMAP.md).
 
 > No es una certificación AISI. `PASS` significará que se evaluaron todos los estados límite
@@ -57,8 +57,8 @@ Un archivo por miembro; los datos del miembro van arriba y sus combinaciones en 
 | `lengths` | `Lx`, `Ly`, `Lz`: longitudes no arriostradas (mm) |
 | `factors` | `Kx`, `Ky`, `Kt` (1 por defecto) |
 | `method` | `DSM` (por defecto) o `EWM` calculan solo ese método; `both` calcula y reporta los dos |
-| `buckling` | `source`: `analytical` (por defecto) o `fsm`; con `fsm`, semiondas local y distorsional opcionales |
-| `flexure` | `Cb`, `Lm` (F4), `inelastic_reserve` |
+| `buckling` | `source`: `analytical` (por defecto) o `fsm` (M8); `Lm`: distancia entre restricciones discretas del pandeo distorsional (mm, obligatoria para el distorsional); `k_phi`: rigidez rotacional continua en la unión ala/alma (N·mm/mm/rad; si falta, 0 conservador según 2.3.3) |
+| `flexure` | `Cb` (obligatorio para Mcre), `inelastic_reserve` |
 | `web_crippling` | `N` (mm), `load_case` (`EOF`, `IOF`, `ETF`, `ITF`), `fastened` |
 | `cases[]` | `name` y demandas: `Pu` (> 0 compresión, < 0 tracción), `Mux`, `Muy`, `Vux`, `Vuy`, `Pw`, `Bu` |
 
@@ -66,7 +66,8 @@ Un archivo por miembro; los datos del miembro van arriba y sus combinaciones en 
 
 `status` (`PASS`/`FAIL`/`INCOMPLETE`), `ratio`, `governing`, `material`, `section` (origen
 `catalog` o `geometry`, dimensiones, propiedades y anchos planos con las relaciones de la
-Tabla B4.1-1; ver [secciones](docs/chapter-sections.md)) y `cases`, cada uno
+Tabla B4.1-1; ver [secciones](docs/chapter-sections.md)), `buckling` (Pcre, Pcrl, Pcrd y Mcre,
+Mcrl, Mcrd por el Apéndice 2.3; ver [pandeo elástico](docs/chapter-appendix-2.md)) y `cases`, cada uno
 con una comprobación por demanda (`compression`, `tension`, `flexure_x`, `flexure_y`,
 `shear_x`, `shear_y`, `web_crippling`, `torsion`) más `interaction` cuando actúan juntas.
 Cada comprobación trae `chapter`, `demand`, `capacity` (φRn), `ratio`, `method`, `result` y

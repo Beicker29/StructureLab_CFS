@@ -59,6 +59,7 @@ class Arc:
 
 @dataclass(frozen=True)
 class Geometry:
+    vertices: tuple[Point, ...]  # sharp-cornered midline polyline
     parts: tuple[Polygon | Sector, ...]
     midline: tuple[Line | Arc, ...]
     flats: tuple[float, ...]
@@ -138,7 +139,7 @@ def build(vertices: list[Point], t: float, R: float) -> Geometry:
             rq = strip[2] if i == n - 2 else right[i + 1]
             parts.append(Polygon((lp, lq, rq, rp)))
             midline.append(Line(p, q))
-        return Geometry(tuple(parts), tuple(midline), tuple(flats))
+        return Geometry(tuple(vertices), tuple(parts), tuple(midline), tuple(flats))
     start = vertices[0]
     for i in range(n - 1):
         v = vertices[i + 1]
@@ -160,4 +161,4 @@ def build(vertices: list[Point], t: float, R: float) -> Geometry:
             midline.append(Arc(cx, cy, rm, phi0, sweep))
             T = trims[2 * i + 2]
             start = (v[0] + u2[0] * T, v[1] + u2[1] * T)
-    return Geometry(tuple(parts), tuple(midline), tuple(flats))
+    return Geometry(tuple(vertices), tuple(parts), tuple(midline), tuple(flats))
