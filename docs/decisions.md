@@ -6,8 +6,8 @@ el usuario la confirme o cambie). Las decisiones de cada capítulo van en `docs/
 
 | Id | Pregunta | Decisión | Estado |
 | --- | --- | --- | --- |
-| DC-0 | Nombre del repositorio y del paquete | `StructureLab_CFM`, paquete `cfs_design`; distinto de StructureLab_CFS | Propuesta |
-| DC-1 | Métodos de resistencia | Se implementan los dos: DSM y EWM. `method`: `DSM` (por defecto), `EWM` o `both`. Con `both` se reportan los dos con su diferencia y el motor no elige el mayor | Confirmada (2026-11-03): ambos métodos. Pendiente: si con `both` gobierna el mayor |
+| DC-0 | Nombre del repositorio y del paquete | Repositorio `StructureLab_CFS` (distribución `structurelab-cfs`), paquete `cfs_design` | Confirmada (2026-11-03) |
+| DC-1 | Métodos de resistencia | Se implementan los dos: DSM y EWM. En el JSON, `method`: `DSM` (por defecto) o `EWM` calculan solo ese método; `both` calcula los dos y reporta el resultado de cada uno (una comprobación por método y demanda). El `status` y el `ratio` agregados salen del método más desfavorable: `INCOMPLETE` si alguno lo es, `FAIL` si alguno falla, `ratio` máximo | Confirmada (2026-11-03) |
 | DC-2 | Origen de las cargas críticas elásticas | Apéndice 2.3 analítico en el núcleo; franjas finitas (pyCUFSM) como extra opcional `[fsm]`. Con FSM, longitudes de semionda dadas por el usuario o mínimos de la curva de firma; sin mínimo claro → `INCOMPLETE` | Propuesta |
 | DC-3 | Dimensiones de entrada | Exteriores (como catálogos comerciales y el Manual AISI); la línea media se deriva y se reporta | Propuesta |
 | DC-4 | Esquinas | Redondeadas en las propiedades; el oráculo verifica también esquinas rectas como control | Propuesta |

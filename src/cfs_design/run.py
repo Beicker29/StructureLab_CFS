@@ -13,7 +13,7 @@ from .execution import execute_payload
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="structurelab-cfm", description="AISI S100-24 cold-formed steel member check (LRFD)")
+    parser = argparse.ArgumentParser(prog="structurelab-cfs", description="AISI S100-24 cold-formed steel member check (LRFD)")
     parser.add_argument("input", type=Path, help="member JSON file")
     parser.add_argument("--output", type=Path, help="write the result here instead of only printing it")
     args = parser.parse_args(argv)

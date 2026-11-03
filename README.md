@@ -1,4 +1,4 @@
-# StructureLab_CFM
+# StructureLab_CFS
 
 Motor de cálculo de la **resistencia de miembros de acero formado en frío** según AISI S100-24
 (North American Specification for the Design of Cold-Formed Steel Structural Members, 2024),
@@ -54,7 +54,7 @@ Un archivo por miembro; los datos del miembro van arriba y sus combinaciones en 
 | `material` | Nombre de `src/cfs_design/data/Materiales.xlsx` (Fy de la Tabla A3.1.1-1); no se aceptan Fy ni Fu numéricos |
 | `lengths` | `Lx`, `Ly`, `Lz`: longitudes no arriostradas (mm) |
 | `factors` | `Kx`, `Ky`, `Kt` (1 por defecto) |
-| `method` | `DSM` (por defecto), `EWM` o `both` |
+| `method` | `DSM` (por defecto) o `EWM` calculan solo ese método; `both` calcula y reporta los dos |
 | `buckling` | `source`: `analytical` (por defecto) o `fsm`; con `fsm`, semiondas local y distorsional opcionales |
 | `flexure` | `Cb`, `Lm` (F4), `inelastic_reserve` |
 | `web_crippling` | `N` (mm), `load_case` (`EOF`, `IOF`, `ETF`, `ITF`), `fastened` |

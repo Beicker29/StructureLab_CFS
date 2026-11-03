@@ -3,7 +3,7 @@ requires = ["setuptools>=80"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "structurelab-cfm"
+name = "structurelab-cfs"
 version = "0.0.1"
 description = "Cold-formed steel member strength per AISI S100-24, LRFD (DSM and EWM)"
 readme = "README.md"
@@ -22,7 +22,7 @@ dev = [
 ]
 
 [project.scripts]
-structurelab-cfm = "cfs_design.run:main"
+structurelab-cfs = "cfs_design.run:main"
 
 [tool.setuptools]
 include-package-data = false

@@ -1,4 +1,4 @@
-# Reglas de trabajo de StructureLab_CFM
+# Reglas de trabajo de StructureLab_CFS
 
 ## Alcance
 
