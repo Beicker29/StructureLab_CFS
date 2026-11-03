@@ -1,0 +1,57 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Python 3.12 / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    env:
+      PYTHONUTF8: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Lint
+        run: python -m ruff check .
+      - name: Types
+        run: python -m mypy
+      - name: Tests
+        run: python -m pytest -q
+      - name: Oracles reproduce their references
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for oracle in tests/oracles/*.py; do
+            case "$(basename "$oracle")" in _*) continue;; esac
+            python "$oracle"
+          done
+          git diff --exit-code -- tests/fixtures
+      - name: Build distribution
+        run: python -m build
+      - name: Run the installed wheel outside the repository
+        shell: bash
+        run: |
+          python -m pip install --target "$RUNNER_TEMP/site" dist/*.whl
+          cd "$RUNNER_TEMP"
+          export PYTHONPATH="$RUNNER_TEMP/site"
+          python -c "import pathlib, cfs_design; assert pathlib.Path(cfs_design.__file__).parents[1].name == 'site'"
+          python -m cfs_design.run "$GITHUB_WORKSPACE/examples/c_lipped.json" > /dev/null
