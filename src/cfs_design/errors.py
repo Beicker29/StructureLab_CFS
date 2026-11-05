@@ -52,10 +52,11 @@ class IncompleteDataError(CfsDesignError):
     default_code = "INCOMPLETE_DATA"
 
 
-class OutsideApplicabilityError(CfsDesignError):
-    """The member falls outside Table B4.1-1 for the requested method (B4.2 is not automated)."""
+class OutOfMethodScopeError(CfsDesignError):
+    """The member is outside the scope of the requested method: Table B4.1-1 limits (B4.2 is not automated)
+    or a DSM slenderness above its limit (no extrapolation). The check status is OUT_OF_METHOD_SCOPE."""
 
-    default_code = "OUTSIDE_B4_1_LIMITS"
+    default_code = "OUT_OF_METHOD_SCOPE"
 
 
-BLOCKING_ERRORS: tuple[type[CfsDesignError], ...] = (RuleNotImplementedError, IncompleteDataError, OutsideApplicabilityError)
+BLOCKING_ERRORS: tuple[type[CfsDesignError], ...] = (RuleNotImplementedError, IncompleteDataError, OutOfMethodScopeError)

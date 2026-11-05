@@ -6,8 +6,9 @@
   AISI S100-24 (North American Specification, edición 2024), solo LRFD (no añadir ASD ni LSD).
 - Se implementan los dos métodos de la norma: Método de Resistencia Directa (DSM: E3.2, E4,
   F3.2, F4) y Método del Ancho Efectivo (EWM: E3.1, F3.1 y Apéndice 1). Ninguno sustituye al otro.
-- Estado actual: M1 (secciones) y M2 (pandeo elástico analítico) implementados y pendientes de
-  oráculo (DC-10); ningún capítulo de resistencia está implementado y el motor devuelve `INCOMPLETE`. Los capítulos entran en el orden de la [hoja de ruta](docs/ROADMAP.md), uno por vez.
+- Estado actual: M1 (secciones), M2 (pandeo elástico analítico) y M3 (compresión DSM)
+  implementados y pendientes de oráculo (DC-10). Sin Fu ni elongación en `Materiales.xlsx`
+  ningún diseño da capacidad (DC-8). Los capítulos entran en el orden de la [hoja de ruta](docs/ROADMAP.md), uno por vez.
 - Fuente normativa: el PDF de S100-24 en `references/` (ignorada por Git; no versionar PDF).
   El AISI Cold-Formed Steel Design Manual y CUFSM sirven para contrastar, no son norma.
 - Decisiones de proyecto: [decisions.md](docs/decisions.md). Decisiones por capítulo: `docs/chapter-<x>.md`.
@@ -38,10 +39,11 @@
   distinguir Specification, User Note y Commentary.
 - Transcribir del PDF; nunca escribir ecuaciones ni coeficientes de memoria (S100-24 cambió,
   entre otras, la forma de la Ec. E4-1 respecto a ediciones anteriores).
-- No suponer valores (Fu, longitudes, Cb, Lm, caso de web crippling) por ausencia de datos:
-  bloquear con error estructurado (`INCOMPLETE`).
-- Fuera de los límites de la Tabla B4.1-1 del método pedido: `INCOMPLETE` con la variable y el
-  límite. B4.2 no se automatiza.
+- No suponer valores (Fu, longitudes, Cb, caso de web crippling) por ausencia de datos:
+  bloquear con error estructurado (`INCOMPLETE`). Excepción decidida por el usuario: Lm faltante
+  se toma igual a Lcrd con kφ = 0, y el supuesto se reporta (DC-12).
+- Fuera de los límites de la Tabla B4.1-1 del método pedido, o con esbeltez DSM > 5:
+  `OUT_OF_METHOD_SCOPE` con la variable y el límite. B4.2 no se automatiza (DC-11).
 - Una decisión que S100-24 no resuelve inequívocamente se consulta al usuario (problema,
   referencia, alternativas, consecuencias, recomendación) y se registra en el documento que
   corresponda.

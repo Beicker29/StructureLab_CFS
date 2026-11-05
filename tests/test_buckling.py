@@ -105,11 +105,19 @@ def test_rotational_restraint_raises_distortional_buckling(c_member):
 
 def test_continuous_restraint_without_lm_takes_lm_as_lcrd(c_member):
     d = _buckling({**c_member, "buckling": {"k_phi": 500.0}})["compression"]["distortional"]
-    assert d["Lm_mm"] == d["Lcrd_mm"] == d["Ld_mm"]
+    assert d["Lm_mm"] == d["Lcrd_mm"] == d["Ld_mm"] and d["Lm_source"].startswith("2.3.3")
+
+
+def test_missing_lm_is_taken_as_lcrd_and_reported(c_member):
+    """D14: no discrete restraint shorter than Lcrd, the conservative case."""
+    b = _buckling({**c_member, "buckling": {}})
+    for group in ("compression", "flexure_x"):
+        d = b[group]["distortional"]
+        assert d["Lm_mm"] == d["Lcrd_mm"] == d["Ld_mm"] and d["Lm_source"].startswith("D14")
+    assert b["compression"]["distortional"]["value"] <= _buckling(c_member)["compression"]["distortional"]["value"]
 
 
 @pytest.mark.parametrize("change, group, key, missing", [
-    ({"buckling": {}}, "compression", "distortional", "Lm"),
     ({"flexure": None}, "flexure_x", "global", "Cb"),
     ({"lengths": {"Lx": 3000, "Ly": 1000}}, "compression", "global", "KtLt"),
 ])

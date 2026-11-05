@@ -30,7 +30,7 @@ src/cfs_design/
 │   ├── appendix_1.py      [M7] anchos efectivos 1.1 a 1.4
 │   └── torsion.py         [M8] G8.1, G8.2
 ├── buckling/              [M2] member_buckling, analytical.py  ·  [M8] fsm.py (extra [fsm])
-├── domain/                selección por capítulo, applicability (B4.1-1), coverage, validation
+├── domain/                [M3] DesignContext, compression, applicability (B4.1-1), coverage
 └── reporting/             [M6] document, text, pdf, glossary (nunca recalcula)
 ```
 
@@ -48,8 +48,8 @@ src/cfs_design/
 6. `domain/coverage.py` enumera desde el texto normativo los estados límite obligatorios; si
    falta alguno, el estado es `INCOMPLETE`; si no, `PASS` o `FAIL` según demanda / capacidad.
 
-Hoy (M2) la sección se resuelve y las cargas críticas elásticas se reportan en `buckling`,
-pero ningún capítulo de resistencia existe: cada demanda produce un check
+Hoy (M3) la sección se resuelve, las cargas críticas elásticas se reportan en `buckling`, el
+material se valida contra A3.1.1 y la compresión se calcula por DSM. Los demás capítulos aún no existen: cada demanda produce un check
 `INCOMPLETE` con código `RULE_NOT_IMPLEMENTED` y el capítulo que la cubrirá. Si la sección queda
 bloqueada (sin `t_design_mm` o con una forma fuera de DC-9), todas las comprobaciones quedan
 `INCOMPLETE` con ese motivo.

@@ -64,16 +64,14 @@ class _Member:
     def pt(self, ktlt: float) -> float:
         return a2.torsional_buckling_force(self.p["ro"], self.p["J"], self.p["Cw"], ktlt)
 
-    def ld(self, lcrd: float) -> tuple[float, float]:
-        """Ld = min(Lcrd, Lm); with continuous rotational restraint (k_phi > 0) and no Lm, Lm = Lcrd (2.3.3.1, 2.3.3.2)."""
-        lm = self.lm
-        if lm is None:
-            if self.k_phi > 0:
-                lm = lcrd
-            else:
-                raise IncompleteDataError("distortional buckling needs Lm (distance between discrete restraints)",
-                                          details={"missing": ["Lm"]})
-        return min(lcrd, lm), lm
+    def ld(self, lcrd: float) -> tuple[float, float, str]:
+        """Ld = min(Lcrd, Lm) (2.3.3.1, 2.3.3.2). Without Lm, Lm = Lcrd: no discrete restraint shorter than the
+        critical half-wavelength, the conservative case (D14, reported); with continuous restraint the
+        Specification itself sets Lm = Lcrd."""
+        if self.lm is not None:
+            return min(lcrd, self.lm), self.lm, "input"
+        source = "2.3.3: continuous restraint, Lm = Lcrd" if self.k_phi > 0 else "D14: Lm not given, Lm = Lcrd (conservative)"
+        return lcrd, lcrd, source
 
 
 # --- global ----------------------------------------------------------------------------------------------------------
@@ -165,22 +163,22 @@ def _local(m: _Member, f: Stress, f_ext: float, sfc_or_area: float, to_unit: flo
 def _compression_distortional(m: _Member) -> dict[str, Any]:
     f, t, ho = m.flange, m.t, m.H
     lcrd = a2.lcrd_compression(f, t, ho)
-    ld, lm = m.ld(lcrd)
+    ld, lm, lm_source = m.ld(lcrd)
     fcrd = a2.fcrd_compression(a2.k_phi_fe(f, ld), a2.k_phi_we_compression(t, ho), m.k_phi,
                                a2.k_phi_fg_compression(f, ld), a2.k_phi_wg_compression(t, ho, ld))
-    return {"value": m.p["A"] * fcrd / 1e3, "stress_MPa": fcrd, "Lcrd_mm": lcrd, "Lm_mm": lm, "Ld_mm": ld,
-            "equation": "Eqs. 2.3.3.1-1 to 2.3.3.1-7; Table 2.3.3-1"}
+    return {"value": m.p["A"] * fcrd / 1e3, "stress_MPa": fcrd, "Lcrd_mm": lcrd, "Lm_mm": lm, "Lm_source": lm_source,
+            "Ld_mm": ld, "equation": "Eqs. 2.3.3.1-1 to 2.3.3.1-7; Table 2.3.3-1"}
 
 
 def _flexure_x_distortional(m: _Member, f_web: tuple[float, float]) -> dict[str, Any]:
     f, t, ho = m.flange, m.t, m.H
     lcrd = a2.lcrd_flexure_perpendicular(f, t, ho)
-    ld, lm = m.ld(lcrd)
+    ld, lm, lm_source = m.ld(lcrd)
     xi_web = (f_web[0] - f_web[1]) / f_web[0]
     fcrd = a2.fcrd_flexure(1.0, a2.k_phi_fe(f, ld), a2.k_phi_we_flexure_perpendicular(t, ho, ld), m.k_phi,
                            a2.k_phi_fg_flexure(f, ld), a2.k_phi_wg_flexure_perpendicular(t, ho, ld, xi_web))
-    return {"value": m.p["Sx"] * fcrd / 1e6, "stress_MPa": fcrd, "Lcrd_mm": lcrd, "Lm_mm": lm, "Ld_mm": ld, "xi_web": xi_web,
-            "beta": 1.0, "equation": "Eqs. 2.3.3.2-1 to 2.3.3.2-7, case (a); Table 2.3.3-1"}
+    return {"value": m.p["Sx"] * fcrd / 1e6, "stress_MPa": fcrd, "Lcrd_mm": lcrd, "Lm_mm": lm, "Lm_source": lm_source,
+            "Ld_mm": ld, "xi_web": xi_web, "beta": 1.0, "equation": "Eqs. 2.3.3.2-1 to 2.3.3.2-7, case (a); Table 2.3.3-1"}
 
 
 def _flexure_y_distortional(m: _Member, compression_at_tips: bool) -> dict[str, Any]:
@@ -192,13 +190,14 @@ def _flexure_y_distortional(m: _Member, compression_at_tips: bool) -> dict[str, 
     f, t = m.flange, m.t
     he = a2.he_parallel(f)
     lcrd = a2.lcrd_flexure_parallel(f, t, he)
-    ld, lm = m.ld(lcrd)
+    ld, lm, lm_source = m.ld(lcrd)
     f1 = m.B - m.xc                                             # extreme compression fiber of flange and stiffener
     xi_f = (f1 - (m.junction_x - m.xc)) / f1
     psi_f = (m.junction_x - f.xhf - m.xc) / f1                  # flange centroid = junction − xhf
     fcrd = a2.fcrd_flexure(1.0, a2.k_phi_fe(f, ld), a2.k_phi_we_flexure_parallel(t, he, ld), m.k_phi,
                            a2.k_phi_fg_flexure_parallel(f, ld, psi_f, xi_f), 0.0)
-    return {"value": m.p["Sy_tip"] * fcrd / 1e6, "stress_MPa": fcrd, "Lcrd_mm": lcrd, "Lm_mm": lm, "Ld_mm": ld, "he_mm": he,
+    return {"value": m.p["Sy_tip"] * fcrd / 1e6, "stress_MPa": fcrd, "Lcrd_mm": lcrd, "Lm_mm": lm, "Lm_source": lm_source,
+            "Ld_mm": ld, "he_mm": he,
             "xi_f": xi_f, "psi_f": psi_f, "beta": 1.0, "equation": "Eqs. 2.3.3.2-1 to 2.3.3.2-3, 2.3.3.2-8 to 2.3.3.2-11, case (b)"}
 
 

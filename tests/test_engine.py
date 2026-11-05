@@ -1,6 +1,7 @@
-"""M0 engine: every demand maps to its S100-24 chapter and is INCOMPLETE; never a capacity, never PASS."""
+"""Engine: demand to chapter, per-method checks, status precedence, blocking by section or material."""
 import pytest
 
+from cfs_design import engine
 from cfs_design.engine import DEMAND_CHAPTERS, demanded_checks
 from cfs_design.execution import execute_payload, parse_member
 from cfs_design.models import Status
@@ -23,24 +24,45 @@ def test_demanded_checks(member_payload, demand, expected):
     assert [name for name, _ in demanded_checks(member.cases[0])] == expected
 
 
-def test_every_check_is_incomplete_with_its_chapter(member_payload):
+def test_unimplemented_chapters_are_incomplete_with_their_milestone(member_payload, validated_material):
     payload = {**member_payload, "cases": [
         {"name": "a", "Pu": 18.0, "Mux": 2.1},
         {"name": "b", "Pu": -5.0, "Muy": 0.4, "Vux": 1.0, "Vuy": 1.0, "Pw": 3.0, "Bu": 0.1},
     ]}
     result = execute_payload(payload)
     assert result["status"] == Status.INCOMPLETE.value
-    assert result["ratio"] is None and result["governing"] is None
     seen = set()
     for case in result["cases"]:
         assert case["status"] == "INCOMPLETE"
         for check in case["checks"]:
             chapter, milestone = DEMAND_CHAPTERS[check["check"]]
-            assert check["chapter"] == chapter and check["capacity"] is None
+            assert check["chapter"] == chapter
+            seen.add(check["check"])
+            if check["check"] == "compression":
+                continue
+            assert check["capacity"] is None
             assert check["errors"][0]["code"] == "RULE_NOT_IMPLEMENTED"
             assert check["errors"][0]["details"]["milestone"] == milestone
-            seen.add(check["check"])
     assert seen == set(DEMAND_CHAPTERS)
+
+
+def test_unvalidated_material_blocks_every_check(member_payload):
+    """Materiales.xlsx has no Fu nor elongation yet: no capacity until A3.1.1 can be validated (D15)."""
+    result = execute_payload(member_payload)
+    assert result["status"] == "INCOMPLETE" and result["section"] is not None and result["buckling"] is not None
+    assert result["errors"][0]["details"]["decision"] == "D15"
+    assert all(c["capacity"] is None for case in result["cases"] for c in case["checks"])
+
+
+@pytest.mark.parametrize("statuses, expected", [
+    (["PASS", "FAIL"], "FAIL"),
+    (["FAIL", "OUT_OF_METHOD_SCOPE"], "OUT_OF_METHOD_SCOPE"),
+    (["OUT_OF_METHOD_SCOPE", "INCOMPLETE", "PASS"], "INCOMPLETE"),
+    (["NOT_APPLICABLE", "PASS"], "PASS"),
+    (["NOT_APPLICABLE"], "NOT_APPLICABLE"),
+])
+def test_status_precedence(statuses, expected):
+    assert engine._aggregate([Status(s) for s in statuses]) == Status(expected)
 
 
 def test_demands_are_reported_as_magnitudes(member_payload):

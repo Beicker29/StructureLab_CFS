@@ -8,10 +8,10 @@ del catálogo `data/Sections.xlsx` o, fuera de él, se calculan desde la geometr
 delgada; el resultado indica el origen. Las cargas críticas elásticas salen del Apéndice 2 (analítico) o, como extra
 opcional, de franjas finitas.
 
-> **Estado: hitos M1 (secciones) y M2 (pandeo elástico), pendientes de validación.** El motor
-> valida la entrada, resuelve el material y la sección, calcula las cargas críticas elásticas y
-> asigna cada demanda a su capítulo, pero ningún capítulo de resistencia está implementado: el resultado es siempre
-> `INCOMPLETE` con el motivo y el hito que lo cubrirá. Ver la [hoja de ruta](docs/ROADMAP.md).
+> **Estado: M1 (secciones), M2 (pandeo elástico) y M3 (compresión DSM), pendientes de
+> validación.** La compresión da capacidad φcPn por DSM; el resto de capítulos devuelve
+> `INCOMPLETE` con el hito que lo cubrirá. Mientras `Materiales.xlsx` no tenga Fu ni elongación,
+> ningún diseño da capacidad. Ver la [hoja de ruta](docs/ROADMAP.md).
 
 > No es una certificación AISI. `PASS` significará que se evaluaron todos los estados límite
 > exigidos para cada demanda dentro del alcance declarado. El análisis de segundo orden
@@ -53,18 +53,19 @@ Un archivo por miembro; los datos del miembro van arriba y sus combinaciones en 
 | Campo | Descripción |
 | --- | --- |
 | `section` | `name` de `data/Sections.xlsx` (p. ej. `PHR Z203x67x19-2.0`) o `shape` con dimensiones exteriores `H`, `B`, `D`, espesor de diseño `t`, radio interior `R` y `lip_angle` (grados; obligatorio en la Z, 90 en la C). Por ahora solo se calculan `C_LIPPED` y `Z_LIPPED`; las demás formas (`C_UNLIPPED`, `HAT`, `ANGLE`, `ANGLE_LIPPED`, `SIGMA`) dan `INCOMPLETE` |
-| `material` | Nombre de `src/cfs_design/data/Materiales.xlsx` (Fy de la Tabla A3.1.1-1); no se aceptan Fy ni Fu numéricos |
+| `material` | Nombre de `src/cfs_design/data/Materiales.xlsx` (Fy de la Tabla A3.1.1-1; Fu y elongación transcritos de la norma ASTM para validar A3.1.1); no se aceptan Fy ni Fu numéricos. Sin Fu ni elongación el diseño queda `INCOMPLETE` |
 | `lengths` | `Lx`, `Ly`, `Lz`: longitudes no arriostradas (mm) |
 | `factors` | `Kx`, `Ky`, `Kt` (1 por defecto) |
 | `method` | `DSM` (por defecto) o `EWM` calculan solo ese método; `both` calcula y reporta los dos |
-| `buckling` | `source`: `analytical` (por defecto) o `fsm` (M8); `Lm`: distancia entre restricciones discretas del pandeo distorsional (mm, obligatoria para el distorsional); `k_phi`: rigidez rotacional continua en la unión ala/alma (N·mm/mm/rad; si falta, 0 conservador según 2.3.3) |
+| `buckling` | `source`: `analytical` (por defecto) o `fsm` (M8); `Lm`: distancia entre restricciones discretas del pandeo distorsional (mm; si falta, Lm = Lcrd, conservador, DC-12); `k_phi`: rigidez rotacional continua en la unión ala/alma (N·mm/mm/rad; si falta, 0 conservador según 2.3.3) |
 | `flexure` | `Cb` (obligatorio para Mcre), `inelastic_reserve` |
 | `web_crippling` | `N` (mm), `load_case` (`EOF`, `IOF`, `ETF`, `ITF`), `fastened` |
 | `cases[]` | `name` y demandas: `Pu` (> 0 compresión, < 0 tracción), `Mux`, `Muy`, `Vux`, `Vuy`, `Pw`, `Bu` |
 
 ### Salida
 
-`status` (`PASS`/`FAIL`/`INCOMPLETE`), `ratio`, `governing`, `material`, `section` (origen
+`status` (`PASS`/`FAIL` con capacidad; `INCOMPLETE`; `OUT_OF_METHOD_SCOPE` fuera de la Tabla
+B4.1-1 o con esbeltez DSM > 5; `NOT_APPLICABLE`; ver DC-11), `ratio`, `governing`, `material`, `section` (origen
 `catalog` o `geometry`, dimensiones, propiedades y anchos planos con las relaciones de la
 Tabla B4.1-1; ver [secciones](docs/chapter-sections.md)), `buckling` (Pcre, Pcrl, Pcrd y Mcre,
 Mcrl, Mcrd por el Apéndice 2.3; ver [pandeo elástico](docs/chapter-appendix-2.md)) y `cases`, cada uno

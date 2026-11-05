@@ -17,8 +17,9 @@ instalada fuera del repositorio.
 | Archivo | Garantía |
 | --- | --- |
 | `tests/test_inputs.py` | Rechazo de entradas inválidas o incompletas |
-| `tests/test_materials.py` | Catálogo de aceros contra la Tabla A3.1.1-1 de S100-24; Fu no se supone |
-| `tests/test_engine.py` | Cada demanda va a su capítulo; sin capítulos implementados todo es `INCOMPLETE` y nunca hay capacidad |
+| `tests/test_materials.py` | Catálogo de aceros contra la Tabla A3.1.1-1 de S100-24; condiciones de A3.1.1; Fu no se supone |
+| `tests/test_engine.py` | Cada demanda va a su capítulo y método; precedencia de estados; material o sección bloqueados |
+| `tests/test_compression.py` | Capítulo E por DSM: ecuaciones a mano (forma 2024), capacidad φcPn, Tabla B4.1-1, λ > 5, `both` y bloqueos (con doble de prueba del material) |
 | `tests/test_buckling.py` | Apéndice 2.3: identidades de la transcripción (Tabla 2.3.3-1 Z(90°) = C, ecuaciones no fusionadas), casos límite, selección del modo y bloqueos |
 | `tests/test_sections.py` | Motor geométrico contra las 125 filas de `Sections.xlsx` (±0,5 %), control en forma cerrada (C de esquinas rectas), origen `catalog`/`geometry` y bloqueos |
 | `tests/test_interfaces.py` | CLI sin escritura por defecto, `--output`, errores con código 2, ejemplos |

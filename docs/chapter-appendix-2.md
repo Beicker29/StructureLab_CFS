@@ -30,6 +30,7 @@ Las ecuaciones de 2.3.3 y las del Apéndice 1 salían ilegibles como texto, así
 | 2.3.3.2 Distorsional, flexión | Caso (a), eje ⟂ alma: 2.3.3.2-1 a -7. Caso (b), eje ∥ alma con alma en tracción: 2.3.3.2-8 a -11 | 2-14 a 2-16 |
 
 **Ecuaciones parecidas que no se fusionan:**
+
 - **k̃φfg:** la de compresión (2.3.3.1-5) tiene un término (x_of − x_hf)²(I_xyf/I_yf)² que la de flexión (2.3.3.2-6) no tiene.
 - **k̄φwe:** la de compresión (2.3.3.1-4) no depende de L_d y la de flexión (2.3.3.2-5) sí.
 
@@ -39,7 +40,7 @@ Las ecuaciones de 2.3.3 y las del Apéndice 1 salían ilegibles como texto, así
 | --- | --- |
 | D5 | Propiedades del ala. Tabla 2.3.3-1 con dimensiones de línea media (b_mid, d_mid, h_mid de `section.elements`, la línea media con esquinas agudas) y sin radio de esquinas; columnas C y Z como funciones separadas. ho = H (alma de fuera a fuera) |
 | D6 | Coeficientes k del pandeo local. Ala k = 4; labio 0,43 o Ec. 1.2.2-2/-3 según el gradiente; alma 4 o Ec. 1.1.2-2. **Condición del usuario:** k = 4 en el ala supone que el labio la sostiene como un apoyo simple. Si el labio no alcanza para eso, la falla es distorsional y se calcula aparte (2.3.3); el pandeo local no la cubre |
-| D7 | k̄φ = 0 y β = 1,0 si no se dan (2.3.3.1, 2.3.3.2 y Ec. 2.3.3.2-3 los permiten como valores conservadores), y se reportan siempre en el resultado. Cb y Lm son obligatorios (AGENTS.md). `Lm` va en `buckling` porque lo usa también el distorsional en compresión. Con k̄φ > 0 y sin Lm, Lm = Lcrd (definición de Lm en 2.3.3) |
+| D7 | k̄φ = 0 y β = 1,0 si no se dan (2.3.3.1, 2.3.3.2 y Ec. 2.3.3.2-3 los permiten como valores conservadores), y se reportan siempre en el resultado. Cb es obligatorio (AGENTS.md). `Lm` va en `buckling` porque lo usa también el distorsional en compresión. Sin Lm se toma Lm = Lcrd y se reporta en `Lm_source`: por la definición de Lm en 2.3.3 si k̄φ > 0, o por D14/DC-12 (caso conservador) si no. Hasta M3, Lm era obligatorio |
 | D8 | Quedan `INCOMPLETE`: la Z alrededor de y (global, local y distorsional) y el distorsional de la C alrededor de y con el alma comprimida. El distorsional de la Z alrededor de x sí se calcula (ver la verificación abajo) |
 | D9 | Vcr pasa a M5, junto con G2.3 y la Ec. 2.3.4-2 |
 | D10 | Z en compresión: 2.3.1.1.3, mínimo entre Pt y el pandeo por flexión sobre x e y, más el pandeo sobre el eje principal menor (I2) con max(KxLx, KyLy), según 2.3.1.1.1 |

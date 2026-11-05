@@ -15,9 +15,13 @@ ShapeKind = Literal["C_LIPPED", "C_UNLIPPED", "Z_LIPPED", "HAT", "ANGLE", "ANGLE
 
 
 class Status(str, Enum):
+    """PASS / FAIL with a capacity; INCOMPLETE (missing data or rule); NOT_APPLICABLE; OUT_OF_METHOD_SCOPE (D12-D14)."""
+
     PASS = "PASS"
     FAIL = "FAIL"
     INCOMPLETE = "INCOMPLETE"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    OUT_OF_METHOD_SCOPE = "OUT_OF_METHOD_SCOPE"
 
 
 class _Strict(BaseModel):

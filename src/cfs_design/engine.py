@@ -1,16 +1,22 @@
-"""Member run: one check per demand (and interaction), then PASS / FAIL / INCOMPLETE.
+"""Member run: one check per demand (and interaction) and per method, then the member status.
 
-The section is resolved first (sections/, milestone M1); if it is blocked (missing data or a
-shape out of scope) every check is INCOMPLETE with that reason. No chapter is implemented yet:
-every demand yields an INCOMPLETE check that names the AISI S100-24 chapter and the roadmap
-milestone that will cover it. Never a capacity.
+The section is resolved first (sections/, M1) and its elastic critical loads computed (buckling/,
+M2); the material is validated against A3.1.1 (D15). A blocked section or material makes every
+check INCOMPLETE with that reason. With `method: both` each demand gets a DSM and an EWM check
+(DC-1). Implemented chapters: E by DSM (M3); the rest yield INCOMPLETE naming their milestone.
+
+Status precedence (DC-1, extended in D14): INCOMPLETE > OUT_OF_METHOD_SCOPE > FAIL > PASS;
+NOT_APPLICABLE does not count unless every check is NOT_APPLICABLE. A capacity is reported only
+with PASS or FAIL.
 """
 from collections.abc import Callable
 from typing import Any
 
 from .buckling import member_buckling
-from .errors import BLOCKING_ERRORS, CfsDesignError, RuleNotImplementedError
-from .materials import Material, get_material
+from .domain import DesignContext
+from .domain.compression import compression_check
+from .errors import BLOCKING_ERRORS, CfsDesignError, OutOfMethodScopeError, RuleNotImplementedError
+from .materials import get_material, validate_a3_1_1
 from .models import CaseDemand, CaseResult, Check, DesignResult, MemberInput, Status
 from .sections import resolve_section
 
@@ -27,7 +33,9 @@ DEMAND_CHAPTERS: dict[str, tuple[str, str]] = {
     "interaction": ("H", "M6"),
 }
 
-Calculator = Callable[[MemberInput, Material, CaseDemand, str], Check]
+PRECEDENCE = (Status.INCOMPLETE, Status.OUT_OF_METHOD_SCOPE, Status.FAIL, Status.PASS)
+
+Calculator = Callable[[DesignContext, float, str], Check]
 
 
 def demanded_checks(case: CaseDemand) -> list[tuple[str, float]]:
@@ -47,32 +55,37 @@ def demanded_checks(case: CaseDemand) -> list[tuple[str, float]]:
     return checks
 
 
-def _not_implemented(member: MemberInput, material: Material, case: CaseDemand, check: str) -> Check:
-    chapter, milestone = DEMAND_CHAPTERS[check]
-    raise RuleNotImplementedError(f"AISI S100-24 chapter {chapter} is not implemented yet (milestone {milestone})",
-                                  details={"chapter": chapter, "milestone": milestone})
+def _not_implemented(check: str) -> Calculator:
+    def calculator(ctx: DesignContext, demand: float, method: str) -> Check:
+        chapter, milestone = DEMAND_CHAPTERS[check]
+        raise RuleNotImplementedError(f"AISI S100-24 chapter {chapter} is not implemented yet (milestone {milestone})",
+                                      details={"chapter": chapter, "milestone": milestone})
+    return calculator
 
 
-CALCULATORS: dict[str, Calculator] = {name: _not_implemented for name in DEMAND_CHAPTERS}
+CALCULATORS: dict[str, Calculator] = {name: _not_implemented(name) for name in DEMAND_CHAPTERS}
+CALCULATORS["compression"] = compression_check
 
 
-def _run_check(member: MemberInput, material: Material, case: CaseDemand, check: str, demand: float,
-               blocked: dict[str, Any] | None) -> Check:
+def _run_check(ctx: DesignContext | None, check: str, demand: float, method: str, blocked: list[dict[str, Any]]) -> Check:
     chapter = DEMAND_CHAPTERS[check][0]
-    if blocked is not None:
-        return Check(check=check, chapter=chapter, demand=demand, status=Status.INCOMPLETE, method=member.method,
-                     errors=[blocked])
+    if ctx is None:
+        return Check(check=check, chapter=chapter, demand=demand, status=Status.INCOMPLETE, method=method, errors=blocked)
     try:
-        return CALCULATORS[check](member, material, case, check)
+        return CALCULATORS[check](ctx, demand, method)
+    except OutOfMethodScopeError as error:
+        return Check(check=check, chapter=chapter, demand=demand, status=Status.OUT_OF_METHOD_SCOPE, method=method,
+                     errors=[error.to_dict()])
     except BLOCKING_ERRORS as error:
-        return Check(check=check, chapter=chapter, demand=demand, status=Status.INCOMPLETE, method=member.method,
+        return Check(check=check, chapter=chapter, demand=demand, status=Status.INCOMPLETE, method=method,
                      errors=[error.to_dict()])
 
 
 def _aggregate(statuses: list[Status]) -> Status:
-    if Status.INCOMPLETE in statuses:
-        return Status.INCOMPLETE
-    return Status.FAIL if Status.FAIL in statuses else Status.PASS
+    for status in PRECEDENCE:
+        if status in statuses:
+            return status
+    return Status.NOT_APPLICABLE
 
 
 def _max_ratio(ratios: list[float | None]) -> float | None:
@@ -85,23 +98,30 @@ def run_member(member: MemberInput) -> DesignResult:
     material = get_material(member.material)
     section: dict[str, Any] | None = None
     buckling: dict[str, Any] | None = None
-    blocked: dict[str, Any] | None = None
+    blocked: list[dict[str, Any]] = []
+    ctx: DesignContext | None = None
     try:
         resolved = resolve_section(member.section)
         section = resolved.to_dict()
         buckling = member_buckling(member, resolved)
+        try:
+            validate_a3_1_1(material)
+            ctx = DesignContext(member, material, resolved, buckling)
+        except BLOCKING_ERRORS as error:
+            blocked.append(error.to_dict())
     except BLOCKING_ERRORS as error:
-        blocked = error.to_dict()
+        blocked.append(error.to_dict())
+    methods = ("DSM", "EWM") if member.method == "both" else (member.method,)
     cases: list[CaseResult] = []
     for case in member.cases:
-        checks = [_run_check(member, material, case, name, demand, blocked) for name, demand in demanded_checks(case)]
+        checks = [_run_check(ctx, name, demand, method, blocked) for name, demand in demanded_checks(case) for method in methods]
         cases.append(CaseResult(name=case.name, status=_aggregate([c.status for c in checks]),
                                 ratio=_max_ratio([c.ratio for c in checks]), checks=checks))
     ratios = [(c.ratio, c.name) for c in cases if c.ratio is not None]
     governing = max(ratios)[1] if ratios else None
     return DesignResult(status=_aggregate([c.status for c in cases]), ratio=_max_ratio([c.ratio for c in cases]),
                         governing=governing, material=material.to_dict(), section=section, buckling=buckling, cases=cases,
-                        errors=[blocked] if blocked else [])
+                        errors=blocked)
 
 
 __all__ = ["DEMAND_CHAPTERS", "CfsDesignError", "demanded_checks", "run_member"]
