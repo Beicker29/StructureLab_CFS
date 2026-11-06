@@ -19,6 +19,7 @@ instalada fuera del repositorio.
 | `tests/test_inputs.py` | Rechazo de entradas inválidas o incompletas |
 | `tests/test_materials.py` | Catálogo de aceros contra la Tabla A3.1.1-1 de S100-24; condiciones de A3.1.1; Fu no se supone |
 | `tests/test_engine.py` | Cada demanda va a su capítulo y método; precedencia de estados; material o sección bloqueados |
+| `tests/test_design_examples.py` | El informe de contraste con Yu (2019) coincide con lo que calcula el código hoy |
 | `tests/test_compression.py` | Capítulo E por DSM: ecuaciones a mano (forma 2024), capacidad φcPn, Tabla B4.1-1, λ > 5, `both` y bloqueos (con doble de prueba del material) |
 | `tests/test_buckling.py` | Apéndice 2.3: identidades de la transcripción (Tabla 2.3.3-1 Z(90°) = C, ecuaciones no fusionadas), casos límite, selección del modo y bloqueos |
 | `tests/test_sections.py` | Motor geométrico contra las 125 filas de `Sections.xlsx` (±0,5 %), control en forma cerrada (C de esquinas rectas), origen `catalog`/`geometry` y bloqueos |
@@ -35,8 +36,19 @@ solo cambia por una razón normativa documentada, nunca para que pase el softwar
 
 ## Contraste externo
 
-Ejemplos del AISI Cold-Formed Steel Design Manual (±1 %) y cargas críticas de CUFSM, en
-`docs/design-examples.md` a partir de M1. Sirven para contrastar; no reemplazan al oráculo.
+Ejemplos resueltos de Yu, LaBoube y Chen, *Cold-Formed Steel Design*, 5.ª ed. (2019; sigue S100-16):
+`tests/contrast/yu_2019.py` calcula los valores del repo y genera
+[docs/validation-yu-2019.md](docs/validation-yu-2019.md) junto a los del libro, con la formulación de cada
+fila y una atribución preliminar. **El usuario dirime cada diferencia** en la columna *Dictamen*, que se
+conserva al regenerar. Si la formulación difiere (S100-16 vs S100-24, método de propiedades, CUFSM), la
+diferencia se atribuye en primera instancia a la formulación. Un ejemplo que use CUFSM en cualquiera de sus
+valores no se usa para comparar (el repo no tiene análisis numérico hasta M8); solo se lista con el motivo.
+`tests/test_design_examples.py` exige que el
+informe esté al día con el código. Más adelante, el Manual AISI y CUFSM. Nada de esto reemplaza al oráculo.
+
+```powershell
+python tests/contrast/yu_2019.py   # regenera el informe tras un cambio de cálculo
+```
 
 ## Reglas
 

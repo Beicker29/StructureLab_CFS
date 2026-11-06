@@ -81,4 +81,4 @@ nunca una resistencia supuesta.
 - [Arquitectura](docs/architecture.md)
 - [Decisiones de proyecto](docs/decisions.md)
 - [Hoja de ruta](docs/ROADMAP.md)
-- [Pruebas y validación](CONTRIBUTING.md)
+- [Pruebas y validación](CONTRIBUTING.md) · [Contraste con Yu (2019)](docs/validation-yu-2019.md)
